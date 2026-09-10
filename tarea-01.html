@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tarea 1 &middot; Generar una imagen (PPM) &mdash; Trazador de Rayos en C</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,600&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><b>Trazador de Rayos en C</b></a>
+    <div class="spacer"></div>
+    <button class="theme-btn" id="themeBtn" aria-label="Cambiar tema">
+      <span id="themeIcon">&#9680;</span><span id="themeLabel">Tema</span>
+    </button>
+  </div>
+</div>
+<div class="shell">
+  <div class="layout">
+    <div class="toc-wrap"><nav class="toc" aria-label="Ruta del curso"><p class="toc-title">Ruta del curso</p><ol>
+<li><a class="" href="index.html"><span class="n">&#9632;</span><span>Inicio</span></a></li>
+<li><a class="" href="tarea-00.html"><span class="n">0</span><span>Preparar el entorno</span></a></li>
+<li><a class="active" href="tarea-01.html"><span class="n">1</span><span>Generar una imagen (PPM)</span></a></li>
+<li><a class="" href="tarea-02.html"><span class="n">2</span><span>El tipo vec3 (structs)</span></a></li>
+<li><a class="" href="tarea-03.html"><span class="n">3</span><span>Rayos y un fondo</span></a></li>
+<li><a class="" href="tarea-04.html"><span class="n">4</span><span>Añadir una esfera</span></a></li>
+<li><a class="" href="tarea-05.html"><span class="n">5</span><span>Normales y varios objetos</span></a></li>
+<li><a class="" href="tarea-06.html"><span class="n">6</span><span>Antialiasing y aleatoriedad</span></a></li>
+<li><a class="" href="tarea-07.html"><span class="n">7</span><span>Materiales difusos (recursión)</span></a></li>
+<li><a class="" href="tarea-08.html"><span class="n">8</span><span>Materiales: metal</span></a></li>
+<li><a class="" href="tarea-09.html"><span class="n">9</span><span>Dieléctricos (vidrio)</span></a></li>
+<li><a class="" href="tarea-10.html"><span class="n">10</span><span>Cámara posicionable</span></a></li>
+<li><a class="" href="tarea-11.html"><span class="n">11</span><span>Desenfoque (profundidad de campo)</span></a></li>
+<li><a class="" href="tarea-12.html"><span class="n">12</span><span>Escena final y memoria dinámica</span></a></li>
+<li><a class="" href="tarea-13.html"><span class="n">13</span><span>Compilación separada y Makefile</span></a></li>
+<li><a class="" href="tarea-14.html"><span class="n">14</span><span>¿Qué sigue?</span></a></li>
+    </ol></nav></div>
+    <main class="solo">
+      <nav class="pager top"><a class="pg prev" href="tarea-00.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tarea 0 &middot; Preparar el entorno</span></a><a class="pg next" href="tarea-02.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tarea 2 &middot; El tipo vec3 (structs)</span></a></nav>
+      <section class="tarea" id="tarea-1" data-num="1" data-title="Generar una imagen (PPM)">
+  <div class="tarea-head">
+    <div class="tarea-num">Tarea<span>1</span></div>
+    <div class="titles">
+      <p class="tarea-kicker">Salida de imágenes</p>
+      <h2>Generar una imagen en formato PPM</h2>
+    </div>
+  </div>
+
+  <div class="box objetivo">
+    <p class="box-label">Objetivo</p>
+    <p>Escribir un programa que genere una imagen de color: un degradado. Aprenderás el formato de imagen
+    más sencillo que existe (PPM) y a producirlo con bucles y <code class="inl">printf</code>.</p>
+  </div>
+
+  <div class="box concepto">
+    <p class="box-label">Concepto de C · bucles, tipos numéricos y salida estándar</p>
+    <p>Usaremos el bucle <code class="inl">for</code> para recorrer filas y columnas de píxeles, y las
+    diferencias entre <strong>enteros</strong> (<code class="inl">int</code>) y <strong>reales</strong>
+    (<code class="inl">double</code>). Con <code class="inl">printf</code> escribimos en la <em>salida
+    estándar</em> (<span class="math">stdout</span>), que luego <strong>redirigiremos</strong> a un archivo.
+    Con <code class="inl">fprintf(stderr, …)</code> escribimos en la <em>salida de error</em> (<span class="math">stderr</span>),
+    útil para mostrar el progreso sin ensuciar la imagen.</p>
+  </div>
+
+  <div class="box fisica">
+    <p class="box-label">El formato PPM</p>
+    <p>Una imagen PPM «P3» es texto plano. La cabecera dice <code class="inl">P3</code>, luego el ancho y
+    el alto, luego el valor máximo de color (255). Después vienen los píxeles, fila por fila de arriba abajo,
+    cada uno como tres enteros <span class="math">r g b</span> entre 0 y 255. Eso es todo: una imagen es
+    una lista de números.</p>
+  </div>
+
+  <script type="text/plain" class="srccode" data-file="main.c">
+#include <stdio.h>
+
+int main(void) {
+    // Tamaño de la imagen en píxeles
+    int image_width  = 256;
+    int image_height = 256;
+
+    // Cabecera PPM: "P3", dimensiones y valor máximo de color
+    printf("P3\n%d %d\n255\n", image_width, image_height);
+
+    // Recorremos la imagen fila a fila (j), y dentro cada columna (i)
+    for (int j = 0; j < image_height; j++) {
+        // Progreso por stderr, para no mezclarlo con la imagen de stdout
+        fprintf(stderr, "\rFilas restantes: %d ", image_height - j);
+        fflush(stderr);
+
+        for (int i = 0; i < image_width; i++) {
+            // Componentes en [0,1) como numeros reales
+            double r = (double)i / (image_width  - 1);
+            double g = (double)j / (image_height - 1);
+            double b = 0.0;
+
+            // Convertimos a enteros [0,255]
+            int ir = (int)(255.999 * r);
+            int ig = (int)(255.999 * g);
+            int ib = (int)(255.999 * b);
+
+            printf("%d %d %d\n", ir, ig, ib);
+        }
+    }
+    fprintf(stderr, "\r¡Listo!                 \n");
+    return 0;
+}
+</script>
+
+  <p>Compílalo y <strong>redirige</strong> la salida estándar a un archivo con <code class="inl">&gt;</code>:</p>
+
+  <div class="term">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="p">$</span> gcc -Wall -O2 main.c -o rt
+<span class="p">$</span> ./rt <span class="p">&gt;</span> imagen.ppm     <span class="c"># stdout va al archivo; el progreso (stderr) sigue en pantalla</span>
+Filas restantes: 0
+¡Listo!</pre>
+  </div>
+
+  <div class="box nota">
+    <p class="box-label">¿Cómo veo un .ppm?</p>
+    <p>Muchos visores no abren PPM. Conviértelo a PNG con ImageMagick
+    (<code class="inl">convert imagen.ppm imagen.png</code>) o con
+    <code class="inl">pnmtopng imagen.ppm &gt; imagen.png</code>. GIMP y muchos visores de Linux también
+    abren PPM directamente. En línea existen visores de PPM si trabajas en el navegador.</p>
+  </div>
+
+  <div class="box concepto">
+    <p class="box-label">Concepto de C · el molde <code>(double)</code> y la división entera</p>
+    <p>Si escribes <code class="inl">i / (image_width - 1)</code> con <code class="inl">i</code> entero, C hace
+    <strong>división entera</strong> y casi siempre da 0. Por eso convertimos con
+    <code class="inl">(double)i</code>: forzamos a que la división sea entre reales. Este «molde» o
+    <em>cast</em> es una fuente clásica de errores para quien empieza en C.</p>
+  </div>
+
+  <div class="box pista">
+    <p class="box-label">Pista · el retorno de carro <code>\r</code></p>
+    <p>El <code class="inl">\r</code> en el mensaje de progreso mueve el cursor al inicio de la línea sin bajar,
+    así el contador se sobrescribe en el sitio en lugar de imprimir miles de líneas.</p>
+  </div>
+
+  <div class="box reto">
+    <p class="box-label">Entrega y retos</p>
+    <ul class="entrega">
+      <li>La imagen PNG resultante (un degradado rojo→verde) y tu <code>main.c</code>.</li>
+      <li><strong>Reto:</strong> cambia el canal azul <code>b</code> a <code>0.25</code> y observa el efecto.</li>
+      <li><strong>Reto:</strong> haz que <code>b</code> dependa de <code>i</code> y <code>j</code> para crear otro patrón.</li>
+    </ul>
+  </div>
+</section>
+      <nav class="pager bottom"><a class="pg prev" href="tarea-00.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tarea 0 &middot; Preparar el entorno</span></a><a class="pg next" href="tarea-02.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tarea 2 &middot; El tipo vec3 (structs)</span></a></nav>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="shell">
+    <p>Material docente derivado y adaptado de <a href="https://raytracing.github.io/books/RayTracingInOneWeekend.html">«Ray Tracing in One Weekend»</a>
+    de Peter Shirley, Trevor David Black y Steve Hollasch (licencia CC0). Esta versión reescribe todo el código en
+    <strong>C puro</strong> y reorganiza el contenido como tareas de curso, con toda la explicación en español.</p>
+    <p>Compila los ejemplos con <code class="inl">gcc -O2 main.c -o rt -lm</code> y visualiza con <code class="inl">./rt &gt; imagen.ppm</code>.</p>
+  </div>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>

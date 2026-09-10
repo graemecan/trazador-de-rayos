@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tarea 2 &middot; El tipo vec3 (structs) &mdash; Trazador de Rayos en C</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,600&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><b>Trazador de Rayos en C</b></a>
+    <div class="spacer"></div>
+    <button class="theme-btn" id="themeBtn" aria-label="Cambiar tema">
+      <span id="themeIcon">&#9680;</span><span id="themeLabel">Tema</span>
+    </button>
+  </div>
+</div>
+<div class="shell">
+  <div class="layout">
+    <div class="toc-wrap"><nav class="toc" aria-label="Ruta del curso"><p class="toc-title">Ruta del curso</p><ol>
+<li><a class="" href="index.html"><span class="n">&#9632;</span><span>Inicio</span></a></li>
+<li><a class="" href="tarea-00.html"><span class="n">0</span><span>Preparar el entorno</span></a></li>
+<li><a class="" href="tarea-01.html"><span class="n">1</span><span>Generar una imagen (PPM)</span></a></li>
+<li><a class="active" href="tarea-02.html"><span class="n">2</span><span>El tipo vec3 (structs)</span></a></li>
+<li><a class="" href="tarea-03.html"><span class="n">3</span><span>Rayos y un fondo</span></a></li>
+<li><a class="" href="tarea-04.html"><span class="n">4</span><span>Añadir una esfera</span></a></li>
+<li><a class="" href="tarea-05.html"><span class="n">5</span><span>Normales y varios objetos</span></a></li>
+<li><a class="" href="tarea-06.html"><span class="n">6</span><span>Antialiasing y aleatoriedad</span></a></li>
+<li><a class="" href="tarea-07.html"><span class="n">7</span><span>Materiales difusos (recursión)</span></a></li>
+<li><a class="" href="tarea-08.html"><span class="n">8</span><span>Materiales: metal</span></a></li>
+<li><a class="" href="tarea-09.html"><span class="n">9</span><span>Dieléctricos (vidrio)</span></a></li>
+<li><a class="" href="tarea-10.html"><span class="n">10</span><span>Cámara posicionable</span></a></li>
+<li><a class="" href="tarea-11.html"><span class="n">11</span><span>Desenfoque (profundidad de campo)</span></a></li>
+<li><a class="" href="tarea-12.html"><span class="n">12</span><span>Escena final y memoria dinámica</span></a></li>
+<li><a class="" href="tarea-13.html"><span class="n">13</span><span>Compilación separada y Makefile</span></a></li>
+<li><a class="" href="tarea-14.html"><span class="n">14</span><span>¿Qué sigue?</span></a></li>
+    </ol></nav></div>
+    <main class="solo">
+      <nav class="pager top"><a class="pg prev" href="tarea-01.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tarea 1 &middot; Generar una imagen (PPM)</span></a><a class="pg next" href="tarea-03.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tarea 3 &middot; Rayos y un fondo</span></a></nav>
+      <section class="tarea" id="tarea-2" data-num="2" data-title="El tipo vec3 (structs)">
+  <div class="tarea-head">
+    <div class="tarea-num">Tarea<span>2</span></div>
+    <div class="titles">
+      <p class="tarea-kicker">Estructuras y cabeceras</p>
+      <h2>El tipo <span class="math">vec3</span>: nuestra herramienta básica</h2>
+    </div>
+  </div>
+
+  <div class="box objetivo">
+    <p class="box-label">Objetivo</p>
+    <p>Crear un tipo <code class="inl">vec3</code> (vector de 3 componentes) con funciones para operar con él,
+    repartido en su propio archivo de cabecera. Reescribir la Tarea 1 usando <code class="inl">vec3</code> para
+    representar el color de cada píxel.</p>
+  </div>
+
+  <p>Un trazador de rayos vive de vectores de tres componentes: los usamos para <strong>puntos</strong> en el
+  espacio, para <strong>direcciones</strong> y para <strong>colores</strong> RGB. En C++ el libro define una
+  clase <code class="inl">vec3</code> con operadores <code class="inl">+</code>, <code class="inl">*</code>, etc.
+  En C no hay sobrecarga de operadores, así que definimos un <code class="inl">struct</code> y una función por
+  cada operación.</p>
+
+  <div class="box concepto">
+    <p class="box-label">Concepto de C · <code>struct</code>, <code>typedef</code> y paso por valor</p>
+    <p>Un <code class="inl">struct</code> agrupa varias variables bajo un mismo nombre. Con
+    <code class="inl">typedef</code> le damos un nombre corto para no escribir <code class="inl">struct vec3</code>
+    cada vez. Nuestras funciones <strong>reciben y devuelven <code>vec3</code> por valor</strong> (una copia):
+    para vectores de 3 doubles es barato y hace el código muy parecido a la fórmula matemática.</p>
+  </div>
+
+  <div class="box concepto">
+    <p class="box-label">Concepto de C · archivos de cabecera y guardas de inclusión</p>
+    <p>Ponemos el tipo y sus funciones en <code class="inl">vec3.h</code>. El bloque
+    <code class="inl">#ifndef VEC3_H … #define VEC3_H … #endif</code> es una <strong>guarda de inclusión</strong>:
+    evita que el archivo se procese dos veces si se incluye desde varios sitios. Usamos
+    <code class="inl">static inline</code> para poder <em>definir</em> las funciones en la cabecera sin provocar
+    errores de «símbolo duplicado» al enlazar.</p>
+  </div>
+
+  <script type="text/plain" class="srccode" data-file="vec3.h">
+#ifndef VEC3_H
+#define VEC3_H
+
+#include <math.h>   // sqrt
+
+// Un vector de 3 componentes reales. Lo reutilizamos para puntos,
+// direcciones y colores: por dentro son los mismos tres numeros.
+typedef struct {
+    double x, y, z;
+} vec3;
+
+// Alias que dan significado al codigo (son EL MISMO tipo por dentro).
+typedef vec3 point3;   // un punto en el espacio 3D
+typedef vec3 color;    // un color RGB, cada componente en [0,1]
+
+// Constructor comodo: v3(x,y,z) crea un vec3.
+static inline vec3 v3(double x, double y, double z) {
+    vec3 v = { x, y, z };
+    return v;
+}
+
+// Operaciones basicas (sustituyen a los operadores de C++)
+static inline vec3 vec3_add(vec3 a, vec3 b)   { return v3(a.x+b.x, a.y+b.y, a.z+b.z); }
+static inline vec3 vec3_sub(vec3 a, vec3 b)   { return v3(a.x-b.x, a.y-b.y, a.z-b.z); }
+static inline vec3 vec3_mul(vec3 a, vec3 b)   { return v3(a.x*b.x, a.y*b.y, a.z*b.z); } // componente a componente
+static inline vec3 vec3_scale(vec3 a, double t){ return v3(a.x*t, a.y*t, a.z*t); }
+static inline vec3 vec3_div(vec3 a, double t) { return vec3_scale(a, 1.0/t); }
+static inline vec3 vec3_neg(vec3 a)           { return v3(-a.x, -a.y, -a.z); }
+
+// Producto escalar y producto vectorial
+static inline double vec3_dot(vec3 a, vec3 b) { return a.x*b.x + a.y*b.y + a.z*b.z; }
+static inline vec3   vec3_cross(vec3 a, vec3 b) {
+    return v3(a.y*b.z - a.z*b.y,
+              a.z*b.x - a.x*b.z,
+              a.x*b.y - a.y*b.x);
+}
+
+// Longitud (norma) y normalizacion
+static inline double vec3_length_squared(vec3 a) { return vec3_dot(a, a); }
+static inline double vec3_length(vec3 a)         { return sqrt(vec3_length_squared(a)); }
+static inline vec3   vec3_unit(vec3 a)           { return vec3_div(a, vec3_length(a)); }
+
+#endif
+</script>
+
+  <div class="box fisica">
+    <p class="box-label">Recordatorio de álgebra vectorial</p>
+    <p>El <strong>producto escalar</strong> <span class="math">a·b = aₓbₓ + a_yb_y + a_zb_z</span> mide cuánto
+    se alinean dos vectores; será clave para iluminación y reflexión. La <strong>norma</strong>
+    <span class="math">|a| = √(a·a)</span>, y un <strong>vector unitario</strong> es <span class="math">a/|a|</span>.
+    Fíjate en que <code class="inl">vec3_length_squared</code> evita la raíz cuadrada cuando solo necesitamos
+    comparar longitudes: es una micro-optimización habitual.</p>
+  </div>
+
+  <h3>Escribir un color como PPM</h3>
+  <p>Añadimos una función que toma un <code class="inl">color</code> (con componentes en [0,1]) y escribe la
+  línea PPM correspondiente. La ponemos en <code class="inl">color.h</code>.</p>
+
+  <script type="text/plain" class="srccode" data-file="color.h">
+#ifndef COLOR_H
+#define COLOR_H
+
+#include <stdio.h>
+#include "vec3.h"
+
+// Escribe un pixel en formato PPM (tres enteros 0..255) en el flujo "out".
+static void write_color(FILE *out, color pixel_color) {
+    double r = pixel_color.x;
+    double g = pixel_color.y;
+    double b = pixel_color.z;
+
+    // Pasamos de [0,1] a bytes [0,255]
+    int ir = (int)(255.999 * r);
+    int ig = (int)(255.999 * g);
+    int ib = (int)(255.999 * b);
+
+    fprintf(out, "%d %d %d\n", ir, ig, ib);
+}
+
+#endif
+</script>
+
+  <p>Y reescribimos <code class="inl">main.c</code> de la Tarea 1 usando los tipos nuevos:</p>
+
+  <script type="text/plain" class="srccode" data-file="main.c">
+#include <stdio.h>
+#include "vec3.h"
+#include "color.h"
+
+int main(void) {
+    int image_width  = 256;
+    int image_height = 256;
+
+    printf("P3\n%d %d\n255\n", image_width, image_height);
+
+    for (int j = 0; j < image_height; j++) {
+        fprintf(stderr, "\rFilas restantes: %d ", image_height - j);
+        fflush(stderr);
+        for (int i = 0; i < image_width; i++) {
+            color pixel = v3((double)i / (image_width - 1),
+                             (double)j / (image_height - 1),
+                             0.0);
+            write_color(stdout, pixel);
+        }
+    }
+    fprintf(stderr, "\r¡Listo!                 \n");
+    return 0;
+}
+</script>
+
+  <div class="box nota">
+    <p class="box-label">Compilar con la biblioteca matemática</p>
+    <p>Como <code class="inl">vec3.h</code> usa <code class="inl">sqrt</code>, ahora hay que enlazar
+    <code class="inl">libm</code> con <code class="inl">-lm</code> (que debe ir <strong>al final</strong>):
+    <code class="inl">gcc -Wall -O2 main.c -o rt -lm</code>. Solo compilamos <code class="inl">main.c</code>;
+    los <code class="inl">.h</code> se incluyen con <code class="inl">#include</code>, no se compilan aparte.</p>
+  </div>
+
+  <div class="box pista">
+    <p class="box-label">Pista · devolver structs no es «lento»</p>
+    <p>Puede sorprender devolver copias de <code class="inl">vec3</code> por todas partes. Con
+    <code class="inl">-O2</code> el compilador elimina casi todas esas copias. Prioriza la claridad;
+    el código se leerá igual que las fórmulas de tus apuntes de física.</p>
+  </div>
+
+  <div class="box reto">
+    <p class="box-label">Entrega</p>
+    <ul class="entrega">
+      <li>Los archivos <code>vec3.h</code>, <code>color.h</code> y <code>main.c</code>, y la imagen resultante (idéntica a la de la Tarea 1).</li>
+      <li><strong>Reto:</strong> escribe una pequeña prueba en <code>main</code> que imprima por <code>stderr</code> el producto escalar y el producto vectorial de dos vectores que elijas, y verifícalos a mano.</li>
+    </ul>
+  </div>
+</section>
+      <nav class="pager bottom"><a class="pg prev" href="tarea-01.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tarea 1 &middot; Generar una imagen (PPM)</span></a><a class="pg next" href="tarea-03.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tarea 3 &middot; Rayos y un fondo</span></a></nav>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="shell">
+    <p>Material docente derivado y adaptado de <a href="https://raytracing.github.io/books/RayTracingInOneWeekend.html">«Ray Tracing in One Weekend»</a>
+    de Peter Shirley, Trevor David Black y Steve Hollasch (licencia CC0). Esta versión reescribe todo el código en
+    <strong>C puro</strong> y reorganiza el contenido como tareas de curso, con toda la explicación en español.</p>
+    <p>Compila los ejemplos con <code class="inl">gcc -O2 main.c -o rt -lm</code> y visualiza con <code class="inl">./rt &gt; imagen.ppm</code>.</p>
+  </div>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>

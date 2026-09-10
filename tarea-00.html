@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tarea 0 &middot; Preparar el entorno &mdash; Trazador de Rayos en C</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,600&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><b>Trazador de Rayos en C</b></a>
+    <div class="spacer"></div>
+    <button class="theme-btn" id="themeBtn" aria-label="Cambiar tema">
+      <span id="themeIcon">&#9680;</span><span id="themeLabel">Tema</span>
+    </button>
+  </div>
+</div>
+<div class="shell">
+  <div class="layout">
+    <div class="toc-wrap"><nav class="toc" aria-label="Ruta del curso"><p class="toc-title">Ruta del curso</p><ol>
+<li><a class="" href="index.html"><span class="n">&#9632;</span><span>Inicio</span></a></li>
+<li><a class="active" href="tarea-00.html"><span class="n">0</span><span>Preparar el entorno</span></a></li>
+<li><a class="" href="tarea-01.html"><span class="n">1</span><span>Generar una imagen (PPM)</span></a></li>
+<li><a class="" href="tarea-02.html"><span class="n">2</span><span>El tipo vec3 (structs)</span></a></li>
+<li><a class="" href="tarea-03.html"><span class="n">3</span><span>Rayos y un fondo</span></a></li>
+<li><a class="" href="tarea-04.html"><span class="n">4</span><span>Añadir una esfera</span></a></li>
+<li><a class="" href="tarea-05.html"><span class="n">5</span><span>Normales y varios objetos</span></a></li>
+<li><a class="" href="tarea-06.html"><span class="n">6</span><span>Antialiasing y aleatoriedad</span></a></li>
+<li><a class="" href="tarea-07.html"><span class="n">7</span><span>Materiales difusos (recursión)</span></a></li>
+<li><a class="" href="tarea-08.html"><span class="n">8</span><span>Materiales: metal</span></a></li>
+<li><a class="" href="tarea-09.html"><span class="n">9</span><span>Dieléctricos (vidrio)</span></a></li>
+<li><a class="" href="tarea-10.html"><span class="n">10</span><span>Cámara posicionable</span></a></li>
+<li><a class="" href="tarea-11.html"><span class="n">11</span><span>Desenfoque (profundidad de campo)</span></a></li>
+<li><a class="" href="tarea-12.html"><span class="n">12</span><span>Escena final y memoria dinámica</span></a></li>
+<li><a class="" href="tarea-13.html"><span class="n">13</span><span>Compilación separada y Makefile</span></a></li>
+<li><a class="" href="tarea-14.html"><span class="n">14</span><span>¿Qué sigue?</span></a></li>
+    </ol></nav></div>
+    <main class="solo">
+      <nav class="pager top"><a class="pg prev" href="index.html"><span class="dir">&larr; Anterior</span><span class="lbl">Inicio</span></a><a class="pg next" href="tarea-01.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tarea 1 &middot; Generar una imagen (PPM)</span></a></nav>
+      <section class="tarea" id="tarea-0" data-num="0" data-title="Preparar el entorno">
+  <div class="tarea-head">
+    <div class="tarea-num">Tarea<span>0</span></div>
+    <div class="titles">
+      <p class="tarea-kicker">Puesta a punto</p>
+      <h2>Preparar el entorno y compilar tu primer programa</h2>
+    </div>
+  </div>
+
+  <div class="box objetivo">
+    <p class="box-label">Objetivo</p>
+    <p>Instalar un compilador de C, escribir un programa mínimo, compilarlo y ejecutarlo.
+    Al terminar debes ver un mensaje impreso en la terminal.</p>
+  </div>
+
+  <p>C es un lenguaje <strong>compilado</strong>: escribes texto en un archivo <code class="inl">.c</code>,
+  un programa llamado <em>compilador</em> lo traduce a instrucciones de máquina (un ejecutable), y entonces
+  ejecutas ese archivo. No hay intérprete como en Python; siempre hay dos pasos: <strong>compilar</strong> y
+  <strong>ejecutar</strong>.</p>
+
+  <h3>Instalar el compilador</h3>
+  <ul>
+    <li><strong>Linux</strong>: normalmente ya está <code class="inl">gcc</code>. Si no: <code class="inl">sudo apt install build-essential</code>.</li>
+    <li><strong>macOS</strong>: instala las <em>Command Line Tools</em> con <code class="inl">xcode-select --install</code> (te da <code class="inl">clang</code>, compatible).</li>
+    <li><strong>Windows</strong>: usa <strong>WSL</strong> (recomendado) o instala <a href="https://www.msys2.org/">MSYS2</a>/MinGW para tener <code class="inl">gcc</code>.</li>
+  </ul>
+
+  <div class="box concepto">
+    <p class="box-label">Concepto de C · estructura mínima de un programa</p>
+    <p>Todo programa en C empieza a ejecutarse por la función <code class="inl">main</code>. La biblioteca
+    estándar te da funciones ya hechas; para usar <code class="inl">printf</code> incluimos la cabecera
+    <code class="inl">&lt;stdio.h&gt;</code> con la directiva <code class="inl">#include</code>.
+    El valor que <code class="inl">main</code> devuelve (<code class="inl">return 0;</code>) le indica al
+    sistema operativo si todo fue bien (0) o hubo error (distinto de 0).</p>
+  </div>
+
+  <script type="text/plain" class="srccode" data-file="hola.c">
+#include <stdio.h>   // printf vive aquí
+
+// La ejecución del programa comienza en main().
+int main(void) {
+    printf("Trazador de rayos: preparado.\n");
+    return 0;   // 0 = todo bien
+}
+</script>
+
+  <p>Compila y ejecuta desde la terminal, en la carpeta donde guardaste el archivo:</p>
+
+  <div class="term">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="p">$</span> gcc -Wall -O2 hola.c -o hola   <span class="c"># compila hola.c y crea el ejecutable "hola"</span>
+<span class="p">$</span> ./hola                        <span class="c"># ejecuta</span>
+Trazador de rayos: preparado.</pre>
+  </div>
+
+  <div class="box nota">
+    <p class="box-label">Qué significan las banderas</p>
+    <p><code class="inl">-Wall</code> activa <em>todos los avisos</em> (úsalo siempre; los avisos suelen
+    ser errores disfrazados). <code class="inl">-O2</code> optimiza el código (lo hará más rápido, importante
+    para un trazador de rayos). <code class="inl">-o hola</code> nombra el ejecutable. Más adelante añadiremos
+    <code class="inl">-lm</code> para enlazar la biblioteca matemática.</p>
+  </div>
+
+  <div class="box pista">
+    <p class="box-label">Pista · el error más común</p>
+    <p>Si al ejecutar escribes <code class="inl">hola</code> y dice «orden no encontrada», recuerda el
+    <code class="inl">./</code> del principio: en Linux/macOS hay que decir explícitamente «ejecuta el archivo
+    que está <em>aquí</em>», con <code class="inl">./hola</code>.</p>
+  </div>
+
+  <div class="box reto">
+    <p class="box-label">Entrega</p>
+    <ul class="entrega">
+      <li>Captura de la terminal mostrando la compilación y la salida del programa.</li>
+      <li>Modifica el mensaje e imprime también tu nombre en una segunda línea usando un segundo <code>printf</code>.</li>
+    </ul>
+  </div>
+</section>
+      <nav class="pager bottom"><a class="pg prev" href="index.html"><span class="dir">&larr; Anterior</span><span class="lbl">Inicio</span></a><a class="pg next" href="tarea-01.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tarea 1 &middot; Generar una imagen (PPM)</span></a></nav>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="shell">
+    <p>Material docente derivado y adaptado de <a href="https://raytracing.github.io/books/RayTracingInOneWeekend.html">«Ray Tracing in One Weekend»</a>
+    de Peter Shirley, Trevor David Black y Steve Hollasch (licencia CC0). Esta versión reescribe todo el código en
+    <strong>C puro</strong> y reorganiza el contenido como tareas de curso, con toda la explicación en español.</p>
+    <p>Compila los ejemplos con <code class="inl">gcc -O2 main.c -o rt -lm</code> y visualiza con <code class="inl">./rt &gt; imagen.ppm</code>.</p>
+  </div>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>

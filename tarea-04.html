@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tarea 4 &middot; Añadir una esfera &mdash; Trazador de Rayos en C</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,600&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><b>Trazador de Rayos en C</b></a>
+    <div class="spacer"></div>
+    <button class="theme-btn" id="themeBtn" aria-label="Cambiar tema">
+      <span id="themeIcon">&#9680;</span><span id="themeLabel">Tema</span>
+    </button>
+  </div>
+</div>
+<div class="shell">
+  <div class="layout">
+    <div class="toc-wrap"><nav class="toc" aria-label="Ruta del curso"><p class="toc-title">Ruta del curso</p><ol>
+<li><a class="" href="index.html"><span class="n">&#9632;</span><span>Inicio</span></a></li>
+<li><a class="" href="tarea-00.html"><span class="n">0</span><span>Preparar el entorno</span></a></li>
+<li><a class="" href="tarea-01.html"><span class="n">1</span><span>Generar una imagen (PPM)</span></a></li>
+<li><a class="" href="tarea-02.html"><span class="n">2</span><span>El tipo vec3 (structs)</span></a></li>
+<li><a class="" href="tarea-03.html"><span class="n">3</span><span>Rayos y un fondo</span></a></li>
+<li><a class="active" href="tarea-04.html"><span class="n">4</span><span>Añadir una esfera</span></a></li>
+<li><a class="" href="tarea-05.html"><span class="n">5</span><span>Normales y varios objetos</span></a></li>
+<li><a class="" href="tarea-06.html"><span class="n">6</span><span>Antialiasing y aleatoriedad</span></a></li>
+<li><a class="" href="tarea-07.html"><span class="n">7</span><span>Materiales difusos (recursión)</span></a></li>
+<li><a class="" href="tarea-08.html"><span class="n">8</span><span>Materiales: metal</span></a></li>
+<li><a class="" href="tarea-09.html"><span class="n">9</span><span>Dieléctricos (vidrio)</span></a></li>
+<li><a class="" href="tarea-10.html"><span class="n">10</span><span>Cámara posicionable</span></a></li>
+<li><a class="" href="tarea-11.html"><span class="n">11</span><span>Desenfoque (profundidad de campo)</span></a></li>
+<li><a class="" href="tarea-12.html"><span class="n">12</span><span>Escena final y memoria dinámica</span></a></li>
+<li><a class="" href="tarea-13.html"><span class="n">13</span><span>Compilación separada y Makefile</span></a></li>
+<li><a class="" href="tarea-14.html"><span class="n">14</span><span>¿Qué sigue?</span></a></li>
+    </ol></nav></div>
+    <main class="solo">
+      <nav class="pager top"><a class="pg prev" href="tarea-03.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tarea 3 &middot; Rayos y un fondo</span></a><a class="pg next" href="tarea-05.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tarea 5 &middot; Normales y varios objetos</span></a></nav>
+      <section class="tarea" id="tarea-4" data-num="4" data-title="Añadir una esfera">
+  <div class="tarea-head">
+    <div class="tarea-num">Tarea<span>4</span></div>
+    <div class="titles">
+      <p class="tarea-kicker">Intersección rayo-objeto</p>
+      <h2>Añadir una esfera</h2>
+    </div>
+  </div>
+
+  <div class="box objetivo">
+    <p class="box-label">Objetivo</p>
+    <p>Detectar cuándo un rayo golpea una esfera y pintar de rojo los píxeles que la ven. Es tu primer objeto
+    de verdad en la escena.</p>
+  </div>
+
+  <div class="box fisica">
+    <p class="box-label">Física · intersección rayo–esfera</p>
+    <p>Una esfera de centro <span class="math">C</span> y radio <span class="math">r</span> cumple
+    <span class="math">(P − C)·(P − C) = r²</span>. Sustituimos <span class="math">P = P(t) = A + t·b</span> y
+    obtenemos una <strong>ecuación cuadrática</strong> en <span class="math">t</span>:
+    <span class="math">a t² − 2h t + c = 0</span>, con
+    <span class="math">a = b·b</span>, <span class="math">h = b·(C−A)</span>,
+    <span class="math">c = (C−A)·(C−A) − r²</span>. El <strong>discriminante</strong>
+    <span class="math">h² − a·c</span> nos dice cuántas soluciones reales hay: si es negativo, el rayo no toca
+    la esfera; si es ≥ 0, sí.</p>
+  </div>
+
+  <div class="box concepto">
+    <p class="box-label">Concepto de C · valores booleanos y condicionales</p>
+    <p>C (antes de C99) no tenía tipo booleano: se usa <code class="inl">int</code>, donde <strong>0 es falso</strong>
+    y <strong>cualquier otro valor es verdadero</strong>. Aquí una función devuelve un <code class="inl">int</code>
+    que actúa como «¿golpea?». (Existe <code class="inl">&lt;stdbool.h&gt;</code> con <code class="inl">bool</code>,
+    <code class="inl">true</code> y <code class="inl">false</code>; lo usaremos más adelante para mayor claridad.)</p>
+  </div>
+
+  <p>Añadimos una función que comprueba el impacto, y modificamos <code class="inl">ray_color</code> para pintar
+  la esfera de rojo:</p>
+
+  <script type="text/plain" class="srccode" data-file="main.c (fragmento)">
+// ¿El rayo r golpea la esfera de centro "center" y radio "radius"?
+int hit_sphere(point3 center, double radius, ray r) {
+    vec3 oc = vec3_sub(center, r.orig);          // C - A
+    double a = vec3_dot(r.dir, r.dir);           // b . b
+    double h = vec3_dot(r.dir, oc);              // b . (C - A)
+    double c = vec3_dot(oc, oc) - radius*radius; // (C-A).(C-A) - r^2
+    double discriminant = h*h - a*c;
+    return discriminant >= 0;                     // 1 si toca, 0 si no
+}
+
+color ray_color(ray r) {
+    // Una esfera roja centrada delante de la camara
+    if (hit_sphere(v3(0, 0, -1), 0.5, r))
+        return v3(1, 0, 0);   // rojo
+
+    // Si no, el cielo de antes
+    vec3 unit_direction = vec3_unit(r.dir);
+    double a = 0.5 * (unit_direction.y + 1.0);
+    return vec3_add(vec3_scale(v3(1,1,1), 1.0 - a),
+                    vec3_scale(v3(0.5,0.7,1.0), a));
+}
+</script>
+
+  <div class="box pista">
+    <p class="box-label">Pista · ¿por qué <code>h</code> en vez del clásico <code>b</code>?</p>
+    <p>Si defines la cuadrática como <span class="math">at² + bt + c</span>, el término lineal
+    <span class="math">b = −2·b·(C−A)</span> lleva un factor 2 que luego se cancela. Escribiendo
+    <span class="math">h = b·(C−A)</span> (la «mitad de b») el discriminante queda
+    <span class="math">h² − a·c</span> y la fórmula final <span class="math">t = (h ± √(h²−ac))/a</span>,
+    más limpia. Es la misma optimización del libro original.</p>
+  </div>
+
+  <div class="box reto">
+    <p class="box-label">Entrega</p>
+    <ul class="entrega">
+      <li>La imagen con una esfera roja sobre el cielo.</li>
+      <li><strong>Reto:</strong> mueve la esfera y cambia su radio; añade una <em>segunda</em> llamada a <code>hit_sphere</code> con otro color.</li>
+    </ul>
+  </div>
+</section>
+      <nav class="pager bottom"><a class="pg prev" href="tarea-03.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tarea 3 &middot; Rayos y un fondo</span></a><a class="pg next" href="tarea-05.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tarea 5 &middot; Normales y varios objetos</span></a></nav>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="shell">
+    <p>Material docente derivado y adaptado de <a href="https://raytracing.github.io/books/RayTracingInOneWeekend.html">«Ray Tracing in One Weekend»</a>
+    de Peter Shirley, Trevor David Black y Steve Hollasch (licencia CC0). Esta versión reescribe todo el código en
+    <strong>C puro</strong> y reorganiza el contenido como tareas de curso, con toda la explicación en español.</p>
+    <p>Compila los ejemplos con <code class="inl">gcc -O2 main.c -o rt -lm</code> y visualiza con <code class="inl">./rt &gt; imagen.ppm</code>.</p>
+  </div>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>

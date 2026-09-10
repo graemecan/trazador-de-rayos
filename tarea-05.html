@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tarea 5 &middot; Normales y varios objetos &mdash; Trazador de Rayos en C</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,600&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><b>Trazador de Rayos en C</b></a>
+    <div class="spacer"></div>
+    <button class="theme-btn" id="themeBtn" aria-label="Cambiar tema">
+      <span id="themeIcon">&#9680;</span><span id="themeLabel">Tema</span>
+    </button>
+  </div>
+</div>
+<div class="shell">
+  <div class="layout">
+    <div class="toc-wrap"><nav class="toc" aria-label="Ruta del curso"><p class="toc-title">Ruta del curso</p><ol>
+<li><a class="" href="index.html"><span class="n">&#9632;</span><span>Inicio</span></a></li>
+<li><a class="" href="tarea-00.html"><span class="n">0</span><span>Preparar el entorno</span></a></li>
+<li><a class="" href="tarea-01.html"><span class="n">1</span><span>Generar una imagen (PPM)</span></a></li>
+<li><a class="" href="tarea-02.html"><span class="n">2</span><span>El tipo vec3 (structs)</span></a></li>
+<li><a class="" href="tarea-03.html"><span class="n">3</span><span>Rayos y un fondo</span></a></li>
+<li><a class="" href="tarea-04.html"><span class="n">4</span><span>Añadir una esfera</span></a></li>
+<li><a class="active" href="tarea-05.html"><span class="n">5</span><span>Normales y varios objetos</span></a></li>
+<li><a class="" href="tarea-06.html"><span class="n">6</span><span>Antialiasing y aleatoriedad</span></a></li>
+<li><a class="" href="tarea-07.html"><span class="n">7</span><span>Materiales difusos (recursión)</span></a></li>
+<li><a class="" href="tarea-08.html"><span class="n">8</span><span>Materiales: metal</span></a></li>
+<li><a class="" href="tarea-09.html"><span class="n">9</span><span>Dieléctricos (vidrio)</span></a></li>
+<li><a class="" href="tarea-10.html"><span class="n">10</span><span>Cámara posicionable</span></a></li>
+<li><a class="" href="tarea-11.html"><span class="n">11</span><span>Desenfoque (profundidad de campo)</span></a></li>
+<li><a class="" href="tarea-12.html"><span class="n">12</span><span>Escena final y memoria dinámica</span></a></li>
+<li><a class="" href="tarea-13.html"><span class="n">13</span><span>Compilación separada y Makefile</span></a></li>
+<li><a class="" href="tarea-14.html"><span class="n">14</span><span>¿Qué sigue?</span></a></li>
+    </ol></nav></div>
+    <main class="solo">
+      <nav class="pager top"><a class="pg prev" href="tarea-04.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tarea 4 &middot; Añadir una esfera</span></a><a class="pg next" href="tarea-06.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tarea 6 &middot; Antialiasing y aleatoriedad</span></a></nav>
+      <section class="tarea" id="tarea-5" data-num="5" data-title="Normales y varios objetos">
+  <div class="tarea-head">
+    <div class="tarea-num">Tarea<span>5</span></div>
+    <div class="titles">
+      <p class="tarea-kicker">Punteros y agregación</p>
+      <h2>Normales de superficie y varios objetos</h2>
+    </div>
+  </div>
+
+  <div class="box objetivo">
+    <p class="box-label">Objetivo</p>
+    <p>Calcular la <strong>normal</strong> en el punto de impacto (y visualizarla como color), y manejar
+    <strong>una lista de esferas</strong> en lugar de una sola. Aquí aparecen los punteros y el paso de datos
+    «por referencia», dos pilares de C.</p>
+  </div>
+
+  <div class="box fisica">
+    <p class="box-label">Física · la normal de una esfera</p>
+    <p>La <strong>normal</strong> es el vector perpendicular a la superficie en el punto de impacto. Para una
+    esfera es sencillísima: apunta del centro hacia el punto, <span class="math">n = (P − C)/r</span> (ya
+    normalizada al dividir por el radio). Visualizaremos <span class="math">n</span> como color mapeando cada
+    componente de [−1,1] a [0,1].</p>
+  </div>
+
+  <div class="box concepto">
+    <p class="box-label">Concepto de C · punteros y «salida por parámetro»</p>
+    <p>Una función en C solo devuelve un valor. Pero al detectar un impacto queremos <em>varios</em> datos:
+    el punto, la normal, la distancia <span class="math">t</span>… La solución idiomática en C es pasar un
+    <strong>puntero</strong> a una estructura <code class="inl">hit_record</code> y que la función la
+    <strong>rellene</strong>: <code class="inl">hit_record *rec</code>. Dentro se accede con la flecha
+    <code class="inl">rec-&gt;t</code>. La función devuelve solo un <code class="inl">int</code> («¿hubo impacto?»).</p>
+  </div>
+
+  <script type="text/plain" class="srccode" data-file="hittable.h">
+#ifndef HITTABLE_H
+#define HITTABLE_H
+
+#include "ray.h"
+
+// Declaracion adelantada: "material" se define en material.h (Tarea 8).
+// Aqui solo necesitamos poder guardar un puntero a el.
+struct material;
+
+// Datos de un impacto rayo-superficie.
+typedef struct {
+    point3 p;                    // punto de impacto
+    vec3   normal;               // normal (unitaria) en p
+    double t;                    // parametro del rayo en el impacto
+    int    front_face;           // 1 si el rayo llega por fuera de la superficie
+    const struct material *mat;  // material del objeto golpeado (Tarea 8)
+} hit_record;
+
+// Ajusta la normal para que siempre apunte "contra" el rayo, y recuerda
+// si golpeamos la cara exterior o interior.
+static inline void set_face_normal(hit_record *rec, ray r, vec3 outward_normal) {
+    rec->front_face = vec3_dot(r.dir, outward_normal) < 0;
+    rec->normal = rec->front_face ? outward_normal : vec3_neg(outward_normal);
+}
+
+// Una esfera: centro, radio y (mas adelante) su material.
+typedef struct {
+    point3 center;
+    double radius;
+    const struct material *mat;
+} sphere;
+
+// ¿El rayo golpea la esfera dentro del intervalo (ray_tmin, ray_tmax)?
+// Si es asi, rellena *rec y devuelve 1.
+static int sphere_hit(sphere s, ray r, double ray_tmin, double ray_tmax, hit_record *rec) {
+    vec3 oc = vec3_sub(s.center, r.orig);
+    double a = vec3_length_squared(r.dir);
+    double h = vec3_dot(r.dir, oc);
+    double c = vec3_length_squared(oc) - s.radius * s.radius;
+
+    double discriminant = h*h - a*c;
+    if (discriminant < 0) return 0;
+    double sqrtd = sqrt(discriminant);
+
+    // Buscamos la raiz mas cercana dentro del rango valido.
+    double root = (h - sqrtd) / a;
+    if (root <= ray_tmin || root >= ray_tmax) {
+        root = (h + sqrtd) / a;
+        if (root <= ray_tmin || root >= ray_tmax) return 0;
+    }
+
+    rec->t = root;
+    rec->p = ray_at(r, root);
+    vec3 outward_normal = vec3_div(vec3_sub(rec->p, s.center), s.radius);
+    set_face_normal(rec, r, outward_normal);
+    rec->mat = s.mat;
+    return 1;
+}
+
+// El "mundo": un array de esferas y su cantidad.
+typedef struct {
+    sphere *spheres;   // puntero al array de esferas
+    int     count;     // cuantas hay
+} hittable_list;
+
+// Golpea el objeto MAS CERCANO de toda la lista.
+static int world_hit(hittable_list world, ray r,
+                     double ray_tmin, double ray_tmax, hit_record *rec) {
+    hit_record temp;
+    int hit_anything = 0;
+    double closest = ray_tmax;   // vamos acortando el rango al objeto mas cercano
+
+    for (int i = 0; i < world.count; i++) {
+        if (sphere_hit(world.spheres[i], r, ray_tmin, closest, &temp)) {
+            hit_anything = 1;
+            closest = temp.t;    // ahora solo aceptamos impactos aun mas cercanos
+            *rec = temp;         // copiamos el mejor impacto hasta ahora
+        }
+    }
+    return hit_anything;
+}
+
+#endif
+</script>
+
+  <div class="box concepto">
+    <p class="box-label">Concepto de C · arrays, <code>&amp;</code> y la diferencia entre <code>.</code> y <code>-&gt;</code></p>
+    <p>El mundo es un <strong>array</strong> de <code class="inl">sphere</code> (un bloque de esferas
+    contiguas) más un contador. Pasamos <code class="inl">&amp;temp</code> (la <em>dirección</em> de
+    <code class="inl">temp</code>) para que <code class="inl">sphere_hit</code> lo rellene. Con una variable
+    normal se usa el punto (<code class="inl">temp.t</code>); con un <em>puntero</em> se usa la flecha
+    (<code class="inl">rec-&gt;t</code>), que es azúcar para <code class="inl">(*rec).t</code>.</p>
+  </div>
+
+  <div class="box concepto">
+    <p class="box-label">Concepto de C · sustituir la clase <code>interval</code> del original</p>
+    <p>El libro en C++ crea una clase <code class="inl">interval</code> para el rango
+    <span class="math">[t_min, t_max]</span>. Para no complicar el curso, en C pasamos ese rango como
+    <strong>dos parámetros</strong> <code class="inl">double</code>. Es una traducción legítima: menos
+    maquinaria, mismo resultado.</p>
+  </div>
+
+  <p>En <code class="inl">main.c</code> ahora construimos el mundo y visualizamos la normal como color:</p>
+
+  <script type="text/plain" class="srccode" data-file="main.c (fragmento)">
+#include <math.h>   // INFINITY
+#include "hittable.h"
+
+color ray_color(ray r, hittable_list world) {
+    hit_record rec;
+    if (world_hit(world, r, 0.0, INFINITY, &rec)) {
+        // La normal esta en [-1,1]; la mapeamos a un color [0,1]
+        return vec3_scale(vec3_add(rec.normal, v3(1,1,1)), 0.5);
+    }
+    vec3 unit_direction = vec3_unit(r.dir);
+    double a = 0.5 * (unit_direction.y + 1.0);
+    return vec3_add(vec3_scale(v3(1,1,1), 1.0 - a),
+                    vec3_scale(v3(0.5,0.7,1.0), a));
+}
+
+int main(void) {
+    // ... (configuracion de imagen y camara como en la Tarea 3) ...
+
+    // El mundo: dos esferas. La grande hace de "suelo".
+    sphere spheres[] = {
+        { v3(0,      0, -1),   0.5, NULL },
+        { v3(0, -100.5, -1), 100.0, NULL },
+    };
+    hittable_list world = { spheres, 2 };
+
+    // En el bucle de render, ahora:  color pixel = ray_color(r, world);
+    // ...
+}
+</script>
+
+  <div class="box pista">
+    <p class="box-label">Pista · cara frontal y trasera</p>
+    <p><code class="inl">set_face_normal</code> hace que la normal siempre apunte hacia el rayo. Esto será
+    imprescindible en la Tarea 9 (vidrio), donde importa si el rayo entra o sale del objeto. De momento solo
+    lo dejamos preparado. El campo <code class="inl">mat</code> lo ponemos a <code class="inl">NULL</code>
+    hasta la Tarea 8.</p>
+  </div>
+
+  <div class="box reto">
+    <p class="box-label">Entrega</p>
+    <ul class="entrega">
+      <li>La imagen de las normales (la esfera se ve en tonos verdes/azules) sobre el «suelo».</li>
+      <li><strong>Reto:</strong> añade una tercera esfera al array y ajusta <code>count</code>. Comprueba que <code>world_hit</code> siempre pinta la más cercana.</li>
+    </ul>
+  </div>
+</section>
+      <nav class="pager bottom"><a class="pg prev" href="tarea-04.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tarea 4 &middot; Añadir una esfera</span></a><a class="pg next" href="tarea-06.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tarea 6 &middot; Antialiasing y aleatoriedad</span></a></nav>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="shell">
+    <p>Material docente derivado y adaptado de <a href="https://raytracing.github.io/books/RayTracingInOneWeekend.html">«Ray Tracing in One Weekend»</a>
+    de Peter Shirley, Trevor David Black y Steve Hollasch (licencia CC0). Esta versión reescribe todo el código en
+    <strong>C puro</strong> y reorganiza el contenido como tareas de curso, con toda la explicación en español.</p>
+    <p>Compila los ejemplos con <code class="inl">gcc -O2 main.c -o rt -lm</code> y visualiza con <code class="inl">./rt &gt; imagen.ppm</code>.</p>
+  </div>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>

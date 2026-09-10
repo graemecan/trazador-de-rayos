@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tarea 3 &middot; Rayos y un fondo &mdash; Trazador de Rayos en C</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,600&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><b>Trazador de Rayos en C</b></a>
+    <div class="spacer"></div>
+    <button class="theme-btn" id="themeBtn" aria-label="Cambiar tema">
+      <span id="themeIcon">&#9680;</span><span id="themeLabel">Tema</span>
+    </button>
+  </div>
+</div>
+<div class="shell">
+  <div class="layout">
+    <div class="toc-wrap"><nav class="toc" aria-label="Ruta del curso"><p class="toc-title">Ruta del curso</p><ol>
+<li><a class="" href="index.html"><span class="n">&#9632;</span><span>Inicio</span></a></li>
+<li><a class="" href="tarea-00.html"><span class="n">0</span><span>Preparar el entorno</span></a></li>
+<li><a class="" href="tarea-01.html"><span class="n">1</span><span>Generar una imagen (PPM)</span></a></li>
+<li><a class="" href="tarea-02.html"><span class="n">2</span><span>El tipo vec3 (structs)</span></a></li>
+<li><a class="active" href="tarea-03.html"><span class="n">3</span><span>Rayos y un fondo</span></a></li>
+<li><a class="" href="tarea-04.html"><span class="n">4</span><span>Añadir una esfera</span></a></li>
+<li><a class="" href="tarea-05.html"><span class="n">5</span><span>Normales y varios objetos</span></a></li>
+<li><a class="" href="tarea-06.html"><span class="n">6</span><span>Antialiasing y aleatoriedad</span></a></li>
+<li><a class="" href="tarea-07.html"><span class="n">7</span><span>Materiales difusos (recursión)</span></a></li>
+<li><a class="" href="tarea-08.html"><span class="n">8</span><span>Materiales: metal</span></a></li>
+<li><a class="" href="tarea-09.html"><span class="n">9</span><span>Dieléctricos (vidrio)</span></a></li>
+<li><a class="" href="tarea-10.html"><span class="n">10</span><span>Cámara posicionable</span></a></li>
+<li><a class="" href="tarea-11.html"><span class="n">11</span><span>Desenfoque (profundidad de campo)</span></a></li>
+<li><a class="" href="tarea-12.html"><span class="n">12</span><span>Escena final y memoria dinámica</span></a></li>
+<li><a class="" href="tarea-13.html"><span class="n">13</span><span>Compilación separada y Makefile</span></a></li>
+<li><a class="" href="tarea-14.html"><span class="n">14</span><span>¿Qué sigue?</span></a></li>
+    </ol></nav></div>
+    <main class="solo">
+      <nav class="pager top"><a class="pg prev" href="tarea-02.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tarea 2 &middot; El tipo vec3 (structs)</span></a><a class="pg next" href="tarea-04.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tarea 4 &middot; Añadir una esfera</span></a></nav>
+      <section class="tarea" id="tarea-3" data-num="3" data-title="Rayos y un fondo">
+  <div class="tarea-head">
+    <div class="tarea-num">Tarea<span>3</span></div>
+    <div class="titles">
+      <p class="tarea-kicker">Rayos y cámara</p>
+      <h2>Rayos, una cámara sencilla y el fondo del cielo</h2>
+    </div>
+  </div>
+
+  <div class="box objetivo">
+    <p class="box-label">Objetivo</p>
+    <p>Definir el tipo <code class="inl">ray</code> (rayo), montar una cámara mínima que lance un rayo por
+    píxel, y colorear el fondo con un degradado azul-blanco («cielo»). Tu imagen dejará de ser un patrón fijo
+    y pasará a depender de la <em>dirección</em> de cada rayo.</p>
+  </div>
+
+  <div class="box fisica">
+    <p class="box-label">Física · ¿qué es un rayo?</p>
+    <p>Un rayo es una semirrecta con origen y dirección. Lo describimos con una función paramétrica
+    <span class="math">P(t) = A + t·b</span>, donde <span class="math">A</span> es el origen (dónde está la
+    cámara), <span class="math">b</span> la dirección, y <span class="math">t</span> un número real. Con
+    <span class="math">t &gt; 0</span> avanzamos «hacia delante». Trazar rayos consiste en preguntarse, para
+    cada rayo, qué encuentra y de qué color se ve.</p>
+  </div>
+
+  <script type="text/plain" class="srccode" data-file="ray.h">
+#ifndef RAY_H
+#define RAY_H
+
+#include "vec3.h"
+
+// Un rayo P(t) = origen + t * direccion
+typedef struct {
+    point3 orig;   // A: de donde parte
+    vec3   dir;    // b: hacia donde apunta
+} ray;
+
+// Punto del rayo para el parametro t
+static inline point3 ray_at(ray r, double t) {
+    return vec3_add(r.orig, vec3_scale(r.dir, t));
+}
+
+#endif
+</script>
+
+  <div class="box concepto">
+    <p class="box-label">Concepto de C · funciones que devuelven <code>struct</code> y organización en módulos</p>
+    <p>Igual que <code class="inl">vec3_add</code> devuelve un <code class="inl">vec3</code>,
+    <code class="inl">ray_at</code> devuelve un <code class="inl">point3</code>. Cada concepto vive en su propia
+    cabecera (<code class="inl">vec3.h</code>, <code class="inl">ray.h</code>, <code class="inl">color.h</code>),
+    y <code class="inl">main.c</code> las junta. Esta separación en módulos es la manera en que los programas
+    en C crecen sin volverse inmanejables.</p>
+  </div>
+
+  <h3>La cámara y el <em>viewport</em></h3>
+  <p>Colocamos la cámara en el origen. Delante de ella imaginamos un rectángulo (el <em>viewport</em>) por el
+  que pasan los rayos. Recorremos sus píxeles y, para cada uno, construimos el rayo que va del ojo a ese punto.
+  El color del rayo, de momento, será un degradado que depende de la altura de su dirección.</p>
+
+  <div class="box fisica">
+    <p class="box-label">Física · interpolación lineal (lerp)</p>
+    <p>Para el cielo mezclamos blanco y azul según la altura. Tomamos la dirección <em>unitaria</em> del rayo,
+    usamos su componente <span class="math">y</span> (de −1 a 1) reescalada a <span class="math">a ∈ [0,1]</span>,
+    y aplicamos la <strong>interpolación lineal</strong>:
+    <span class="math">color = (1−a)·blanco + a·azul</span>. Esta fórmula «lerp» aparecerá muchas veces.</p>
+  </div>
+
+  <script type="text/plain" class="srccode" data-file="main.c">
+#include <stdio.h>
+#include "vec3.h"
+#include "color.h"
+#include "ray.h"
+
+// Color de fondo: degradado azul-blanco segun la direccion del rayo.
+color ray_color(ray r) {
+    vec3 unit_direction = vec3_unit(r.dir);
+    double a = 0.5 * (unit_direction.y + 1.0);          // a en [0,1]
+    color white = v3(1.0, 1.0, 1.0);
+    color blue  = v3(0.5, 0.7, 1.0);
+    // (1-a)*blanco + a*azul
+    return vec3_add(vec3_scale(white, 1.0 - a),
+                    vec3_scale(blue,  a));
+}
+
+int main(void) {
+    // --- Imagen ---
+    double aspect_ratio = 16.0 / 9.0;
+    int image_width  = 400;
+    int image_height = (int)(image_width / aspect_ratio);
+    if (image_height < 1) image_height = 1;
+
+    // --- Camara ---
+    double focal_length    = 1.0;
+    double viewport_height = 2.0;
+    double viewport_width  = viewport_height * ((double)image_width / image_height);
+    point3 camera_center   = v3(0, 0, 0);
+
+    // Vectores que recorren el viewport (u: horizontal, v: vertical hacia abajo)
+    vec3 viewport_u = v3(viewport_width, 0, 0);
+    vec3 viewport_v = v3(0, -viewport_height, 0);
+
+    // Separacion entre pixeles
+    vec3 pixel_delta_u = vec3_div(viewport_u, image_width);
+    vec3 pixel_delta_v = vec3_div(viewport_v, image_height);
+
+    // Esquina superior izquierda del viewport y centro del primer pixel
+    point3 viewport_upper_left =
+        vec3_sub(vec3_sub(vec3_sub(camera_center, v3(0,0,focal_length)),
+                          vec3_scale(viewport_u, 0.5)),
+                 vec3_scale(viewport_v, 0.5));
+    point3 pixel00_loc =
+        vec3_add(viewport_upper_left,
+                 vec3_scale(vec3_add(pixel_delta_u, pixel_delta_v), 0.5));
+
+    // --- Render ---
+    printf("P3\n%d %d\n255\n", image_width, image_height);
+    for (int j = 0; j < image_height; j++) {
+        fprintf(stderr, "\rFilas restantes: %d ", image_height - j);
+        fflush(stderr);
+        for (int i = 0; i < image_width; i++) {
+            point3 pixel_center =
+                vec3_add(pixel00_loc,
+                    vec3_add(vec3_scale(pixel_delta_u, i),
+                             vec3_scale(pixel_delta_v, j)));
+            vec3 ray_direction = vec3_sub(pixel_center, camera_center);
+            ray r = { camera_center, ray_direction };
+
+            color pixel = ray_color(r);
+            write_color(stdout, pixel);
+        }
+    }
+    fprintf(stderr, "\r¡Listo!                 \n");
+    return 0;
+}
+</script>
+
+  <div class="box concepto">
+    <p class="box-label">Concepto de C · inicializar un <code>struct</code> con llaves</p>
+    <p><code class="inl">ray r = { camera_center, ray_direction };</code> rellena los campos en orden. También
+    puedes usar campos designados: <code class="inl">ray r = { .orig = camera_center, .dir = ray_direction };</code>,
+    más claro cuando hay muchos campos. Verás las dos formas.</p>
+  </div>
+
+  <div class="box pista">
+    <p class="box-label">Pista · el eje Y apunta hacia arriba, pero las filas van hacia abajo</p>
+    <p>Por eso <code class="inl">viewport_v</code> es negativo: recorremos la imagen de arriba abajo (fila
+    <code class="inl">j=0</code> es la de arriba), pero en el espacio la <span class="math">y</span> crece hacia
+    arriba. Si tu cielo sale invertido, revisa ese signo.</p>
+  </div>
+
+  <div class="box reto">
+    <p class="box-label">Entrega</p>
+    <ul class="entrega">
+      <li>La imagen del degradado de cielo y tu <code>main.c</code> con <code>ray.h</code>.</li>
+      <li><strong>Reto:</strong> cambia los colores <code>white</code> y <code>blue</code> por un atardecer (naranja→morado).</li>
+    </ul>
+  </div>
+</section>
+      <nav class="pager bottom"><a class="pg prev" href="tarea-02.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tarea 2 &middot; El tipo vec3 (structs)</span></a><a class="pg next" href="tarea-04.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tarea 4 &middot; Añadir una esfera</span></a></nav>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="shell">
+    <p>Material docente derivado y adaptado de <a href="https://raytracing.github.io/books/RayTracingInOneWeekend.html">«Ray Tracing in One Weekend»</a>
+    de Peter Shirley, Trevor David Black y Steve Hollasch (licencia CC0). Esta versión reescribe todo el código en
+    <strong>C puro</strong> y reorganiza el contenido como tareas de curso, con toda la explicación en español.</p>
+    <p>Compila los ejemplos con <code class="inl">gcc -O2 main.c -o rt -lm</code> y visualiza con <code class="inl">./rt &gt; imagen.ppm</code>.</p>
+  </div>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>

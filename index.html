@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trazador de Rayos en C &mdash; Curso de C</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,600&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><b>Trazador de Rayos en C</b></a>
+    <div class="spacer"></div>
+    <button class="theme-btn" id="themeBtn" aria-label="Cambiar tema">
+      <span id="themeIcon">&#9680;</span><span id="themeLabel">Tema</span>
+    </button>
+  </div>
+</div>
+<div class="shell">
+  <header class="hero">
+    <p class="eyebrow">Curso de Programación en C · 2.º de Física</p>
+    <h1>Construye un <em>trazador de rayos</em>, aprende C</h1>
+    <div class="spectrum" aria-hidden="true"></div>
+    <p class="lede">Una ruta de aprendizaje guiada, tarea a tarea, que adapta el célebre libro
+    <strong>«Ray Tracing in One Weekend»</strong> al <strong>C puro</strong> (sin C++).
+    Cada tarea introduce una pieza nueva del lenguaje —estructuras, punteros, memoria dinámica—
+    mientras la imagen que renderizas gana esferas, sombras, reflejos y refracción.</p>
+    <div class="meta-row">
+      <span class="chip">Lenguaje: <b>C (C11)</b></span>
+      <span class="chip">Compilador: <b>gcc / clang</b></span>
+      <span class="chip">Prerrequisito: <b>álgebra vectorial</b></span>
+      <span class="chip"><b>14</b> tareas</span>
+    </div>
+  </header>
+  <section id="intro">
+  <h2>Sobre este curso</h2>
+  <p>Un <strong>trazador de rayos</strong> (<em>ray tracer</em>) es un programa que genera imágenes
+  simulando cómo viajan los rayos de luz: por cada píxel de la imagen lanzamos un rayo hacia la escena,
+  averiguamos qué objeto golpea, y calculamos el color combinando geometría y física óptica.
+  Es un proyecto ideal para aprender C porque toca casi todas las piezas del lenguaje —tipos numéricos,
+  funciones, estructuras, punteros, memoria dinámica, organización en módulos— y porque cada paso produce
+  <strong>una imagen que puedes mirar</strong>, así que los errores se ven, literalmente.</p>
+
+  <p>Trabajaremos sobre el guion del libro <a href="https://raytracing.github.io/books/RayTracingInOneWeekend.html">«Ray Tracing in One Weekend»</a>,
+  pero con una diferencia importante: el original está escrito en <strong>C++</strong> y usa clases, herencia,
+  sobrecarga de operadores, plantillas y <span class="math">std::vector</span>. Nada de eso existe en C.
+  Aquí lo reconstruimos todo con las herramientas del <strong>C puro</strong>: <code class="inl">struct</code>,
+  funciones ordinarias, <code class="inl">enum</code>, punteros y <code class="inl">malloc</code>. Esa traducción
+  <em>es</em> gran parte de lo que vas a aprender.</p>
+
+  <div class="box concepto">
+    <p class="box-label">De C++ a C · qué cambia</p>
+    <div class="tablewrap" style="margin:.4rem 0 0">
+      <table>
+        <thead><tr><th>En C++ (original)</th><th>En C (este curso)</th></tr></thead>
+        <tbody>
+          <tr><td><code>class vec3</code> con operadores <code>+ - *</code></td><td><code>struct</code> + funciones <code>vec3_add</code>, <code>vec3_scale</code>…</td></tr>
+          <tr><td>Herencia: <code>class sphere : public hittable</code></td><td><code>enum</code> de tipo dentro de un <code>struct</code></td></tr>
+          <tr><td>Métodos virtuales (polimorfismo)</td><td><code>switch</code> sobre el <code>enum</code> (o punteros a función)</td></tr>
+          <tr><td><code>std::vector&lt;shared_ptr&gt;</code></td><td>array + <code>malloc</code> / <code>free</code></td></tr>
+          <tr><td><code>std::cout</code>, <code>std::make_shared</code></td><td><code>printf</code> / <code>fprintf</code>, punteros ordinarios</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <h3>Cómo está organizada cada tarea</h3>
+  <p>Cada tarea sigue la misma estructura para que sepas siempre qué se espera de ti:</p>
+  <ul>
+    <li><strong>Objetivo</strong> — qué debe hacer tu programa al terminar la tarea.</li>
+    <li><strong>Concepto de C</strong> — la característica nueva del lenguaje que se introduce.</li>
+    <li><strong>Física / Matemáticas</strong> — el fundamento óptico o geométrico cuando lo hay.</li>
+    <li><strong>Código</strong> — fragmentos de referencia en C puro que puedes usar y estudiar.</li>
+    <li><strong>Pista</strong> y <strong>Reto</strong> — ayuda para atascos y extensiones opcionales.</li>
+  </ul>
+
+  <div class="box nota">
+    <p class="box-label">Convención de nombres</p>
+    <p>En el código, los <strong>identificadores</strong> (nombres de funciones y variables) están en inglés,
+    como es costumbre en programación y para que puedas comparar con el libro original. Todos los
+    <strong>comentarios y explicaciones</strong> están en español.</p>
+  </div>
+
+  
+</section>
+  <h2 style="font-family:'Spectral',Georgia,serif;margin-top:3rem">Las 15 tareas</h2>
+  <ol class="course-list">
+<li><a href="tarea-00.html"><span class="cl-num">0</span><span class="cl-title">Preparar el entorno</span></a></li>
+<li><a href="tarea-01.html"><span class="cl-num">1</span><span class="cl-title">Generar una imagen (PPM)</span></a></li>
+<li><a href="tarea-02.html"><span class="cl-num">2</span><span class="cl-title">El tipo vec3 (structs)</span></a></li>
+<li><a href="tarea-03.html"><span class="cl-num">3</span><span class="cl-title">Rayos y un fondo</span></a></li>
+<li><a href="tarea-04.html"><span class="cl-num">4</span><span class="cl-title">Añadir una esfera</span></a></li>
+<li><a href="tarea-05.html"><span class="cl-num">5</span><span class="cl-title">Normales y varios objetos</span></a></li>
+<li><a href="tarea-06.html"><span class="cl-num">6</span><span class="cl-title">Antialiasing y aleatoriedad</span></a></li>
+<li><a href="tarea-07.html"><span class="cl-num">7</span><span class="cl-title">Materiales difusos (recursión)</span></a></li>
+<li><a href="tarea-08.html"><span class="cl-num">8</span><span class="cl-title">Materiales: metal</span></a></li>
+<li><a href="tarea-09.html"><span class="cl-num">9</span><span class="cl-title">Dieléctricos (vidrio)</span></a></li>
+<li><a href="tarea-10.html"><span class="cl-num">10</span><span class="cl-title">Cámara posicionable</span></a></li>
+<li><a href="tarea-11.html"><span class="cl-num">11</span><span class="cl-title">Desenfoque (profundidad de campo)</span></a></li>
+<li><a href="tarea-12.html"><span class="cl-num">12</span><span class="cl-title">Escena final y memoria dinámica</span></a></li>
+<li><a href="tarea-13.html"><span class="cl-num">13</span><span class="cl-title">Compilación separada y Makefile</span></a></li>
+<li><a href="tarea-14.html"><span class="cl-num">14</span><span class="cl-title">¿Qué sigue?</span></a></li>
+  </ol>
+</div>
+<footer class="foot">
+  <div class="shell">
+    <p>Material docente derivado y adaptado de <a href="https://raytracing.github.io/books/RayTracingInOneWeekend.html">«Ray Tracing in One Weekend»</a>
+    de Peter Shirley, Trevor David Black y Steve Hollasch (licencia CC0). Esta versión reescribe todo el código en
+    <strong>C puro</strong> y reorganiza el contenido como tareas de curso, con toda la explicación en español.</p>
+    <p>Compila los ejemplos con <code class="inl">gcc -O2 main.c -o rt -lm</code> y visualiza con <code class="inl">./rt &gt; imagen.ppm</code>.</p>
+  </div>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>
