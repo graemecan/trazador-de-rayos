@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tarea 10 &middot; Cámara posicionable &mdash; Trazador de Rayos en C</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,600&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><b>Trazador de Rayos en C</b></a>
+    <div class="spacer"></div>
+    <button class="theme-btn" id="themeBtn" aria-label="Cambiar tema">
+      <span id="themeIcon">&#9680;</span><span id="themeLabel">Tema</span>
+    </button>
+  </div>
+</div>
+<div class="shell">
+  <div class="layout">
+    <div class="toc-wrap"><nav class="toc" aria-label="Ruta del curso"><p class="toc-title">Ruta del curso</p><ol>
+<li><a class="" href="index.html"><span class="n">&#9632;</span><span>Inicio</span></a></li>
+<li><a class="" href="tarea-00.html"><span class="n">0</span><span>Preparar el entorno</span></a></li>
+<li><a class="" href="tarea-01.html"><span class="n">1</span><span>Generar una imagen (PPM)</span></a></li>
+<li><a class="" href="tarea-02.html"><span class="n">2</span><span>El tipo vec3 (structs)</span></a></li>
+<li><a class="" href="tarea-03.html"><span class="n">3</span><span>Rayos y un fondo</span></a></li>
+<li><a class="" href="tarea-04.html"><span class="n">4</span><span>Añadir una esfera</span></a></li>
+<li><a class="" href="tarea-05.html"><span class="n">5</span><span>Normales y varios objetos</span></a></li>
+<li><a class="" href="tarea-06.html"><span class="n">6</span><span>Antialiasing y aleatoriedad</span></a></li>
+<li><a class="" href="tarea-07.html"><span class="n">7</span><span>Materiales difusos (recursión)</span></a></li>
+<li><a class="" href="tarea-08.html"><span class="n">8</span><span>Materiales: metal</span></a></li>
+<li><a class="" href="tarea-09.html"><span class="n">9</span><span>Dieléctricos (vidrio)</span></a></li>
+<li><a class="active" href="tarea-10.html"><span class="n">10</span><span>Cámara posicionable</span></a></li>
+<li><a class="" href="tarea-11.html"><span class="n">11</span><span>Desenfoque (profundidad de campo)</span></a></li>
+<li><a class="" href="tarea-12.html"><span class="n">12</span><span>Escena final y memoria dinámica</span></a></li>
+<li><a class="" href="tarea-13.html"><span class="n">13</span><span>Compilación separada y Makefile</span></a></li>
+<li><a class="" href="tarea-14.html"><span class="n">14</span><span>¿Qué sigue?</span></a></li>
+    </ol></nav></div>
+    <main class="solo">
+      <nav class="pager top"><a class="pg prev" href="tarea-09.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tarea 9 &middot; Dieléctricos (vidrio)</span></a><a class="pg next" href="tarea-11.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tarea 11 &middot; Desenfoque (profundidad de campo)</span></a></nav>
+      <section class="tarea" id="tarea-10" data-num="10" data-title="Cámara posicionable">
+  <div class="tarea-head">
+    <div class="tarea-num">Tarea<span>10</span></div>
+    <div class="titles">
+      <p class="tarea-kicker">Encapsular con struct</p>
+      <h2>Una cámara que puedes colocar y orientar</h2>
+    </div>
+  </div>
+
+  <div class="box objetivo">
+    <p class="box-label">Objetivo</p>
+    <p>Poder situar la cámara en cualquier punto, apuntarla a cualquier objetivo y elegir su ángulo de visión
+    (<em>campo de visión</em> o FOV). Como ahora hay muchos parámetros de cámara, los <strong>agrupamos en un
+    <code>struct</code></strong> <code class="inl">camera</code> y llevamos el render dentro de
+    <code class="inl">camera.h</code>.</p>
+  </div>
+
+  <div class="box concepto">
+    <p class="box-label">Concepto de C · agrupar estado en un <code>struct</code> (la «clase» de C)</p>
+    <p>Veníamos arrastrando <code class="inl">pixel00_loc</code>, <code class="inl">pixel_delta_u</code>,
+    <code class="inl">camera_center</code>… como variables sueltas de <code class="inl">main</code>. Un
+    <code class="inl">struct camera</code> reúne los parámetros que tú fijas (ancho, muestras, FOV, posición)
+    y los valores derivados que se calculan una vez. Esto es justo lo que una «clase» hace en C++: agrupar datos
+    y las funciones que operan sobre ellos. En C, las funciones son externas y reciben un
+    <code class="inl">camera *</code>.</p>
+  </div>
+
+  <div class="box fisica">
+    <p class="box-label">Física · campo de visión y base ortonormal de la cámara</p>
+    <p>El <strong>FOV vertical</strong> (<code class="inl">vfov</code>, en grados) fija cuánto abarca la cámara:
+    la altura del <em>viewport</em> es <span class="math">2·tan(θ/2)</span>. Para orientar la cámara construimos
+    una <strong>base ortonormal</strong> <span class="math">(u, v, w)</span>: <span class="math">w</span> apunta
+    <em>hacia atrás</em> (de <span class="math">lookat</span> a <span class="math">lookfrom</span>),
+    <span class="math">u</span> es «derecha» (<span class="math">vup × w</span> normalizado) y
+    <span class="math">v</span> es «arriba» (<span class="math">w × u</span>). Es el mismo cambio de base que
+    usas en mecánica para describir un sólido en su sistema propio.</p>
+  </div>
+
+  <p>Esta es la cámara completa, con el render y <code class="inl">ray_color</code> ya dentro. Reemplaza el
+  antiguo bucle de <code class="inl">main.c</code> por una llamada a <code class="inl">camera_render</code>:</p>
+
+  <script type="text/plain" class="srccode" data-file="camera.h">
+#ifndef CAMERA_H
+#define CAMERA_H
+
+#include <stdio.h>
+#include "rtweekend.h"
+#include "hittable.h"
+#include "material.h"
+#include "color.h"
+
+typedef struct {
+    // --- Parametros que fijas tu ---
+    double aspect_ratio;        // ancho / alto
+    int    image_width;         // pixeles de ancho
+    int    samples_per_pixel;   // muestras por pixel (antialiasing)
+    int    max_depth;           // rebotes maximos por rayo
+    double vfov;                // campo de vision vertical, en grados
+    point3 lookfrom;            // posicion de la camara
+    point3 lookat;              // a donde mira
+    vec3   vup;                 // "arriba" de la camara
+
+    // --- Valores derivados (los calcula camera_initialize) ---
+    int    image_height;
+    double pixel_samples_scale;
+    point3 center;
+    point3 pixel00_loc;
+    vec3   pixel_delta_u, pixel_delta_v;
+    vec3   u, v, w;             // base ortonormal de la camara
+} camera;
+
+// Calcula todos los valores derivados a partir de los parametros.
+static void camera_initialize(camera *cam) {
+    cam->image_height = (int)(cam->image_width / cam->aspect_ratio);
+    if (cam->image_height < 1) cam->image_height = 1;
+
+    cam->pixel_samples_scale = 1.0 / cam->samples_per_pixel;
+    cam->center = cam->lookfrom;
+
+    // Dimensiones del viewport a partir del FOV y la distancia al objetivo
+    double focal_length = vec3_length(vec3_sub(cam->lookfrom, cam->lookat));
+    double theta = degrees_to_radians(cam->vfov);
+    double h = tan(theta / 2);
+    double viewport_height = 2 * h * focal_length;
+    double viewport_width  = viewport_height *
+                             ((double)cam->image_width / cam->image_height);
+
+    // Base ortonormal (u derecha, v arriba, w hacia atras)
+    cam->w = vec3_unit(vec3_sub(cam->lookfrom, cam->lookat));
+    cam->u = vec3_unit(vec3_cross(cam->vup, cam->w));
+    cam->v = vec3_cross(cam->w, cam->u);
+
+    // Vectores del viewport
+    vec3 viewport_u = vec3_scale(cam->u, viewport_width);
+    vec3 viewport_v = vec3_scale(vec3_neg(cam->v), viewport_height);
+    cam->pixel_delta_u = vec3_div(viewport_u, cam->image_width);
+    cam->pixel_delta_v = vec3_div(viewport_v, cam->image_height);
+
+    // Esquina superior izquierda y primer pixel
+    point3 viewport_upper_left =
+        vec3_sub(vec3_sub(vec3_sub(cam->center, vec3_scale(cam->w, focal_length)),
+                          vec3_scale(viewport_u, 0.5)),
+                 vec3_scale(viewport_v, 0.5));
+    cam->pixel00_loc =
+        vec3_add(viewport_upper_left,
+                 vec3_scale(vec3_add(cam->pixel_delta_u, cam->pixel_delta_v), 0.5));
+}
+
+// Rayo hacia un punto aleatorio del pixel (i, j).
+static ray get_ray(const camera *cam, int i, int j) {
+    double px = random_double() - 0.5;
+    double py = random_double() - 0.5;
+    point3 pixel_sample =
+        vec3_add(cam->pixel00_loc,
+            vec3_add(vec3_scale(cam->pixel_delta_u, i + px),
+                     vec3_scale(cam->pixel_delta_v, j + py)));
+    ray r = { cam->center, vec3_sub(pixel_sample, cam->center) };
+    return r;
+}
+
+// Color de un rayo, con rebotes (recursivo).
+static color ray_color(ray r, int depth, hittable_list world) {
+    if (depth <= 0) return v3(0, 0, 0);
+
+    hit_record rec;
+    if (world_hit(world, r, 0.001, INFINITY, &rec)) {
+        ray scattered;
+        color attenuation;
+        if (scatter(rec.mat, r, rec, &attenuation, &scattered))
+            return vec3_mul(attenuation, ray_color(scattered, depth - 1, world));
+        return v3(0, 0, 0);
+    }
+    vec3 unit_direction = vec3_unit(r.dir);
+    double a = 0.5 * (unit_direction.y + 1.0);
+    return vec3_add(vec3_scale(v3(1,1,1), 1.0 - a),
+                    vec3_scale(v3(0.5,0.7,1.0), a));
+}
+
+// Renderiza el mundo y escribe la imagen PPM por stdout.
+static void camera_render(camera *cam, hittable_list world) {
+    camera_initialize(cam);
+
+    printf("P3\n%d %d\n255\n", cam->image_width, cam->image_height);
+    for (int j = 0; j < cam->image_height; j++) {
+        fprintf(stderr, "\rFilas restantes: %d ", cam->image_height - j);
+        fflush(stderr);
+        for (int i = 0; i < cam->image_width; i++) {
+            color pixel = v3(0, 0, 0);
+            for (int s = 0; s < cam->samples_per_pixel; s++) {
+                ray r = get_ray(cam, i, j);
+                pixel = vec3_add(pixel, ray_color(r, cam->max_depth, world));
+            }
+            write_color(stdout, vec3_scale(pixel, cam->pixel_samples_scale));
+        }
+    }
+    fprintf(stderr, "\r¡Listo!                 \n");
+}
+
+#endif
+</script>
+
+  <p>Con esto, <code class="inl">main.c</code> queda breve y declarativo:</p>
+
+  <script type="text/plain" class="srccode" data-file="main.c">
+#include "rtweekend.h"
+#include "hittable.h"
+#include "material.h"
+#include "camera.h"
+
+int main(void) {
+    // Materiales
+    material mat_ground = { LAMBERTIAN, v3(0.8, 0.8, 0.0), 0, 0 };
+    material mat_center = { LAMBERTIAN, v3(0.1, 0.2, 0.5), 0, 0 };
+    material mat_left   = { DIELECTRIC, v3(0,0,0), 0, 1.50 };
+    material mat_bubble = { DIELECTRIC, v3(0,0,0), 0, 1.0/1.50 };
+    material mat_right  = { METAL,      v3(0.8, 0.6, 0.2), 1.0, 0 };
+
+    sphere spheres[] = {
+        { v3( 0, -100.5, -1), 100.0, &mat_ground },
+        { v3( 0,      0, -1.2), 0.5,  &mat_center },
+        { v3(-1,      0, -1),   0.5,  &mat_left },
+        { v3(-1,      0, -1),   0.4,  &mat_bubble },
+        { v3( 1,      0, -1),   0.5,  &mat_right },
+    };
+    hittable_list world = { spheres, 5 };
+
+    // Camara: fija los parametros y renderiza
+    camera cam;
+    cam.aspect_ratio      = 16.0 / 9.0;
+    cam.image_width       = 400;
+    cam.samples_per_pixel = 100;
+    cam.max_depth         = 50;
+    cam.vfov              = 20;
+    cam.lookfrom          = v3(-2, 2, 1);
+    cam.lookat            = v3(0, 0, -1);
+    cam.vup               = v3(0, 1, 0);
+
+    camera_render(&cam, world);
+    return 0;
+}
+</script>
+
+  <div class="box pista">
+    <p class="box-label">Pista · un <code>vfov</code> pequeño hace «zoom»</p>
+    <p>Reducir <code class="inl">vfov</code> estrecha el ángulo y acerca la escena (teleobjetivo); aumentarlo la
+    aleja y deforma (gran angular). Mueve <code class="inl">lookfrom</code> alrededor de la escena para verla
+    desde distintos puntos sin tocar nada más.</p>
+  </div>
+
+  <div class="box reto">
+    <p class="box-label">Entrega</p>
+    <ul class="entrega">
+      <li>Tres vistas de la misma escena desde posiciones distintas de <code>lookfrom</code>.</li>
+      <li>Una vista con <code>vfov = 90</code> y otra con <code>vfov = 20</code>, comentando el efecto.</li>
+    </ul>
+  </div>
+</section>
+      <nav class="pager bottom"><a class="pg prev" href="tarea-09.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tarea 9 &middot; Dieléctricos (vidrio)</span></a><a class="pg next" href="tarea-11.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tarea 11 &middot; Desenfoque (profundidad de campo)</span></a></nav>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="shell">
+    <p>Material docente derivado y adaptado de <a href="https://raytracing.github.io/books/RayTracingInOneWeekend.html">«Ray Tracing in One Weekend»</a>
+    de Peter Shirley, Trevor David Black y Steve Hollasch (licencia CC0). Esta versión reescribe todo el código en
+    <strong>C puro</strong> y reorganiza el contenido como tareas de curso, con toda la explicación en español.</p>
+    <p>Compila los ejemplos con <code class="inl">gcc -O2 main.c -o rt -lm</code> y visualiza con <code class="inl">./rt &gt; imagen.ppm</code>.</p>
+  </div>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tarea 8 &middot; Materiales: metal &mdash; Trazador de Rayos en C</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,600&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><b>Trazador de Rayos en C</b></a>
+    <div class="spacer"></div>
+    <button class="theme-btn" id="themeBtn" aria-label="Cambiar tema">
+      <span id="themeIcon">&#9680;</span><span id="themeLabel">Tema</span>
+    </button>
+  </div>
+</div>
+<div class="shell">
+  <div class="layout">
+    <div class="toc-wrap"><nav class="toc" aria-label="Ruta del curso"><p class="toc-title">Ruta del curso</p><ol>
+<li><a class="" href="index.html"><span class="n">&#9632;</span><span>Inicio</span></a></li>
+<li><a class="" href="tarea-00.html"><span class="n">0</span><span>Preparar el entorno</span></a></li>
+<li><a class="" href="tarea-01.html"><span class="n">1</span><span>Generar una imagen (PPM)</span></a></li>
+<li><a class="" href="tarea-02.html"><span class="n">2</span><span>El tipo vec3 (structs)</span></a></li>
+<li><a class="" href="tarea-03.html"><span class="n">3</span><span>Rayos y un fondo</span></a></li>
+<li><a class="" href="tarea-04.html"><span class="n">4</span><span>Añadir una esfera</span></a></li>
+<li><a class="" href="tarea-05.html"><span class="n">5</span><span>Normales y varios objetos</span></a></li>
+<li><a class="" href="tarea-06.html"><span class="n">6</span><span>Antialiasing y aleatoriedad</span></a></li>
+<li><a class="" href="tarea-07.html"><span class="n">7</span><span>Materiales difusos (recursión)</span></a></li>
+<li><a class="active" href="tarea-08.html"><span class="n">8</span><span>Materiales: metal</span></a></li>
+<li><a class="" href="tarea-09.html"><span class="n">9</span><span>Dieléctricos (vidrio)</span></a></li>
+<li><a class="" href="tarea-10.html"><span class="n">10</span><span>Cámara posicionable</span></a></li>
+<li><a class="" href="tarea-11.html"><span class="n">11</span><span>Desenfoque (profundidad de campo)</span></a></li>
+<li><a class="" href="tarea-12.html"><span class="n">12</span><span>Escena final y memoria dinámica</span></a></li>
+<li><a class="" href="tarea-13.html"><span class="n">13</span><span>Compilación separada y Makefile</span></a></li>
+<li><a class="" href="tarea-14.html"><span class="n">14</span><span>¿Qué sigue?</span></a></li>
+    </ol></nav></div>
+    <main class="solo">
+      <nav class="pager top"><a class="pg prev" href="tarea-07.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tarea 7 &middot; Materiales difusos (recursión)</span></a><a class="pg next" href="tarea-09.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tarea 9 &middot; Dieléctricos (vidrio)</span></a></nav>
+      <section class="tarea" id="tarea-8" data-num="8" data-title="Materiales: metal">
+  <div class="tarea-head">
+    <div class="tarea-num">Tarea<span>8</span></div>
+    <div class="titles">
+      <p class="tarea-kicker">Polimorfismo sin clases</p>
+      <h2>Materiales: abstracción y metal</h2>
+    </div>
+  </div>
+
+  <div class="box objetivo">
+    <p class="box-label">Objetivo</p>
+    <p>Dar a cada esfera un <strong>material</strong> propio (mate o metálico) y decidir cómo rebota la luz según
+    el material. Es el corazón de la traducción de C++ a C: reemplazar la <em>herencia</em> por un
+    <code class="inl">enum</code> y un <code class="inl">switch</code>.</p>
+  </div>
+
+  <div class="box concepto">
+    <p class="box-label">Concepto de C · emular polimorfismo (dos técnicas)</p>
+    <p>En C++, <code class="inl">material</code> es una clase base abstracta con un método virtual
+    <code class="inl">scatter</code>, y <code class="inl">lambertian</code>, <code class="inl">metal</code>…
+    heredan de ella. C no tiene ni clases ni herencia ni métodos virtuales. Hay dos formas idiomáticas de
+    lograr el mismo efecto:</p>
+    <ol>
+      <li><strong>Etiqueta + <code>switch</code></strong>: un <code class="inl">enum</code> guarda el tipo de
+      material y una única función <code class="inl">scatter</code> ramifica con <code class="inl">switch</code>.
+      Sencillo y muy legible. <em>Es el que usaremos.</em></li>
+      <li><strong>Punteros a función</strong>: cada material guarda un puntero a su propia función
+      <code class="inl">scatter</code>. Es exactamente lo que hace un método virtual por dentro; potente, pero
+      con más andamiaje. Lo comentamos al final como ampliación.</li>
+    </ol>
+  </div>
+
+  <p>Definimos el material como una estructura con una <strong>etiqueta de tipo</strong> y los campos que
+  necesita cada variante (albedo para el color, <code class="inl">fuzz</code> para el desenfoque del metal,
+  índice de refracción para el vidrio de la Tarea 9):</p>
+
+  <script type="text/plain" class="srccode" data-file="material.h">
+#ifndef MATERIAL_H
+#define MATERIAL_H
+
+#include "rtweekend.h"
+#include "hittable.h"
+
+// La "etiqueta": que clase de material es.
+typedef enum {
+    LAMBERTIAN,   // mate
+    METAL,        // metalico
+    DIELECTRIC    // vidrio (Tarea 9)
+} material_type;
+
+// Un unico struct que sirve para los tres materiales.
+// Cada variante usa solo los campos que le interesan.
+typedef struct material {
+    material_type type;
+    color  albedo;             // LAMBERTIAN y METAL: color/atenuacion
+    double fuzz;               // METAL: cuanto se difumina el reflejo (0 = espejo)
+    double refraction_index;   // DIELECTRIC: indice de refraccion
+} material;
+
+// Reflexion especular: refleja v respecto a la normal n.
+static inline vec3 reflect(vec3 v, vec3 n) {
+    return vec3_sub(v, vec3_scale(n, 2 * vec3_dot(v, n)));
+}
+
+// scatter: dado un rayo entrante y un impacto, decide el rayo dispersado
+// y cuanto atenua el color. Devuelve 0 si el rayo se absorbe.
+static int scatter(const material *mat, ray r_in, hit_record rec,
+                   color *attenuation, ray *scattered) {
+    switch (mat->type) {
+
+    case LAMBERTIAN: {
+        // Rebote difuso: normal + direccion aleatoria
+        vec3 dir = vec3_add(rec.normal, random_unit_vector());
+        if (vec3_near_zero(dir)) dir = rec.normal;   // evita direccion nula
+        scattered->orig = rec.p;
+        scattered->dir  = dir;
+        *attenuation = mat->albedo;
+        return 1;
+    }
+
+    case METAL: {
+        // Reflejo especular, opcionalmente difuminado por "fuzz"
+        vec3 reflected = reflect(r_in.dir, rec.normal);
+        reflected = vec3_add(vec3_unit(reflected),
+                             vec3_scale(random_unit_vector(), mat->fuzz));
+        scattered->orig = rec.p;
+        scattered->dir  = reflected;
+        *attenuation = mat->albedo;
+        // Si el rayo difuminado se hunde bajo la superficie, se absorbe.
+        return vec3_dot(scattered->dir, rec.normal) > 0;
+    }
+
+    case DIELECTRIC:
+        // Se completa en la Tarea 9
+        return 0;
+    }
+    return 0;
+}
+
+#endif
+</script>
+
+  <div class="box concepto">
+    <p class="box-label">Concepto de C · orden de inclusión y declaración adelantada</p>
+    <p>Recuerda que en <code class="inl">hittable.h</code> escribimos <code class="inl">struct material;</code>
+    (declaración adelantada) porque <code class="inl">hit_record</code> guarda un
+    <code class="inl">const struct material *mat</code> sin conocer aún los detalles del material. Ahora, en
+    <code class="inl">material.h</code>, sí lo definimos por completo. Esta danza entre cabeceras —quién conoce a
+    quién— es habitual en C; las declaraciones adelantadas rompen las dependencias circulares.</p>
+  </div>
+
+  <div class="box fisica">
+    <p class="box-label">Física · reflexión especular y <em>fuzz</em></p>
+    <p>Un espejo refleja el rayo según <span class="math">r = d − 2(d·n)n</span>. Un metal real no es perfecto:
+    añadimos un pequeño vector aleatorio de tamaño <code class="inl">fuzz</code> a la dirección reflejada, lo que
+    difumina el reflejo. <code class="inl">fuzz = 0</code> es un espejo perfecto; valores mayores, un metal más
+    «cepillado».</p>
+  </div>
+
+  <p>Actualizamos <code class="inl">ray_color</code> para que delegue el rebote en <code class="inl">scatter</code>,
+  usando el material del objeto golpeado:</p>
+
+  <script type="text/plain" class="srccode" data-file="main.c (fragmento)">
+#include "material.h"
+
+color ray_color(ray r, int depth, hittable_list world) {
+    if (depth <= 0)
+        return v3(0, 0, 0);
+
+    hit_record rec;
+    if (world_hit(world, r, 0.001, INFINITY, &rec)) {
+        ray scattered;
+        color attenuation;
+        if (scatter(rec.mat, r, rec, &attenuation, &scattered)) {
+            // color = atenuacion * color del rayo dispersado
+            return vec3_mul(attenuation, ray_color(scattered, depth - 1, world));
+        }
+        return v3(0, 0, 0);   // material que absorbe
+    }
+
+    vec3 unit_direction = vec3_unit(r.dir);
+    double a = 0.5 * (unit_direction.y + 1.0);
+    return vec3_add(vec3_scale(v3(1,1,1), 1.0 - a),
+                    vec3_scale(v3(0.5,0.7,1.0), a));
+}
+</script>
+
+  <p>Y en <code class="inl">main</code> creamos materiales y los asignamos a las esferas. Fíjate en que la
+  esfera guarda un <strong>puntero</strong> al material, así que los materiales deben seguir existiendo mientras
+  se renderiza (aquí son variables locales de <code class="inl">main</code>, que viven durante todo el render):</p>
+
+  <script type="text/plain" class="srccode" data-file="main.c (fragmento)">
+int main(void) {
+    // Materiales (¡deben sobrevivir a todo el render!)
+    material mat_ground = { LAMBERTIAN, v3(0.8, 0.8, 0.0), 0, 0 };
+    material mat_center = { LAMBERTIAN, v3(0.1, 0.2, 0.5), 0, 0 };
+    material mat_left   = { METAL,      v3(0.8, 0.8, 0.8), 0.3, 0 };
+    material mat_right  = { METAL,      v3(0.8, 0.6, 0.2), 1.0, 0 };
+
+    // Esferas: cada una apunta a su material con &
+    sphere spheres[] = {
+        { v3( 0, -100.5, -1), 100.0, &mat_ground },
+        { v3( 0,      0, -1.2), 0.5,  &mat_center },
+        { v3(-1,      0, -1),   0.5,  &mat_left },
+        { v3( 1,      0, -1),   0.5,  &mat_right },
+    };
+    hittable_list world = { spheres, 4 };
+
+    // ... configuracion de camara y bucle de render (Tarea 6) ...
+}
+</script>
+
+  <div class="box pista">
+    <p class="box-label">Pista · el peligro del puntero colgante</p>
+    <p>Si crearas los materiales dentro de un bloque más pequeño (por ejemplo, en un bucle que termina antes del
+    render), sus punteros quedarían «colgando» y el programa fallaría. Regla mental: <strong>el objeto apuntado
+    debe vivir al menos tanto como el puntero que lo usa</strong>. En la Tarea 12 resolveremos esto con memoria
+    dinámica.</p>
+  </div>
+
+  <div class="box nota">
+    <p class="box-label">Ampliación · polimorfismo con punteros a función</p>
+    <p>En lugar del <code class="inl">enum</code>, cada material podría guardar
+    <code class="inl">int (*scatter)(const material*, ray, hit_record, color*, ray*)</code>. Entonces
+    <code class="inl">rec.mat-&gt;scatter(...)</code> llamaría a la función correcta sin
+    <code class="inl">switch</code>. Es, literalmente, cómo implementan los compiladores de C++ las funciones
+    virtuales (la «vtable»). Pruébalo como ejercicio avanzado cuando domines los punteros.</p>
+  </div>
+
+  <div class="box reto">
+    <p class="box-label">Entrega</p>
+    <ul class="entrega">
+      <li>La escena de cuatro esferas con dos metales y dos superficies mate.</li>
+      <li><strong>Reto:</strong> varía el <code>fuzz</code> del metal de la derecha entre 0 y 1 y muestra la serie de imágenes.</li>
+    </ul>
+  </div>
+</section>
+      <nav class="pager bottom"><a class="pg prev" href="tarea-07.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tarea 7 &middot; Materiales difusos (recursión)</span></a><a class="pg next" href="tarea-09.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tarea 9 &middot; Dieléctricos (vidrio)</span></a></nav>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="shell">
+    <p>Material docente derivado y adaptado de <a href="https://raytracing.github.io/books/RayTracingInOneWeekend.html">«Ray Tracing in One Weekend»</a>
+    de Peter Shirley, Trevor David Black y Steve Hollasch (licencia CC0). Esta versión reescribe todo el código en
+    <strong>C puro</strong> y reorganiza el contenido como tareas de curso, con toda la explicación en español.</p>
+    <p>Compila los ejemplos con <code class="inl">gcc -O2 main.c -o rt -lm</code> y visualiza con <code class="inl">./rt &gt; imagen.ppm</code>.</p>
+  </div>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tarea 6 &middot; Antialiasing y aleatoriedad &mdash; Trazador de Rayos en C</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,600&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><b>Trazador de Rayos en C</b></a>
+    <div class="spacer"></div>
+    <button class="theme-btn" id="themeBtn" aria-label="Cambiar tema">
+      <span id="themeIcon">&#9680;</span><span id="themeLabel">Tema</span>
+    </button>
+  </div>
+</div>
+<div class="shell">
+  <div class="layout">
+    <div class="toc-wrap"><nav class="toc" aria-label="Ruta del curso"><p class="toc-title">Ruta del curso</p><ol>
+<li><a class="" href="index.html"><span class="n">&#9632;</span><span>Inicio</span></a></li>
+<li><a class="" href="tarea-00.html"><span class="n">0</span><span>Preparar el entorno</span></a></li>
+<li><a class="" href="tarea-01.html"><span class="n">1</span><span>Generar una imagen (PPM)</span></a></li>
+<li><a class="" href="tarea-02.html"><span class="n">2</span><span>El tipo vec3 (structs)</span></a></li>
+<li><a class="" href="tarea-03.html"><span class="n">3</span><span>Rayos y un fondo</span></a></li>
+<li><a class="" href="tarea-04.html"><span class="n">4</span><span>Añadir una esfera</span></a></li>
+<li><a class="" href="tarea-05.html"><span class="n">5</span><span>Normales y varios objetos</span></a></li>
+<li><a class="active" href="tarea-06.html"><span class="n">6</span><span>Antialiasing y aleatoriedad</span></a></li>
+<li><a class="" href="tarea-07.html"><span class="n">7</span><span>Materiales difusos (recursión)</span></a></li>
+<li><a class="" href="tarea-08.html"><span class="n">8</span><span>Materiales: metal</span></a></li>
+<li><a class="" href="tarea-09.html"><span class="n">9</span><span>Dieléctricos (vidrio)</span></a></li>
+<li><a class="" href="tarea-10.html"><span class="n">10</span><span>Cámara posicionable</span></a></li>
+<li><a class="" href="tarea-11.html"><span class="n">11</span><span>Desenfoque (profundidad de campo)</span></a></li>
+<li><a class="" href="tarea-12.html"><span class="n">12</span><span>Escena final y memoria dinámica</span></a></li>
+<li><a class="" href="tarea-13.html"><span class="n">13</span><span>Compilación separada y Makefile</span></a></li>
+<li><a class="" href="tarea-14.html"><span class="n">14</span><span>¿Qué sigue?</span></a></li>
+    </ol></nav></div>
+    <main class="solo">
+      <nav class="pager top"><a class="pg prev" href="tarea-05.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tarea 5 &middot; Normales y varios objetos</span></a><a class="pg next" href="tarea-07.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tarea 7 &middot; Materiales difusos (recursión)</span></a></nav>
+      <section class="tarea" id="tarea-6" data-num="6" data-title="Antialiasing y aleatoriedad">
+  <div class="tarea-head">
+    <div class="tarea-num">Tarea<span>6</span></div>
+    <div class="titles">
+      <p class="tarea-kicker">Muestreo y números aleatorios</p>
+      <h2>Suavizado de bordes (<em>antialiasing</em>)</h2>
+    </div>
+  </div>
+
+  <div class="box objetivo">
+    <p class="box-label">Objetivo</p>
+    <p>Eliminar los bordes «en escalera» lanzando varios rayos por píxel, con una pequeña posición aleatoria,
+    y promediando su color. Aprenderás a generar números aleatorios en C.</p>
+  </div>
+
+  <div class="box concepto">
+    <p class="box-label">Concepto de C · números aleatorios con <code>rand()</code></p>
+    <p>La biblioteca estándar ofrece <code class="inl">rand()</code> (en <code class="inl">&lt;stdlib.h&gt;</code>),
+    que devuelve un entero entre 0 y <code class="inl">RAND_MAX</code>. Para obtener un real en
+    <span class="math">[0,1)</span> dividimos por <code class="inl">RAND_MAX + 1</code>. Reunimos estas utilidades
+    en una cabecera común, <code class="inl">rtweekend.h</code>.</p>
+  </div>
+
+  <script type="text/plain" class="srccode" data-file="rtweekend.h">
+#ifndef RTWEEKEND_H
+#define RTWEEKEND_H
+
+#include <math.h>
+#include <stdlib.h>   // rand, RAND_MAX
+
+#define PI 3.1415926535897932385
+
+static inline double degrees_to_radians(double degrees) {
+    return degrees * PI / 180.0;
+}
+
+// Numero real aleatorio en [0, 1)
+static inline double random_double(void) {
+    return rand() / (RAND_MAX + 1.0);
+}
+
+// Numero real aleatorio en [min, max)
+static inline double random_double_range(double min, double max) {
+    return min + (max - min) * random_double();
+}
+
+// Recorta x al intervalo [min, max]
+static inline double clamp(double x, double min, double max) {
+    if (x < min) return min;
+    if (x > max) return max;
+    return x;
+}
+
+#endif
+</script>
+
+  <div class="box concepto">
+    <p class="box-label">Concepto de C · promediar muestras y recortar con <code>clamp</code></p>
+    <p>Sumamos el color de <code class="inl">samples_per_pixel</code> rayos y dividimos por ese número. Como el
+    resultado podría salirse de [0,1], <code class="inl">write_color</code> ahora aplica
+    <code class="inl">clamp</code> antes de convertir a byte.</p>
+  </div>
+
+  <script type="text/plain" class="srccode" data-file="color.h (actualizado)">
+#ifndef COLOR_H
+#define COLOR_H
+
+#include <stdio.h>
+#include "vec3.h"
+#include "rtweekend.h"
+
+static void write_color(FILE *out, color pixel_color) {
+    double r = pixel_color.x;
+    double g = pixel_color.y;
+    double b = pixel_color.z;
+
+    // Recortamos a [0, 0.999] y pasamos a bytes [0,255]
+    int ir = (int)(256 * clamp(r, 0.0, 0.999));
+    int ig = (int)(256 * clamp(g, 0.0, 0.999));
+    int ib = (int)(256 * clamp(b, 0.0, 0.999));
+
+    fprintf(out, "%d %d %d\n", ir, ig, ib);
+}
+
+#endif
+</script>
+
+  <p>En <code class="inl">main.c</code>, envolvemos la construcción del rayo en una función
+  <code class="inl">get_ray</code> que añade una pequeña sacudida aleatoria dentro del píxel, y promediamos:</p>
+
+  <script type="text/plain" class="srccode" data-file="main.c (fragmento)">
+#include "rtweekend.h"
+
+// Construye un rayo hacia un punto aleatorio dentro del pixel (i, j).
+// pixel00_loc, pixel_delta_u/v y camera_center son variables de la camara.
+ray get_ray(int i, int j, point3 pixel00_loc,
+            vec3 pixel_delta_u, vec3 pixel_delta_v, point3 camera_center) {
+    // Desplazamiento aleatorio en [-0.5, 0.5] dentro del pixel
+    double px = random_double() - 0.5;
+    double py = random_double() - 0.5;
+
+    point3 pixel_sample =
+        vec3_add(pixel00_loc,
+            vec3_add(vec3_scale(pixel_delta_u, i + px),
+                     vec3_scale(pixel_delta_v, j + py)));
+
+    vec3 ray_direction = vec3_sub(pixel_sample, camera_center);
+    ray r = { camera_center, ray_direction };
+    return r;
+}
+
+// Dentro del bucle de render:
+int samples_per_pixel = 100;
+double pixel_samples_scale = 1.0 / samples_per_pixel;
+// ...
+color pixel = v3(0, 0, 0);
+for (int s = 0; s < samples_per_pixel; s++) {
+    ray r = get_ray(i, j, pixel00_loc, pixel_delta_u, pixel_delta_v, camera_center);
+    pixel = vec3_add(pixel, ray_color(r, world));
+}
+write_color(stdout, vec3_scale(pixel, pixel_samples_scale));
+</script>
+
+  <div class="box pista">
+    <p class="box-label">Pista · <code>srand</code> y la reproducibilidad</p>
+    <p>Sin llamar a <code class="inl">srand(semilla)</code>, <code class="inl">rand()</code> produce siempre la
+    <em>misma</em> secuencia. Para un curso eso es una <strong>ventaja</strong>: tu imagen será idéntica cada
+    vez y comparable con la de referencia. Si quieres variar, llama a <code class="inl">srand(time(NULL))</code>
+    (incluye <code class="inl">&lt;time.h&gt;</code>) al principio de <code class="inl">main</code>.</p>
+  </div>
+
+  <div class="box nota">
+    <p class="box-label">Sobre la calidad de <code>rand()</code></p>
+    <p><code class="inl">rand()</code> no es un generador de gran calidad, pero sobra para este proyecto y es
+    parte de la biblioteca estándar, sin dependencias. Si más adelante te interesa, investiga generadores
+    mejores; el trazador funcionará igual.</p>
+  </div>
+
+  <div class="box reto">
+    <p class="box-label">Entrega</p>
+    <ul class="entrega">
+      <li>La misma escena de la Tarea 5, ahora con bordes suaves, y una comparación con 1, 10 y 100 muestras.</li>
+      <li><strong>Reto:</strong> mide (con <code>time ./rt &gt; img.ppm</code>) cómo crece el tiempo con el número de muestras. ¿Es lineal?</li>
+    </ul>
+  </div>
+</section>
+      <nav class="pager bottom"><a class="pg prev" href="tarea-05.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tarea 5 &middot; Normales y varios objetos</span></a><a class="pg next" href="tarea-07.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tarea 7 &middot; Materiales difusos (recursión)</span></a></nav>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="shell">
+    <p>Material docente derivado y adaptado de <a href="https://raytracing.github.io/books/RayTracingInOneWeekend.html">«Ray Tracing in One Weekend»</a>
+    de Peter Shirley, Trevor David Black y Steve Hollasch (licencia CC0). Esta versión reescribe todo el código en
+    <strong>C puro</strong> y reorganiza el contenido como tareas de curso, con toda la explicación en español.</p>
+    <p>Compila los ejemplos con <code class="inl">gcc -O2 main.c -o rt -lm</code> y visualiza con <code class="inl">./rt &gt; imagen.ppm</code>.</p>
+  </div>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tarea 7 &middot; Materiales difusos (recursión) &mdash; Trazador de Rayos en C</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,600&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><b>Trazador de Rayos en C</b></a>
+    <div class="spacer"></div>
+    <button class="theme-btn" id="themeBtn" aria-label="Cambiar tema">
+      <span id="themeIcon">&#9680;</span><span id="themeLabel">Tema</span>
+    </button>
+  </div>
+</div>
+<div class="shell">
+  <div class="layout">
+    <div class="toc-wrap"><nav class="toc" aria-label="Ruta del curso"><p class="toc-title">Ruta del curso</p><ol>
+<li><a class="" href="index.html"><span class="n">&#9632;</span><span>Inicio</span></a></li>
+<li><a class="" href="tarea-00.html"><span class="n">0</span><span>Preparar el entorno</span></a></li>
+<li><a class="" href="tarea-01.html"><span class="n">1</span><span>Generar una imagen (PPM)</span></a></li>
+<li><a class="" href="tarea-02.html"><span class="n">2</span><span>El tipo vec3 (structs)</span></a></li>
+<li><a class="" href="tarea-03.html"><span class="n">3</span><span>Rayos y un fondo</span></a></li>
+<li><a class="" href="tarea-04.html"><span class="n">4</span><span>Añadir una esfera</span></a></li>
+<li><a class="" href="tarea-05.html"><span class="n">5</span><span>Normales y varios objetos</span></a></li>
+<li><a class="" href="tarea-06.html"><span class="n">6</span><span>Antialiasing y aleatoriedad</span></a></li>
+<li><a class="active" href="tarea-07.html"><span class="n">7</span><span>Materiales difusos (recursión)</span></a></li>
+<li><a class="" href="tarea-08.html"><span class="n">8</span><span>Materiales: metal</span></a></li>
+<li><a class="" href="tarea-09.html"><span class="n">9</span><span>Dieléctricos (vidrio)</span></a></li>
+<li><a class="" href="tarea-10.html"><span class="n">10</span><span>Cámara posicionable</span></a></li>
+<li><a class="" href="tarea-11.html"><span class="n">11</span><span>Desenfoque (profundidad de campo)</span></a></li>
+<li><a class="" href="tarea-12.html"><span class="n">12</span><span>Escena final y memoria dinámica</span></a></li>
+<li><a class="" href="tarea-13.html"><span class="n">13</span><span>Compilación separada y Makefile</span></a></li>
+<li><a class="" href="tarea-14.html"><span class="n">14</span><span>¿Qué sigue?</span></a></li>
+    </ol></nav></div>
+    <main class="solo">
+      <nav class="pager top"><a class="pg prev" href="tarea-06.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tarea 6 &middot; Antialiasing y aleatoriedad</span></a><a class="pg next" href="tarea-08.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tarea 8 &middot; Materiales: metal</span></a></nav>
+      <section class="tarea" id="tarea-7" data-num="7" data-title="Materiales difusos (recursión)">
+  <div class="tarea-head">
+    <div class="tarea-num">Tarea<span>7</span></div>
+    <div class="titles">
+      <p class="tarea-kicker">Recursión y rebotes de luz</p>
+      <h2>Materiales difusos y rebote de rayos</h2>
+    </div>
+  </div>
+
+  <div class="box objetivo">
+    <p class="box-label">Objetivo</p>
+    <p>Hacer que los rayos <strong>reboten</strong> en las superficies mates, oscureciéndose en cada rebote.
+    Aparecen sombras suaves y una iluminación creíble. El motor de todo esto es la <strong>recursión</strong>.</p>
+  </div>
+
+  <div class="box fisica">
+    <p class="box-label">Física · reflexión difusa</p>
+    <p>Una superficie <strong>mate</strong> (difusa o «lambertiana») dispersa la luz en direcciones casi
+    aleatorias. Modelamos el rebote así: desde el punto de impacto, lanzamos un nuevo rayo en una dirección
+    <span class="math">n + û</span>, donde <span class="math">n</span> es la normal y <span class="math">û</span>
+    un vector unitario aleatorio. Cada rebote absorbe parte de la luz (multiplicamos por la reflectividad),
+    por eso las esquinas quedan más oscuras.</p>
+  </div>
+
+  <div class="box concepto">
+    <p class="box-label">Concepto de C · recursión con condición de parada</p>
+    <p><code class="inl">ray_color</code> se llama a sí misma para seguir el rayo rebotado. Toda recursión
+    necesita un <strong>caso base</strong> que la detenga: aquí un contador <code class="inl">depth</code> que
+    decrece en cada rebote; al llegar a 0 devolvemos negro. Sin ese límite, un rayo podría rebotar para siempre
+    y agotar la pila.</p>
+  </div>
+
+  <p>Primero, más utilidades vectoriales aleatorias. Las añadimos a <code class="inl">rtweekend.h</code>
+  (después de incluir <code class="inl">vec3.h</code>):</p>
+
+  <script type="text/plain" class="srccode" data-file="rtweekend.h (añadir)">
+#include "vec3.h"
+
+// Vector con componentes aleatorias
+static inline vec3 vec3_random(void) {
+    return v3(random_double(), random_double(), random_double());
+}
+static inline vec3 vec3_random_range(double min, double max) {
+    return v3(random_double_range(min, max),
+              random_double_range(min, max),
+              random_double_range(min, max));
+}
+
+// Vector unitario con direccion uniformemente aleatoria
+static inline vec3 random_unit_vector(void) {
+    while (1) {
+        vec3 p = vec3_random_range(-1, 1);
+        double lensq = vec3_length_squared(p);
+        if (1e-160 < lensq && lensq <= 1.0)   // dentro de la esfera y no degenerado
+            return vec3_div(p, sqrt(lensq));
+    }
+}
+
+// Vector aleatorio en el hemisferio de la normal (una alternativa)
+static inline vec3 random_on_hemisphere(vec3 normal) {
+    vec3 on_unit = random_unit_vector();
+    return (vec3_dot(on_unit, normal) > 0.0) ? on_unit : vec3_neg(on_unit);
+}
+
+// ¿Es el vector practicamente cero? (lo usaremos en la Tarea 8)
+static inline int vec3_near_zero(vec3 v) {
+    double s = 1e-8;
+    return (fabs(v.x) < s) && (fabs(v.y) < s) && (fabs(v.z) < s);
+}
+</script>
+
+  <p>Ahora <code class="inl">ray_color</code> se vuelve recursiva y recibe la profundidad restante:</p>
+
+  <script type="text/plain" class="srccode" data-file="main.c (fragmento)">
+color ray_color(ray r, int depth, hittable_list world) {
+    // Caso base: demasiados rebotes, ya no se recoge mas luz.
+    if (depth <= 0)
+        return v3(0, 0, 0);
+
+    hit_record rec;
+    // OJO: tmin = 0.001, no 0, para evitar el "acne de sombra" (ver pista).
+    if (world_hit(world, r, 0.001, INFINITY, &rec)) {
+        // Nueva direccion difusa: normal + vector unitario aleatorio
+        vec3 direction = vec3_add(rec.normal, random_unit_vector());
+        ray bounced = { rec.p, direction };
+        // Cada rebote conserva el 50% de la luz (reflectividad de prueba)
+        return vec3_scale(ray_color(bounced, depth - 1, world), 0.5);
+    }
+
+    // Fondo (cielo)
+    vec3 unit_direction = vec3_unit(r.dir);
+    double a = 0.5 * (unit_direction.y + 1.0);
+    return vec3_add(vec3_scale(v3(1,1,1), 1.0 - a),
+                    vec3_scale(v3(0.5,0.7,1.0), a));
+}
+
+// En el render, pasa la profundidad maxima:
+int max_depth = 50;
+// ...
+pixel = vec3_add(pixel, ray_color(r, max_depth, world));
+</script>
+
+  <div class="box pista">
+    <p class="box-label">Pista · el «acné de sombra» y por qué <code>tmin = 0.001</code></p>
+    <p>Por errores de redondeo, el rayo rebotado puede volver a «golpear» la misma superficie a una distancia
+    minúscula (<span class="math">t ≈ 0</span>), generando un moteado oscuro. Ignorar los impactos con
+    <span class="math">t &lt; 0.001</span> lo elimina. Es uno de esos detalles numéricos, típicos de la física
+    computacional, que marcan la diferencia entre una imagen limpia y una sucia.</p>
+  </div>
+
+  <div class="box fisica">
+    <p class="box-label">Física · corrección gamma</p>
+    <p>Nuestros colores están en espacio «lineal», pero las pantallas esperan valores «gamma». Sin corregir,
+    la imagen se ve demasiado oscura. Aplicamos una gamma sencilla (γ = 2): tomamos la
+    <strong>raíz cuadrada</strong> de cada componente antes de escribirla. Actualiza
+    <code class="inl">write_color</code>:</p>
+  </div>
+
+  <script type="text/plain" class="srccode" data-file="color.h (con gamma)">
+#ifndef COLOR_H
+#define COLOR_H
+
+#include <stdio.h>
+#include "vec3.h"
+#include "rtweekend.h"
+
+// De lineal a gamma (gamma = 2)  ->  raiz cuadrada
+static inline double linear_to_gamma(double linear) {
+    return (linear > 0) ? sqrt(linear) : 0;
+}
+
+static void write_color(FILE *out, color pixel_color) {
+    double r = linear_to_gamma(pixel_color.x);
+    double g = linear_to_gamma(pixel_color.y);
+    double b = linear_to_gamma(pixel_color.z);
+
+    int ir = (int)(256 * clamp(r, 0.0, 0.999));
+    int ig = (int)(256 * clamp(g, 0.0, 0.999));
+    int ib = (int)(256 * clamp(b, 0.0, 0.999));
+
+    fprintf(out, "%d %d %d\n", ir, ig, ib);
+}
+
+#endif
+</script>
+
+  <div class="box reto">
+    <p class="box-label">Entrega y retos</p>
+    <ul class="entrega">
+      <li>La esfera con sombreado difuso, con y sin corrección gamma (compara).</li>
+      <li>Prueba <code>max_depth</code> = 1, 5, 50 y comenta el efecto en las sombras.</li>
+      <li><strong>Reto:</strong> sustituye <code>random_unit_vector</code> por <code>random_on_hemisphere(rec.normal)</code> y describe la diferencia en el aspecto.</li>
+    </ul>
+  </div>
+</section>
+      <nav class="pager bottom"><a class="pg prev" href="tarea-06.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tarea 6 &middot; Antialiasing y aleatoriedad</span></a><a class="pg next" href="tarea-08.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tarea 8 &middot; Materiales: metal</span></a></nav>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="shell">
+    <p>Material docente derivado y adaptado de <a href="https://raytracing.github.io/books/RayTracingInOneWeekend.html">«Ray Tracing in One Weekend»</a>
+    de Peter Shirley, Trevor David Black y Steve Hollasch (licencia CC0). Esta versión reescribe todo el código en
+    <strong>C puro</strong> y reorganiza el contenido como tareas de curso, con toda la explicación en español.</p>
+    <p>Compila los ejemplos con <code class="inl">gcc -O2 main.c -o rt -lm</code> y visualiza con <code class="inl">./rt &gt; imagen.ppm</code>.</p>
+  </div>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>
