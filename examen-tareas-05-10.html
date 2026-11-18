@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Examen escrito &middot; Tareas 5&ndash;10 &mdash; Programación en C</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,600&display=swap">
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* ===== Página de examen (usa los tokens de styles.css en pantalla) ===== */
+  .toolbar{max-width:840px;margin:1.4rem auto 0;padding:0 clamp(1rem,4vw,2rem);
+    display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
+  .toolbar .btn{font-family:"IBM Plex Mono",monospace;font-size:.78rem;cursor:pointer;
+    border:1px solid var(--line-strong);background:var(--surface);color:var(--ink-soft);
+    border-radius:8px;padding:.4rem .8rem}
+  .toolbar .btn:hover{border-color:var(--accent);color:var(--accent)}
+  .toolbar .hint{font-family:"IBM Plex Mono",monospace;font-size:.72rem;color:var(--muted)}
+
+  .sheet{max-width:840px;margin:1.2rem auto 3rem;background:var(--surface);
+    border:1px solid var(--line);border-radius:14px;padding:clamp(1.4rem,4vw,2.8rem);
+    box-shadow:var(--shadow)}
+  .sheet h1{font-family:"Spectral",Georgia,serif;font-size:1.7rem;margin:0 0 .2rem;color:var(--ink)}
+  .exam-kicker{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--accent);margin:0 0 .5rem}
+  .exam-sub{color:var(--ink-soft);margin:.1rem 0 1.1rem}
+
+  .idbox{display:grid;grid-template-columns:1fr 1fr;gap:.4rem 1.6rem;margin:1rem 0;
+    padding:1rem 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .idbox .fld{display:flex;align-items:flex-end;gap:.5rem;font-size:.92rem}
+  .idbox .fld b{white-space:nowrap;color:var(--ink)}
+  .idbox .fld .line{flex:1;border-bottom:1px solid var(--line-strong);height:1.2rem}
+  .idbox .full{grid-column:1 / -1}
+
+  .meta{display:flex;flex-wrap:wrap;gap:.5rem 1.4rem;font-family:"IBM Plex Mono",monospace;
+    font-size:.78rem;color:var(--ink-soft);margin:.4rem 0 0}
+  .meta b{color:var(--accent-ink)}
+
+  .instr{margin:1rem 0 0;padding:.9rem 1.1rem;border-left:4px solid var(--accent);
+    background:var(--accent-soft);border-radius:8px;font-size:.9rem}
+  .instr ul{margin:.4rem 0 0;padding-left:1.15rem}
+  .instr li{margin:.15rem 0}
+
+  .marks{width:100%;border-collapse:collapse;margin:1.1rem 0 .2rem;font-family:"IBM Plex Mono",monospace;font-size:.74rem}
+  .marks th,.marks td{border:1px solid var(--line-strong);padding:.35rem .4rem;text-align:center}
+  .marks th{background:var(--surface-2);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
+  .marks td.note{color:var(--muted)}
+
+  .part{margin:2.2rem 0 0;break-inside:avoid}
+  .part-head{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;
+    border-bottom:2px solid var(--ink);padding-bottom:.35rem;margin-bottom:.4rem}
+  .part-head h2{font-family:"IBM Plex Mono",monospace;font-size:.95rem;letter-spacing:.02em;
+    text-transform:uppercase;margin:0;color:var(--ink)}
+  .part-head .pp{font-family:"IBM Plex Mono",monospace;font-size:.74rem;color:var(--muted);white-space:nowrap}
+  .part > .lead{font-size:.88rem;color:var(--ink-soft);margin:.45rem 0 .9rem}
+
+  ol.q{list-style:none;counter-reset:qq;margin:0;padding:0}
+  ol.q > li{counter-increment:qq;position:relative;padding:.55rem 0;border-bottom:1px dashed var(--line);break-inside:avoid}
+  ol.q > li:last-child{border-bottom:none}
+  ol.q > li::before{content:counter(qq) ".";position:absolute;left:0;top:.55rem;
+    font-family:"IBM Plex Mono",monospace;color:var(--accent);font-weight:600;font-size:.9rem}
+  ol.q > li{padding-left:2rem}
+  .qtext{display:block}
+  .qpts{font-family:"IBM Plex Mono",monospace;font-size:.7rem;color:var(--muted);margin-left:.4rem}
+
+  /* Verdadero / Falso */
+  .vf{float:right;font-family:"IBM Plex Mono",monospace;font-weight:600;letter-spacing:.25em;
+    color:var(--ink-soft);border:1px solid var(--line-strong);border-radius:6px;padding:.12rem .6rem;margin-left:1rem}
+
+  /* Opción múltiple */
+  .opts{list-style:none;margin:.5rem 0 0;padding:0}
+  .opts li{padding:.15rem 0 .15rem 1.9rem;position:relative;font-size:.92rem}
+  .opts li .lt{position:absolute;left:0;top:.15rem;font-family:"IBM Plex Mono",monospace;
+    color:var(--ink-soft);border:1px solid var(--line-strong);border-radius:50%;
+    width:1.4em;height:1.4em;display:inline-flex;align-items:center;justify-content:center;font-size:.78rem}
+
+  /* Bloques de código para leer (claros, aptos para imprimir) */
+  pre.examcode{margin:.6rem 0;padding:.8rem 1rem;border:1px solid var(--line-strong);
+    border-radius:8px;background:var(--surface-2);overflow-x:auto;
+    font-family:"IBM Plex Mono",monospace;font-size:.82rem;line-height:1.55;color:var(--ink)}
+  pre.examcode code{font-family:inherit;white-space:pre}
+
+  /* Líneas para escribir a mano */
+  .write{margin:.55rem 0 .3rem}
+  .write .ln{height:1.85rem;border-bottom:1px solid var(--line-strong)}
+  .write.short .ln{width:60%}
+
+  code.k{font-family:"IBM Plex Mono",monospace;font-size:.86em;background:var(--surface-2);
+    border:1px solid var(--line);border-radius:5px;padding:.05em .35em;color:var(--accent-ink);white-space:nowrap}
+
+  /* Solucionario (nunca se imprime) */
+  .solucionario{max-width:840px;margin:0 auto 4rem;padding:0 clamp(1rem,4vw,2rem)}
+  .solucionario .inner{border:1px dashed var(--indigo);border-radius:12px;background:var(--indigo-soft);
+    padding:1.2rem 1.4rem}
+  .solucionario h2{font-family:"IBM Plex Mono",monospace;font-size:.9rem;letter-spacing:.05em;
+    text-transform:uppercase;color:var(--indigo);margin:0 0 .3rem}
+  .solucionario h3{font-family:"IBM Plex Mono",monospace;font-size:.78rem;letter-spacing:.04em;
+    text-transform:uppercase;color:var(--ink-soft);margin:1.1rem 0 .3rem}
+  .solucionario ol{margin:.2rem 0;padding-left:1.3rem}
+  .solucionario li{margin:.28rem 0;font-size:.9rem;color:var(--ink-soft)}
+  .solucionario code{font-family:"IBM Plex Mono",monospace;font-size:.86em;color:var(--accent-ink)}
+
+  /* ===== Impresión: tinta mínima, blanco y negro ===== */
+  @media print {
+    :root, :root[data-theme="dark"], :root[data-theme="light"]{
+      --paper:#fff;--surface:#fff;--surface-2:#fff;--ink:#000;--ink-soft:#111;--muted:#333;
+      --line:#c4c4c4;--line-strong:#7a7a7a;--accent:#000;--accent-ink:#000;--accent-soft:#fff;
+      --indigo:#000;--teal:#000;--shadow:none;
+    }
+    body{background:#fff;color:#000}
+    .topbar,.toolbar,.solucionario,.foot{display:none !important}
+    .sheet{box-shadow:none;border:none;border-radius:0;margin:0 auto;max-width:none;padding:0}
+    .part{break-inside:auto}
+    ol.q > li, .part-head{break-inside:avoid}
+    pre.examcode{background:#fff}
+    a{color:#000;text-decoration:none}
+    @page{margin:1.6cm}
+  }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><b>Trazador de Rayos en C</b></a>
+    <div class="spacer"></div>
+    <button class="theme-btn" id="themeBtn" aria-label="Cambiar tema">
+      <span id="themeIcon">&#9680;</span><span id="themeLabel">Tema</span>
+    </button>
+  </div>
+</div>
+
+<div class="toolbar noprint">
+  <button class="btn" id="printBtn" type="button">&#128424; Imprimir examen</button>
+  <button class="btn" id="solBtn" type="button">Mostrar solucionario</button>
+  <span class="hint">El solucionario nunca se imprime &mdash; solo se ve en pantalla.</span>
+</div>
+
+<article class="sheet">
+  <p class="exam-kicker">Curso de Programación en C &middot; 2.º de Física</p>
+  <h1>Segundo examen escrito &mdash; Punteros, recursión y materiales</h1>
+  <p class="exam-sub">Tareas 5 a 10: punteros y salida por parámetro, números aleatorios, recursión, <code class="k">enum</code> y <code class="k">switch</code>, tiempo de vida de las variables y el <code class="k">struct camera</code>.</p>
+
+  <div class="meta">
+    <span>Duración: <b>1 hora</b></span>
+    <span>Puntuación: <b>100 puntos</b></span>
+    <span>Sin ordenador, apuntes ni calculadora</span>
+  </div>
+
+  <div class="idbox">
+    <div class="fld full"><b>Nombre y apellidos:</b><span class="line"></span></div>
+    <div class="fld full"><b>Fecha:</b><span class="line"></span></div>
+  </div>
+
+  <div class="instr">
+    <strong>Instrucciones.</strong>
+    <ul>
+      <li>Escribe con bolígrafo, de forma legible. Responde en los espacios previstos.</li>
+      <li>En Verdadero/Falso y en las opciones múltiples, <strong>rodea con un círculo</strong> tu respuesta.</li>
+      <li>En las respuestas breves basta con 1&ndash;3 frases claras; no hace falta escribir código largo salvo donde se pida.</li>
+      <li>Se valora la precisión de los términos técnicos (caso base, salida por parámetro, declaración adelantada, puntero colgante&hellip;).</li>
+      <li>Puedes suponer disponibles <code class="k">vec3</code>, <code class="k">v3</code>, <code class="k">vec3_add</code>, <code class="k">vec3_scale</code>, <code class="k">random_double</code> y el resto de funciones del curso.</li>
+    </ul>
+  </div>
+
+  <table class="marks">
+    <thead>
+      <tr><th>Parte</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>Total</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="note">Máx.</td><td>10</td><td>18</td><td>30</td><td>24</td><td>18</td><td>100</td></tr>
+      <tr><td class="note">Nota</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    </tbody>
+  </table>
+
+  <!-- ============ PARTE 1 ============ -->
+  <section class="part">
+    <div class="part-head"><h2>Parte 1 &middot; Verdadero o Falso</h2><span class="pp">10 preguntas &middot; 1 pt c/u &middot; 10 pts</span></div>
+    <p class="lead">Rodea <b>V</b> (verdadero) o <b>F</b> (falso). No hay que justificar.</p>
+    <ol class="q">
+      <li><span class="vf">V &middot; F</span><span class="qtext"><code class="k">rand()</code> devuelve un número real entre <code class="k">0</code> y <code class="k">1</code>.</span></li>
+      <li><span class="vf">V &middot; F</span><span class="qtext">Si nunca se llama a <code class="k">srand</code>, <code class="k">rand()</code> produce la misma secuencia de números en cada ejecución.</span></li>
+      <li><span class="vf">V &middot; F</span><span class="qtext">Toda función recursiva necesita un caso base que detenga las llamadas.</span></li>
+      <li><span class="vf">V &middot; F</span><span class="qtext">En un <code class="k">switch</code>, si un <code class="k">case</code> no termina con <code class="k">break</code> (ni <code class="k">return</code>), la ejecución continúa en el <code class="k">case</code> siguiente.</span></li>
+      <li><span class="vf">V &middot; F</span><span class="qtext">Los valores de un <code class="k">enum</code> son constantes enteras y, por defecto, el primero vale <code class="k">0</code>.</span></li>
+      <li><span class="vf">V &middot; F</span><span class="qtext">C permite que un <code class="k">struct</code> herede de otro y tenga métodos virtuales, igual que una clase de C++.</span></li>
+      <li><span class="vf">V &middot; F</span><span class="qtext">Tras la declaración adelantada <code class="k">struct material;</code> se pueden declarar punteros de tipo <code class="k">struct material *</code> aunque aún no se conozcan sus campos.</span></li>
+      <li><span class="vf">V &middot; F</span><span class="qtext">Es seguro guardar en una esfera la dirección de un material declarado como variable local de una función que ya ha terminado.</span></li>
+      <li><span class="vf">V &middot; F</span><span class="qtext">Si <code class="k">cam</code> es de tipo <code class="k">camera *</code>, el campo se lee con <code class="k">cam.vfov</code>.</span></li>
+      <li><span class="vf">V &middot; F</span><span class="qtext"><code class="k">pow</code>, <code class="k">fmin</code> y <code class="k">tan</code> se declaran en <code class="k">&lt;math.h&gt;</code> y requieren enlazar con <code class="k">-lm</code>.</span></li>
+    </ol>
+  </section>
+
+  <!-- ============ PARTE 2 ============ -->
+  <section class="part">
+    <div class="part-head"><h2>Parte 2 &middot; Opción múltiple</h2><span class="pp">6 preguntas &middot; 3 pts c/u &middot; 18 pts</span></div>
+    <p class="lead">Rodea la <b>única</b> opción correcta.</p>
+    <ol class="q">
+      <li><span class="qtext">¿Qué expresión da un número real aleatorio en el intervalo <code class="k">[0, 1)</code>?</span>
+        <ul class="opts">
+          <li><span class="lt">a</span><code class="k">rand() % 1</code></li>
+          <li><span class="lt">b</span><code class="k">rand() / RAND_MAX</code></li>
+          <li><span class="lt">c</span><code class="k">rand() / (RAND_MAX + 1.0)</code></li>
+          <li><span class="lt">d</span><code class="k">(double)(rand() / RAND_MAX)</code></li>
+        </ul></li>
+      <li><span class="qtext">En la función <code class="k">ray get_ray(const camera *cam, int i, int j)</code>, ¿qué indica <code class="k">const</code>?</span>
+        <ul class="opts">
+          <li><span class="lt">a</span>Que <code class="k">cam</code> es una copia de la cámara</li>
+          <li><span class="lt">b</span>Que la función promete no modificar la cámara a través de <code class="k">cam</code></li>
+          <li><span class="lt">c</span>Que la cámara se guarda en memoria dinámica</li>
+          <li><span class="lt">d</span>Que la función solo puede llamarse una vez</li>
+        </ul></li>
+      <li><span class="qtext">Si en <code class="k">ray_color</code> se elimina la línea <code class="k">if (depth &lt;= 0) return v3(0,0,0);</code>, ¿qué puede ocurrir?</span>
+        <ul class="opts">
+          <li><span class="lt">a</span>Nada: la imagen sale igual</li>
+          <li><span class="lt">b</span>El compilador da un error de sintaxis</li>
+          <li><span class="lt">c</span>Un rayo puede rebotar sin fin y el programa agota la pila</li>
+          <li><span class="lt">d</span>La imagen sale en blanco y negro</li>
+        </ul></li>
+      <li><span class="qtext">¿Por qué <code class="k">world_hit</code> se llama con <code class="k">tmin = 0.001</code> y no con <code class="k">0</code>?</span>
+        <ul class="opts">
+          <li><span class="lt">a</span>Para que el render sea más rápido</li>
+          <li><span class="lt">b</span>Para evitar el «acné de sombra» causado por errores de redondeo</li>
+          <li><span class="lt">c</span>Porque <code class="k">0</code> no es un <code class="k">double</code> válido</li>
+          <li><span class="lt">d</span>Para aplicar la corrección gamma</li>
+        </ul></li>
+      <li><span class="qtext">Dado <code class="k">typedef enum { LAMBERTIAN, METAL, DIELECTRIC } material_type;</code>, ¿cuánto vale <code class="k">METAL</code>?</span>
+        <ul class="opts">
+          <li><span class="lt">a</span><code class="k">0</code></li>
+          <li><span class="lt">b</span><code class="k">1</code></li>
+          <li><span class="lt">c</span><code class="k">2</code></li>
+          <li><span class="lt">d</span>No tiene valor numérico</li>
+        </ul></li>
+      <li><span class="qtext">¿Qué técnica de C reproduce lo que hace C++ por dentro con los métodos virtuales (la <em>vtable</em>)?</span>
+        <ul class="opts">
+          <li><span class="lt">a</span>Un <code class="k">enum</code> con un <code class="k">switch</code></li>
+          <li><span class="lt">b</span>Guardar en cada objeto un puntero a función</li>
+          <li><span class="lt">c</span>Una macro <code class="k">#define</code></li>
+          <li><span class="lt">d</span>Un <code class="k">typedef</code></li>
+        </ul></li>
+    </ol>
+  </section>
+
+  <!-- ============ PARTE 3 ============ -->
+  <section class="part">
+    <div class="part-head"><h2>Parte 3 &middot; Respuesta breve</h2><span class="pp">6 preguntas &middot; 5 pts c/u &middot; 30 pts</span></div>
+    <p class="lead">Responde en <b>1&ndash;3 frases</b>. Usa los términos técnicos correctos.</p>
+    <ol class="q">
+      <li><span class="qtext">Explica cómo implementamos el <em>antialiasing</em>: cuántos rayos se lanzan por píxel, por qué con un desplazamiento aleatorio y cómo se obtiene el color final del píxel.</span>
+        <div class="write"><div class="ln"></div><div class="ln"></div></div></li>
+      <li><span class="qtext">¿Qué es una función <em>recursiva</em>? En <code class="k">ray_color</code>, identifica el caso base y la llamada recursiva, y di qué representa <code class="k">depth</code>.</span>
+        <div class="write"><div class="ln"></div><div class="ln"></div></div></li>
+      <li><span class="qtext">C no tiene clases ni herencia. Explica cómo representamos los distintos materiales (mate, metal, vidrio) con un <code class="k">enum</code> y un <code class="k">switch</code>.</span>
+        <div class="write"><div class="ln"></div><div class="ln"></div></div></li>
+      <li><span class="qtext"><code class="k">scatter</code> devuelve un <code class="k">int</code>, pero además entrega la atenuación y el rayo dispersado. ¿Cómo lo consigue? ¿Cómo se llama esta técnica?</span>
+        <div class="write"><div class="ln"></div><div class="ln"></div></div></li>
+      <li><span class="qtext">¿Qué es un <em>puntero colgante</em>? Explica por qué los materiales de la escena deben existir durante todo el render.</span>
+        <div class="write"><div class="ln"></div><div class="ln"></div></div></li>
+      <li><span class="qtext">¿Qué es una <em>declaración adelantada</em>? ¿Por qué <code class="k">hittable.h</code> necesita escribir <code class="k">struct material;</code>?</span>
+        <div class="write"><div class="ln"></div><div class="ln"></div></div></li>
+    </ol>
+  </section>
+
+  <!-- ============ PARTE 4 ============ -->
+  <section class="part">
+    <div class="part-head"><h2>Parte 4 &middot; Lee el código</h2><span class="pp">4 apartados &middot; 6 pts c/u &middot; 24 pts</span></div>
+    <p class="lead">Lee cada fragmento y responde. No necesitas un ordenador.</p>
+    <ol class="q">
+      <li><span class="qtext">¿Qué imprime este programa? Escribe todas las líneas de salida, en orden.</span>
+<pre class="examcode"><code>int rebotes(int depth) {
+    if (depth &lt;= 0) return 0;
+    printf("depth = %d\n", depth);
+    return 1 + rebotes(depth - 1);
+}
+
+int main(void) {
+    printf("total = %d\n", rebotes(3));
+    return 0;
+}</code></pre>
+        <div class="write short"><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div></li>
+      <li><span class="qtext">¿Qué imprime este fragmento? Explica por qué y corrígelo para que imprima solo <code class="k">metal</code>.</span>
+<pre class="examcode"><code>typedef enum { LAMBERTIAN, METAL, DIELECTRIC } material_type;
+
+material_type t = METAL;
+switch (t) {
+case LAMBERTIAN: printf("mate\n");
+case METAL:      printf("metal\n");
+case DIELECTRIC: printf("vidrio\n");
+}</code></pre>
+        <div class="write"><div class="ln"></div><div class="ln"></div><div class="ln"></div></div></li>
+      <li><span class="qtext">Se esperaba que este código imprimiera <code class="k">200</code>, pero imprime un valor basura. Explica por qué y escribe la función y la llamada corregidas.</span>
+<pre class="examcode"><code>void poner_alto(camera cam) {
+    cam.image_height = (int)(cam.image_width / cam.aspect_ratio);
+}
+
+/* en main: */
+camera cam;
+cam.image_width  = 400;
+cam.aspect_ratio = 2.0;
+poner_alto(cam);
+printf("%d\n", cam.image_height);</code></pre>
+        <div class="write"><div class="ln"></div><div class="ln"></div><div class="ln"></div></div></li>
+      <li><span class="qtext">Con las funciones siguientes, ¿qué línea escribe <code class="k">write_color(stdout, v3(0.25, 1.7, -0.2))</code>? Indica el cálculo de cada componente.</span>
+<pre class="examcode"><code>double linear_to_gamma(double linear) {
+    return (linear &gt; 0) ? sqrt(linear) : 0;
+}
+
+void write_color(FILE *out, color c) {
+    int ir = (int)(256 * clamp(linear_to_gamma(c.x), 0.0, 0.999));
+    int ig = (int)(256 * clamp(linear_to_gamma(c.y), 0.0, 0.999));
+    int ib = (int)(256 * clamp(linear_to_gamma(c.z), 0.0, 0.999));
+    fprintf(out, "%d %d %d\n", ir, ig, ib);
+}</code></pre>
+        <div class="write"><div class="ln"></div><div class="ln"></div></div></li>
+    </ol>
+  </section>
+
+  <!-- ============ PARTE 5 ============ -->
+  <section class="part">
+    <div class="part-head"><h2>Parte 5 &middot; Escribe</h2><span class="pp">3 apartados &middot; 6 pts c/u &middot; 18 pts</span></div>
+    <p class="lead">Respuestas cortas y exactas. Cuida la sintaxis.</p>
+    <ol class="q">
+      <li><span class="qtext">Escribe la función <code class="k">double random_double_range(double min, double max)</code>, que devuelve un real aleatorio en <code class="k">[min, max)</code>. Puedes usar <code class="k">random_double()</code>, que devuelve un real en <code class="k">[0, 1)</code>.</span>
+        <div class="write"><div class="ln"></div><div class="ln"></div><div class="ln"></div></div></li>
+      <li><span class="qtext">Escribe el bucle de muestreo de un píxel <code class="k">(i, j)</code>: suma <code class="k">samples_per_pixel</code> colores obtenidos con <code class="k">ray_color(get_ray(i, j), max_depth, world)</code> y escribe el <em>promedio</em> con <code class="k">write_color(stdout, ...)</code>. Cuidado con la división entera.</span>
+        <div class="write"><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div></li>
+      <li><span class="qtext">Define con <code class="k">typedef enum</code> un tipo <code class="k">forma</code> con los valores <code class="k">ESFERA</code> y <code class="k">CUBO</code>. Después escribe una función <code class="k">double area(forma f, double r)</code> que, usando un <code class="k">switch</code>, devuelva <code class="k">4&pi;r²</code> para la esfera (radio <code class="k">r</code>) y <code class="k">6r²</code> para el cubo (lado <code class="k">r</code>). Usa la constante <code class="k">PI</code>.</span>
+        <div class="write"><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div></li>
+    </ol>
+  </section>
+
+  <p style="text-align:center;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--muted);margin-top:2rem">&mdash; Fin del examen &middot; revisa tus respuestas &mdash;</p>
+</article>
+
+<!-- ============ SOLUCIONARIO (no se imprime) ============ -->
+<div class="solucionario noprint" id="solucionario" hidden>
+  <div class="inner">
+    <h2>Solucionario &middot; para el profesor</h2>
+    <p style="font-size:.85rem;color:var(--ink-soft);margin:.2rem 0 .6rem">Criterio orientativo. En Parte 3 se acepta cualquier redacción equivalente que use bien los términos.</p>
+
+    <h3>Parte 1 &middot; Verdadero / Falso (1 pt c/u)</h3>
+    <ol>
+      <li>1. <b>F</b> (entero entre 0 y <code>RAND_MAX</code>) &nbsp; 2. <b>V</b> &nbsp; 3. <b>V</b> &nbsp; 4. <b>V</b> (<i>fall-through</i>) &nbsp; 5. <b>V</b></li>
+      <li>6. <b>F</b> (lo emulamos con <code>enum</code> + <code>switch</code>) &nbsp; 7. <b>V</b> &nbsp; 8. <b>F</b> (puntero colgante) &nbsp; 9. <b>F</b> (<code>cam-&gt;vfov</code>) &nbsp; 10. <b>V</b></li>
+    </ol>
+
+    <h3>Parte 2 &middot; Opción múltiple (3 pts c/u)</h3>
+    <ol>
+      <li>1 &rarr; <b>c</b> &nbsp;&middot;&nbsp; 2 &rarr; <b>b</b> &nbsp;&middot;&nbsp; 3 &rarr; <b>c</b> &nbsp;&middot;&nbsp; 4 &rarr; <b>b</b> &nbsp;&middot;&nbsp; 5 &rarr; <b>b</b> &nbsp;&middot;&nbsp; 6 &rarr; <b>b</b></li>
+      <li style="list-style:none;margin-left:-1.3rem;color:var(--muted);font-size:.82rem">(En la 1, <b>b</b> y <b>d</b> hacen división entera &mdash;casi siempre 0&mdash; y además podrían dar 1; <b>a</b> da siempre 0.)</li>
+    </ol>
+
+    <h3>Parte 3 &middot; Respuesta breve (5 pts c/u)</h3>
+    <ol>
+      <li><b>Antialiasing:</b> se lanzan <code>samples_per_pixel</code> rayos (p. ej. 100) por píxel, cada uno hacia un punto aleatorio dentro del píxel (desplazamiento en [&minus;0.5, 0.5]), porque el píxel es un área y así se muestrean los bordes. Se suman los colores y se divide por el número de muestras (se multiplica por <code>1.0/N</code>): el promedio suaviza los bordes en escalera.</li>
+      <li><b>Recursión:</b> una función que se llama a sí misma. Caso base: <code>if (depth &lt;= 0) return negro;</code> (y también cuando el rayo no golpea nada y se devuelve el cielo). Llamada recursiva: <code>ray_color(scattered, depth - 1, world)</code>. <code>depth</code> es el número de rebotes que le quedan al rayo.</li>
+      <li><b>Polimorfismo sin clases:</b> un único <code>struct material</code> con un campo <code>type</code> de tipo <code>enum</code> (<code>LAMBERTIAN</code>, <code>METAL</code>, <code>DIELECTRIC</code>) y los campos de todas las variantes (<code>albedo</code>, <code>fuzz</code>, <code>refraction_index</code>). Una sola función <code>scatter</code> hace <code>switch (mat-&gt;type)</code> y ejecuta el comportamiento de cada material.</li>
+      <li><b>Salida por parámetro:</b> recibe punteros <code>color *attenuation</code> y <code>ray *scattered</code> y escribe en ellos (<code>*attenuation = ...</code>, <code>scattered-&gt;dir = ...</code>); el que llama pasa <code>&amp;attenuation</code>, <code>&amp;scattered</code>. El <code>int</code> de retorno indica si el rayo se dispersa (1) o se absorbe (0).</li>
+      <li><b>Puntero colgante:</b> un puntero que apunta a una variable que ya no existe (salió de su bloque). Las esferas guardan <em>punteros</em> a los materiales (<code>&amp;mat_ground</code>), y <code>scatter</code> los usa durante todo el render; si el material hubiera muerto, se leería basura. Por eso se declaran en <code>main</code>.</li>
+      <li><b>Declaración adelantada:</b> anunciar que un tipo existe sin dar sus detalles (<code>struct material;</code>). Permite declarar el puntero <code>const struct material *mat</code> dentro de <code>hit_record</code> sin incluir <code>material.h</code>, que a su vez necesita <code>hit_record</code>: rompe la dependencia circular entre cabeceras.</li>
+    </ol>
+
+    <h3>Parte 4 &middot; Lee el código (6 pts c/u)</h3>
+    <ol>
+      <li>Imprime <code>depth = 3</code>, <code>depth = 2</code>, <code>depth = 1</code> y por último <code>total = 3</code> (el <code>printf</code> de <code>main</code> solo se ejecuta cuando la recursión ha terminado; <code>rebotes(0)</code> devuelve 0 sin imprimir).</li>
+      <li>Imprime <code>metal</code> y <code>vidrio</code>: salta a <code>case METAL</code> y, al no haber <code>break</code>, «cae» al caso siguiente. Corrección: añadir <code>break;</code> al final de cada <code>case</code>.</li>
+      <li>La cámara se pasa <b>por valor</b>: la función modifica su <em>copia</em> y la variable de <code>main</code> queda con <code>image_height</code> sin inicializar. Corrección:
+<pre class="examcode"><code>void poner_alto(camera *cam) {
+    cam-&gt;image_height = (int)(cam-&gt;image_width / cam-&gt;aspect_ratio);
+}
+/* llamada: */ poner_alto(&amp;cam);</code></pre></li>
+      <li><code>128 255 0</code>. R: &radic;0.25 = 0.5 &rarr; 256&middot;0.5 = 128. G: &radic;1.7 &asymp; 1.30 &rarr; <code>clamp</code> a 0.999 &rarr; 255.74 &rarr; 255 (el molde trunca). B: negativo &rarr; gamma devuelve 0 &rarr; 0.</li>
+    </ol>
+
+    <h3>Parte 5 &middot; Escribe (6 pts c/u)</h3>
+    <ol>
+      <li>
+<pre class="examcode"><code>double random_double_range(double min, double max) {
+    return min + (max - min) * random_double();
+}</code></pre></li>
+      <li>Imprescindible: acumulador a cero, bucle, y factor <code>1.0 / samples_per_pixel</code> (no <code>1 / ...</code>).
+<pre class="examcode"><code>color pixel = v3(0, 0, 0);
+for (int s = 0; s &lt; samples_per_pixel; s++)
+    pixel = vec3_add(pixel, ray_color(get_ray(i, j), max_depth, world));
+write_color(stdout, vec3_scale(pixel, 1.0 / samples_per_pixel));</code></pre></li>
+      <li>
+<pre class="examcode"><code>typedef enum { ESFERA, CUBO } forma;
+
+double area(forma f, double r) {
+    switch (f) {
+    case ESFERA: return 4 * PI * r * r;
+    case CUBO:   return 6 * r * r;
+    }
+    return 0;
+}</code></pre>
+      Se acepta usar <code>break</code> con una variable de resultado en lugar de <code>return</code> en cada caso.</li>
+    </ol>
+  </div>
+</div>
+
+<footer class="foot">
+  <div class="shell">
+    <p>Examen de la asignatura basada en el material «Trazador de Rayos en C», adaptado de
+    <a href="https://raytracing.github.io/books/RayTracingInOneWeekend.html">«Ray Tracing in One Weekend»</a> (CC0).
+    Cubre las Tareas 5&ndash;10.</p>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+<script>
+(function(){
+  var pb = document.getElementById('printBtn');
+  if(pb) pb.addEventListener('click', function(){ window.print(); });
+  var sb = document.getElementById('solBtn');
+  var sol = document.getElementById('solucionario');
+  if(sb && sol){
+    sb.addEventListener('click', function(){
+      sol.hidden = !sol.hidden;
+      sb.textContent = sol.hidden ? 'Mostrar solucionario' : 'Ocultar solucionario';
+      if(!sol.hidden) sol.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,743 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Repaso Tareas 5&ndash;10 &mdash; Trazador de Rayos en C</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,600&display=swap">
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* ---- Extras propios de la página de repaso (usan los tokens de styles.css) ---- */
+  .repaso-num{background:linear-gradient(135deg,var(--accent-soft),var(--indigo-soft))}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.4rem 0}
+  @media (max-width:720px){.grid2{grid-template-columns:1fr}}
+  .grid2 .box{margin:0}
+  .keys{display:flex;flex-wrap:wrap;gap:.4rem;margin:1rem 0}
+  .keys code{font-family:"IBM Plex Mono",monospace;font-size:.78rem;background:var(--surface-2);
+    border:1px solid var(--line);border-radius:6px;padding:.22em .5em;color:var(--accent-ink);white-space:nowrap}
+  h3.sec{font-family:"IBM Plex Mono",monospace;font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);border-top:1px solid var(--line);padding-top:1.4rem;margin-top:2.4rem}
+  .qa details{border:1px solid var(--line);border-left:4px solid var(--indigo);border-radius:10px;
+    background:var(--surface);margin:.7rem 0;padding:.2rem .95rem}
+  .qa summary{cursor:pointer;font-weight:600;color:var(--ink);padding:.65rem 0;list-style:none}
+  .qa summary::-webkit-details-marker{display:none}
+  .qa summary::before{content:"?";display:inline-flex;align-items:center;justify-content:center;
+    width:1.35em;height:1.35em;margin-right:.55em;border-radius:6px;background:var(--indigo-soft);
+    color:var(--indigo);font-family:"IBM Plex Mono",monospace;font-size:.8em;font-weight:600}
+  .qa details[open] summary{border-bottom:1px solid var(--line)}
+  .qa details > p, .qa details > ul{margin:.7rem 0 .85rem;color:var(--ink-soft)}
+  .qa details ul{padding-left:1.2rem}
+  .num-badge{font-family:"IBM Plex Mono",monospace;color:var(--muted);font-size:.85em}
+  .checklist{list-style:none;padding:0;margin:1rem 0}
+  .checklist li{position:relative;padding:.4rem 0 .4rem 1.9rem;border-bottom:1px solid var(--line)}
+  .checklist li:last-child{border-bottom:none}
+  .checklist li::before{content:"\2713";position:absolute;left:0;top:.4rem;
+    color:var(--teal);font-weight:700;font-family:"IBM Plex Mono",monospace}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><b>Trazador de Rayos en C</b></a>
+    <div class="spacer"></div>
+    <button class="theme-btn" id="themeBtn" aria-label="Cambiar tema">
+      <span id="themeIcon">&#9680;</span><span id="themeLabel">Tema</span>
+    </button>
+  </div>
+</div>
+<div class="shell">
+  <div class="layout">
+    <div class="toc-wrap"><nav class="toc" id="repasoToc" aria-label="Contenido del repaso"><p class="toc-title">Contenido del repaso</p><ol>
+<li><a href="index.html"><span class="n">&#9632;</span><span>Volver al inicio</span></a></li>
+<li><a href="#resumen"><span class="n">&#9635;</span><span>Tabla resumen</span></a></li>
+<li><a href="#c-punteros"><span class="n">C1</span><span>Punteros y salida por parámetro</span></a></li>
+<li><a href="#c-aleatorio"><span class="n">C2</span><span>Números aleatorios</span></a></li>
+<li><a href="#c-promedio"><span class="n">C3</span><span>Acumular, clamp y ?:</span></a></li>
+<li><a href="#c-recursion"><span class="n">C4</span><span>Recursión</span></a></li>
+<li><a href="#c-enum"><span class="n">C5</span><span>enum y switch</span></a></li>
+<li><a href="#c-cabeceras"><span class="n">C6</span><span>Declaración adelantada</span></a></li>
+<li><a href="#c-vida"><span class="n">C7</span><span>Tiempo de vida</span></a></li>
+<li><a href="#c-camara"><span class="n">C8</span><span>struct camera</span></a></li>
+<li><a href="#c-math"><span class="n">C9</span><span>math.h y -lm</span></a></li>
+<li><a href="#linux"><span class="n">Lx</span><span>Terminal: medir y separar</span></a></li>
+<li><a href="#fisica"><span class="n">&fnof;</span><span>Física y matemáticas</span></a></li>
+<li><a href="#errores"><span class="n">!</span><span>Errores frecuentes</span></a></li>
+<li><a href="#test"><span class="n">?</span><span>Autoevaluación</span></a></li>
+    </ol></nav></div>
+    <main class="solo">
+      <nav class="pager top"><a class="pg prev" href="tarea-10.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tarea 10 &middot; Cámara posicionable</span></a><a class="pg next" href="tarea-11.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tarea 11 &middot; Desenfoque</span></a></nav>
+
+      <section class="tarea" id="intro" data-num="R" data-title="Repaso 5-10">
+  <div class="tarea-head">
+    <div class="tarea-num repaso-num">Repaso<span>5&ndash;10</span></div>
+    <div class="titles">
+      <p class="tarea-kicker">Antes del segundo examen escrito</p>
+      <h2>Repaso de las Tareas 5 a 10: punteros, aleatoriedad, recursión, materiales y la cámara</h2>
+    </div>
+  </div>
+
+  <div class="box objetivo">
+    <p class="box-label">Cómo usar este repaso</p>
+    <p>Este documento resume <strong>las destrezas de programación en C</strong> que hemos ido usando entre las
+    Tareas 5 y 10: punteros y salida por parámetro, números aleatorios, recursión, <code class="inl">enum</code> y
+    <code class="inl">switch</code> para imitar el polimorfismo, el tiempo de vida de las variables y agrupar estado
+    en un <code class="inl">struct</code>. La física (Lambert, Snell, gamma, FOV&hellip;) aparece al final como
+    referencia: en el examen se evalúa sobre todo <strong>el C</strong>. Repasa la <em>tabla resumen</em>, cada bloque,
+    los <em>errores frecuentes</em> y termina con la <em>autoevaluación</em>. Se da por sabido todo lo del
+    <a href="repaso-tareas-00-05.html">repaso 0&ndash;5</a>.</p>
+  </div>
+
+  <h3 class="sec" id="resumen">Tabla resumen &mdash; qué introdujo cada tarea</h3>
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr><th>Tarea</th><th>Conceptos de C</th><th>Física / mates</th><th>Linux / terminal</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>5</b> · Normales</td>
+          <td>Punteros <code>*</code> · <code>&amp;</code> · <code>-&gt;</code> vs <code>.</code> · arrays de <code>struct</code> · salida por parámetro · <code>*rec = temp</code> · <code>NULL</code></td>
+          <td>Normal <code>n=(P&minus;C)/r</code> · cara frontal/trasera</td>
+          <td>&mdash;</td>
+        </tr>
+        <tr>
+          <td><b>6</b> · Antialiasing</td>
+          <td><code>rand()</code> · <code>RAND_MAX</code> · <code>&lt;stdlib.h&gt;</code> · <code>srand</code> · acumular y promediar · <code>clamp</code> · <code>#define</code></td>
+          <td>Muestreo aleatorio (Monte Carlo) dentro del píxel</td>
+          <td><code>time ./rt &gt; img.ppm</code></td>
+        </tr>
+        <tr>
+          <td><b>7</b> · Difusos</td>
+          <td><strong>Recursión</strong> con caso base · <code>while (1)</code> + <code>return</code> · operador ternario <code>?:</code></td>
+          <td>Reflexión lambertiana · acné de sombra (<code>tmin=0.001</code>) · gamma</td>
+          <td>&mdash;</td>
+        </tr>
+        <tr>
+          <td><b>8</b> · Metal</td>
+          <td><code>enum</code> · <code>switch</code>/<code>case</code> · polimorfismo sin clases · declaración adelantada · <code>const</code> · puntero colgante · punteros a función</td>
+          <td>Reflexión especular <code>r=d&minus;2(d·n)n</code> · <code>fuzz</code></td>
+          <td>&mdash;</td>
+        </tr>
+        <tr>
+          <td><b>9</b> · Vidrio</td>
+          <td>Completar una rama del <code>switch</code> · usar <code>front_face</code> · <code>fmin</code>, <code>fabs</code>, <code>pow</code></td>
+          <td>Ley de Snell · reflexión total interna · Schlick</td>
+          <td><code>-lm</code> para <code>pow</code></td>
+        </tr>
+        <tr>
+          <td><b>10</b> · Cámara</td>
+          <td>Agrupar estado en un <code>struct</code> · parámetros vs. derivados · funciones que reciben <code>camera *</code> / <code>const camera *</code> · <code>static</code></td>
+          <td>Campo de visión (FOV) · base ortonormal <code>u, v, w</code> · producto vectorial</td>
+          <td>&mdash;</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="tarea" id="c-punteros" data-num="C1" data-title="Punteros">
+  <h3 class="sec">C · Bloque 1 &mdash; Punteros y salida por parámetro (Tareas 5, 8 y 10)</h3>
+  <p>Es la destreza que más se repite en estas tareas. Una función en C <strong>solo devuelve un valor</strong>, y además
+  recibe sus argumentos <strong>por valor</strong> (copias). Si queremos que una función <em>modifique</em> algo del que
+  llama, o que entregue varios resultados, le pasamos <strong>la dirección</strong> de ese algo: un puntero.</p>
+
+  <script type="text/plain" class="srccode" data-file="el patrón que se repite (Tareas 5, 8 y 10)">
+// Tarea 5: rellena *rec y devuelve "¿hubo impacto?"
+int sphere_hit(sphere s, ray r, double tmin, double tmax, hit_record *rec);
+
+// Tarea 8: TRES resultados -> el int de retorno y dos salidas por parámetro
+int scatter(const material *mat, ray r_in, hit_record rec,
+            color *attenuation, ray *scattered);
+
+// Tarea 10: la función modifica los campos derivados de la cámara
+void camera_initialize(camera *cam);
+
+// Al llamar, pasamos direcciones con &
+hit_record rec;
+ray scattered;
+color attenuation;
+if (scatter(rec.mat, r, rec, &attenuation, &scattered)) { /* ... */ }
+camera_initialize(&cam);
+</script>
+
+  <div class="grid2">
+    <div class="box concepto">
+      <p class="box-label">Las tres notaciones</p>
+      <ul>
+        <li><code class="inl">&amp;x</code> &rarr; «la dirección de <code class="inl">x</code>».</li>
+        <li><code class="inl">*p</code> &rarr; «lo apuntado por <code class="inl">p</code>»: <code class="inl">*attenuation = mat-&gt;albedo;</code></li>
+        <li><code class="inl">p-&gt;campo</code> &equiv; <code class="inl">(*p).campo</code>: <code class="inl">scattered-&gt;dir = dir;</code></li>
+      </ul>
+    </div>
+    <div class="box concepto">
+      <p class="box-label">Copiar un struct entero</p>
+      <p>En <code class="inl">world_hit</code>, <code class="inl">*rec = temp;</code> copia <em>todos</em> los campos de
+      <code class="inl">temp</code> en la estructura a la que apunta <code class="inl">rec</code>. La asignación
+      <code class="inl">=</code> entre structs del mismo tipo copia campo a campo.</p>
+    </div>
+  </div>
+
+  <script type="text/plain" class="srccode" data-file="buscar el impacto más cercano (Tarea 5)">
+hit_record temp;
+int hit_anything = 0;
+double closest = ray_tmax;            // vamos acortando el rango
+for (int i = 0; i < world.count; i++) {
+    if (sphere_hit(world.spheres[i], r, ray_tmin, closest, &temp)) {
+        hit_anything = 1;
+        closest = temp.t;             // solo aceptaremos impactos aún más cercanos
+        *rec = temp;                  // guardamos el mejor hasta ahora
+    }
+}
+return hit_anything;
+</script>
+
+  <div class="box nota">
+    <p class="box-label">Ojo &middot; ¿valor o puntero?</p>
+    <p>Si una función recibe <code class="inl">camera cam</code> (por valor) y cambia <code class="inl">cam.image_height</code>,
+    solo cambia <strong>su copia</strong>: al volver, la cámara del que llama sigue igual. Para modificarla hay que recibir
+    <code class="inl">camera *cam</code> y llamar con <code class="inl">&amp;cam</code>. Por el contrario, si la función
+    solo <em>lee</em>, se puede pasar por valor o, mejor para un struct grande, como <code class="inl">const camera *</code>.</p>
+  </div>
+</section>
+
+<section class="tarea" id="c-aleatorio" data-num="C2" data-title="Números aleatorios">
+  <h3 class="sec">C · Bloque 2 &mdash; Números aleatorios con <code>rand()</code> (Tareas 6 y 7)</h3>
+  <p>La biblioteca estándar (<code class="inl">&lt;stdlib.h&gt;</code>) ofrece <code class="inl">rand()</code>, que devuelve un
+  <strong>entero</strong> entre <code class="inl">0</code> y <code class="inl">RAND_MAX</code>. A partir de él construimos
+  todo lo demás en <code class="inl">rtweekend.h</code>.</p>
+
+  <script type="text/plain" class="srccode" data-file="rtweekend.h (utilidades aleatorias)">
+#include <stdlib.h>            // rand, RAND_MAX
+
+#define PI 3.1415926535897932385
+
+// Real aleatorio en [0, 1): el 1.0 fuerza división REAL
+static inline double random_double(void) {
+    return rand() / (RAND_MAX + 1.0);
+}
+
+// Real aleatorio en [min, max): reescalar y desplazar
+static inline double random_double_range(double min, double max) {
+    return min + (max - min) * random_double();
+}
+
+// Vector unitario aleatorio por RECHAZO: probar hasta acertar
+static inline vec3 random_unit_vector(void) {
+    while (1) {
+        vec3 p = vec3_random_range(-1, 1);       // punto en el cubo [-1,1]^3
+        double lensq = vec3_length_squared(p);
+        if (1e-160 < lensq && lensq <= 1.0)      // ¿dentro de la esfera unidad?
+            return vec3_div(p, sqrt(lensq));     // el return rompe el bucle
+    }
+}
+</script>
+
+  <div class="grid2">
+    <div class="box concepto">
+      <p class="box-label">¿Por qué <code>RAND_MAX + 1.0</code>?</p>
+      <ul>
+        <li>Con <code class="inl">rand() / RAND_MAX</code> (dos <code class="inl">int</code>) habría <strong>división entera</strong>: casi siempre 0.</li>
+        <li>El <code class="inl">1.0</code> es un <code class="inl">double</code> y convierte la división en real (igual que el molde <code class="inl">(double)</code>).</li>
+        <li>El <code class="inl">+1</code> hace que el resultado nunca llegue a 1: intervalo <strong>[0, 1)</strong>.</li>
+      </ul>
+    </div>
+    <div class="box concepto">
+      <p class="box-label"><code>srand</code> y reproducibilidad</p>
+      <p>Sin <code class="inl">srand(semilla)</code>, <code class="inl">rand()</code> da <strong>siempre la misma secuencia</strong>
+      en cada ejecución: tu imagen sale idéntica y comparable con la de referencia. Para variar:
+      <code class="inl">srand(time(NULL));</code> al inicio de <code class="inl">main</code> (con <code class="inl">&lt;time.h&gt;</code>).</p>
+    </div>
+  </div>
+
+  <div class="box pista">
+    <p class="box-label">Pista &middot; <code>while (1)</code> no es un bucle infinito aquí</p>
+    <p><code class="inl">while (1)</code> repite «para siempre», pero el <code class="inl">return</code> dentro sale de la
+    función en cuanto un punto cae dentro de la esfera (≈ 52 % de los intentos). Es el <strong>método de rechazo</strong>:
+    generar al azar y descartar lo que no sirve.</p>
+  </div>
+</section>
+
+<section class="tarea" id="c-promedio" data-num="C3" data-title="Acumular, clamp y ?:">
+  <h3 class="sec">C · Bloque 3 &mdash; Acumular y promediar, <code>clamp</code> y el operador <code>?:</code> (Tareas 6 y 7)</h3>
+  <p>El antialiasing es un patrón clásico de cálculo numérico: <strong>inicializar a cero, acumular en un bucle y
+  dividir</strong> (aquí, multiplicar por <code class="inl">1.0/N</code>, calculado una sola vez).</p>
+
+  <script type="text/plain" class="srccode" data-file="promediar muestras (Tarea 6)">
+int samples_per_pixel = 100;
+double pixel_samples_scale = 1.0 / samples_per_pixel;   // 1.0, no 1: ¡división real!
+
+color pixel = v3(0, 0, 0);                              // 1) acumulador a cero
+for (int s = 0; s < samples_per_pixel; s++) {           // 2) sumar N muestras
+    ray r = get_ray(i, j, pixel00_loc, pixel_delta_u, pixel_delta_v, camera_center);
+    pixel = vec3_add(pixel, ray_color(r, max_depth, world));
+}
+write_color(stdout, vec3_scale(pixel, pixel_samples_scale));  // 3) promedio
+</script>
+
+  <script type="text/plain" class="srccode" data-file="clamp, gamma y conversión a byte (Tareas 6 y 7)">
+static inline double clamp(double x, double min, double max) {
+    if (x < min) return min;
+    if (x > max) return max;
+    return x;
+}
+
+static inline double linear_to_gamma(double linear) {
+    return (linear > 0) ? sqrt(linear) : 0;     // ternario: cond ? si_verdad : si_falso
+}
+
+int ir = (int)(256 * clamp(r, 0.0, 0.999));     // el molde (int) TRUNCA: 255.74 -> 255
+</script>
+
+  <div class="box concepto">
+    <p class="box-label">Ideas clave</p>
+    <ul>
+      <li><code class="inl">clamp</code> recorta un valor a un intervalo. Lo usamos porque el promedio podría salirse de [0,1].</li>
+      <li>El <strong>operador ternario</strong> <code class="inl">c ? a : b</code> es un <code class="inl">if/else</code> que
+      <em>produce un valor</em>. Lo vimos también en <code class="inl">set_face_normal</code> y en
+      <code class="inl">random_on_hemisphere</code>.</li>
+      <li>El molde <code class="inl">(int)</code> <strong>trunca</strong> (no redondea). Por eso recortamos a
+      <code class="inl">0.999</code>: <code class="inl">256·0.999 = 255.74 &rarr; 255</code>, nunca 256.</li>
+      <li><code class="inl">#define PI ...</code> es una <strong>macro</strong>: el preprocesador sustituye el texto antes de compilar.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="tarea" id="c-recursion" data-num="C4" data-title="Recursión">
+  <h3 class="sec">C · Bloque 4 &mdash; Recursión con caso base (Tarea 7)</h3>
+  <p>Una función <strong>recursiva</strong> se llama a sí misma. <code class="inl">ray_color</code> sigue el rayo rebotado
+  llamándose con <code class="inl">depth - 1</code>; cada llamada «espera» el resultado de la siguiente y luego lo atenúa.</p>
+
+  <script type="text/plain" class="srccode" data-file="ray_color recursiva (Tareas 7 y 8)">
+color ray_color(ray r, int depth, hittable_list world) {
+    if (depth <= 0)                         // CASO BASE: se acaban los rebotes
+        return v3(0, 0, 0);                 // ya no se recoge más luz -> negro
+
+    hit_record rec;
+    if (world_hit(world, r, 0.001, INFINITY, &rec)) {
+        ray scattered;
+        color attenuation;
+        if (scatter(rec.mat, r, rec, &attenuation, &scattered))
+            // LLAMADA RECURSIVA, con un problema "más pequeño" (depth - 1)
+            return vec3_mul(attenuation, ray_color(scattered, depth - 1, world));
+        return v3(0, 0, 0);                 // el material absorbe el rayo
+    }
+    // CASO BASE 2: el rayo escapa -> color del cielo (lerp blanco-azul, como siempre)
+    vec3 unit_direction = vec3_unit(r.dir);
+    double a = 0.5 * (unit_direction.y + 1.0);
+    return vec3_add(vec3_scale(v3(1,1,1), 1.0 - a), vec3_scale(v3(0.5,0.7,1.0), a));
+}
+</script>
+
+  <div class="grid2">
+    <div class="box concepto">
+      <p class="box-label">Las dos reglas de la recursión</p>
+      <ul>
+        <li>Un <strong>caso base</strong> que devuelve sin volver a llamarse (aquí: <code class="inl">depth &lt;= 0</code>, o el rayo no golpea nada).</li>
+        <li>Cada llamada recursiva <strong>se acerca</strong> al caso base (<code class="inl">depth - 1</code>).</li>
+      </ul>
+    </div>
+    <div class="box nota">
+      <p class="box-label">La pila</p>
+      <p>Cada llamada ocupa un hueco en la <strong>pila</strong> (sus variables locales). Sin caso base, un rayo atrapado
+      entre dos superficies rebotaría sin fin y el programa terminaría con un <em>desbordamiento de pila</em>
+      (<em>segmentation fault</em>). <code class="inl">max_depth = 50</code> acota la profundidad.</p>
+    </div>
+  </div>
+
+  <div class="box pista">
+    <p class="box-label">Pista &middot; traza a mano</p>
+    <p>Para entender una recursión, escribe las llamadas una debajo de otra:
+    <code class="inl">ray_color(r, 3)</code> &rarr; <code class="inl">0.5·ray_color(r₁, 2)</code> &rarr;
+    <code class="inl">0.5·0.5·ray_color(r₂, 1)</code> &rarr; &hellip; Con reflectividad 0.5, tras <em>k</em> rebotes la luz
+    se multiplica por <code class="inl">0.5<sup>k</sup></code>: por eso las zonas con muchos rebotes (esquinas) se ven oscuras.</p>
+  </div>
+</section>
+
+<section class="tarea" id="c-enum" data-num="C5" data-title="enum y switch">
+  <h3 class="sec">C · Bloque 5 &mdash; <code>enum</code>, <code>switch</code> y polimorfismo sin clases (Tareas 8 y 9)</h3>
+  <p>En C++, <code class="inl">material</code> es una clase base con un método virtual <code class="inl">scatter</code>.
+  C <strong>no tiene clases, ni herencia, ni métodos virtuales</strong>. Lo imitamos con una <em>etiqueta</em>
+  (<code class="inl">enum</code>) dentro de un único <code class="inl">struct</code> y una única función que
+  <strong>ramifica con <code class="inl">switch</code></strong>.</p>
+
+  <script type="text/plain" class="srccode" data-file="material.h (idea)">
+typedef enum {
+    LAMBERTIAN,     // vale 0
+    METAL,          // vale 1
+    DIELECTRIC      // vale 2
+} material_type;
+
+typedef struct material {      // un único struct para los tres materiales
+    material_type type;        // la ETIQUETA: qué clase de material es
+    color  albedo;             // LAMBERTIAN y METAL
+    double fuzz;               // solo METAL
+    double refraction_index;   // solo DIELECTRIC
+} material;
+
+static int scatter(const material *mat, ray r_in, hit_record rec,
+                   color *attenuation, ray *scattered) {
+    switch (mat->type) {
+    case LAMBERTIAN: {         // llaves: permiten declarar variables locales al case
+        vec3 dir = vec3_add(rec.normal, random_unit_vector());
+        /* ... */
+        return 1;              // return sale del switch Y de la función
+    }
+    case METAL: { /* ... */ return vec3_dot(scattered->dir, rec.normal) > 0; }
+    case DIELECTRIC: { /* ... Tarea 9 ... */ return 1; }
+    }
+    return 0;
+}
+
+// Crear materiales: inicialización POR ORDEN de los campos
+material mat_left  = { DIELECTRIC, v3(0,0,0),         0,   1.50 };
+material mat_right = { METAL,      v3(0.8, 0.6, 0.2), 1.0, 0    };
+</script>
+
+  <div class="grid2">
+    <div class="box concepto">
+      <p class="box-label"><code>enum</code></p>
+      <p>Da nombres legibles a un conjunto de <strong>constantes enteras</strong>. Por defecto empiezan en
+      <code class="inl">0</code> y suben de uno en uno. Es mucho más claro escribir <code class="inl">METAL</code> que
+      <code class="inl">1</code>.</p>
+    </div>
+    <div class="box concepto">
+      <p class="box-label"><code>switch</code> y <code>break</code></p>
+      <p><code class="inl">switch</code> salta al <code class="inl">case</code> que coincide. Si ese caso no termina con
+      <code class="inl">break</code> o <code class="inl">return</code>, la ejecución <strong>sigue en el case siguiente</strong>
+      (<em>fall-through</em>). En nuestro <code class="inl">scatter</code> cada caso acaba con <code class="inl">return</code>.</p>
+    </div>
+  </div>
+
+  <div class="box nota">
+    <p class="box-label">Ampliación &middot; punteros a función</p>
+    <p>La otra técnica: que cada material guarde un <strong>puntero a su propia función</strong>,
+    <code class="inl">int (*scatter)(const material*, ray, hit_record, color*, ray*)</code>, y llamar
+    <code class="inl">mat-&gt;scatter(...)</code> sin <code class="inl">switch</code>. Es exactamente cómo C++ implementa los
+    métodos virtuales por dentro (la <em>vtable</em>). Más flexible, pero con más andamiaje.</p>
+  </div>
+</section>
+
+<section class="tarea" id="c-cabeceras" data-num="C6" data-title="Declaración adelantada">
+  <h3 class="sec">C · Bloque 6 &mdash; Declaración adelantada, <code>const</code> y orden de inclusión (Tareas 5 y 8)</h3>
+  <p><code class="inl">hit_record</code> (en <code class="inl">hittable.h</code>) guarda un puntero al material, pero
+  <code class="inl">material.h</code> necesita a su vez <code class="inl">hit_record</code>. ¿Quién va primero? Rompemos
+  el círculo con una <strong>declaración adelantada</strong>.</p>
+
+  <script type="text/plain" class="srccode" data-file="hittable.h">
+struct material;                   // "existe un struct material" (sin detalles aún)
+
+typedef struct {
+    point3 p;
+    vec3   normal;
+    double t;
+    int    front_face;
+    const struct material *mat;    // un PUNTERO a un tipo incompleto: permitido
+} hit_record;
+</script>
+
+  <div class="box concepto">
+    <p class="box-label">Ideas clave</p>
+    <ul>
+      <li>Con solo <code class="inl">struct material;</code> el compilador sabe que el tipo existe y puede manejar
+      <strong>punteros</strong> a él (todos los punteros ocupan lo mismo), pero aún no puede acceder a sus campos.</li>
+      <li>Por eso <code class="inl">material.h</code> escribe <code class="inl">typedef struct material { ... } material;</code>:
+      el struct necesita un <em>nombre de etiqueta</em> (<code class="inl">struct material</code>) que coincida con la declaración adelantada.</li>
+      <li><code class="inl">const material *mat</code> significa «puedo leer el material, pero <strong>no modificarlo</strong>
+      a través de este puntero». Es una promesa que el compilador vigila.</li>
+      <li>La guarda de inclusión de cada cabecera sigue evitando las redefiniciones cuando varias se incluyen entre sí.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="tarea" id="c-vida" data-num="C7" data-title="Tiempo de vida">
+  <h3 class="sec">C · Bloque 7 &mdash; Tiempo de vida y el puntero colgante (Tarea 8)</h3>
+  <p>Las esferas no guardan el material, sino <strong>un puntero a él</strong> (<code class="inl">&amp;mat_ground</code>).
+  Un puntero solo es válido mientras <strong>vive</strong> la variable a la que apunta.</p>
+
+  <script type="text/plain" class="srccode" data-file="bien y mal">
+int main(void) {
+    material mat_ground = { LAMBERTIAN, v3(0.8, 0.8, 0.0), 0, 0 };   // vive hasta el final de main
+    sphere spheres[] = {
+        { v3(0, -100.5, -1), 100.0, &mat_ground },                   // BIEN
+    };
+    /* ... render ... */
+}
+
+sphere crear_esfera(void) {
+    material m = { METAL, v3(0.8, 0.8, 0.8), 0.0, 0 };  // variable LOCAL de la función
+    sphere s = { v3(0, 0, -1), 0.5, &m };
+    return s;              // MAL: m deja de existir aquí; s.mat apunta a basura
+}
+</script>
+
+  <div class="box nota">
+    <p class="box-label">Regla mental</p>
+    <p>Una variable local vive <strong>desde su declaración hasta la llave <code>}</code> que cierra su bloque</strong>.
+    El objeto apuntado debe vivir <strong>al menos tanto como el puntero</strong> que lo usa. Un puntero a algo que ya
+    murió es un <strong>puntero colgante</strong>: el compilador no avisa y el fallo aparece (o no) al ejecutar.
+    En la Tarea 12 lo resolveremos con memoria dinámica (<code class="inl">malloc</code>).</p>
+  </div>
+</section>
+
+<section class="tarea" id="c-camara" data-num="C8" data-title="struct camera">
+  <h3 class="sec">C · Bloque 8 &mdash; Agrupar estado en un <code>struct</code>: la «clase» de C (Tarea 10)</h3>
+  <p>Teníamos muchas variables sueltas en <code class="inl">main</code> (<code class="inl">pixel00_loc</code>,
+  <code class="inl">pixel_delta_u</code>&hellip;). Las reunimos en <code class="inl">struct camera</code> y escribimos
+  funciones externas que reciben un <code class="inl">camera *</code>. Es lo que hace una clase de C++: datos + funciones
+  que operan sobre ellos.</p>
+
+  <script type="text/plain" class="srccode" data-file="camera.h (idea) y main.c">
+typedef struct {
+    // --- Parámetros que fijas tú ---
+    double aspect_ratio;  int image_width;  int samples_per_pixel;  int max_depth;
+    double vfov;  point3 lookfrom;  point3 lookat;  vec3 vup;
+    // --- Valores derivados (los calcula camera_initialize) ---
+    int image_height;  double pixel_samples_scale;
+    point3 center, pixel00_loc;  vec3 pixel_delta_u, pixel_delta_v;  vec3 u, v, w;
+} camera;
+
+static void camera_initialize(camera *cam);              // MODIFICA -> camera *
+static ray  get_ray(const camera *cam, int i, int j);    // solo LEE  -> const camera *
+static void camera_render(camera *cam, hittable_list world);
+
+int main(void) {
+    camera cam;                       // una variable: se usa el punto
+    cam.image_width = 400;
+    cam.vfov        = 20;
+    cam.lookfrom    = v3(-2, 2, 1);
+    /* ... */
+    camera_render(&cam, world);       // pasamos su dirección
+    return 0;
+}
+// Dentro de las funciones, cam es un puntero: se usa la flecha
+//   cam->image_height = (int)(cam->image_width / cam->aspect_ratio);
+</script>
+
+  <div class="grid2">
+    <div class="box concepto">
+      <p class="box-label">Parámetros frente a derivados</p>
+      <p>Tú fijas unos pocos parámetros; <code class="inl">camera_initialize</code> calcula <strong>una sola vez</strong>
+      todo lo que se deduce de ellos (alto, base <code class="inl">u,v,w</code>, esquina del viewport). Así no se recalculan
+      en cada uno de los millones de rayos.</p>
+    </div>
+    <div class="box concepto">
+      <p class="box-label"><code>static</code> en una función</p>
+      <p>Una función <code class="inl">static</code> solo es visible dentro del archivo donde se incluye. Como las
+      cabeceras se incluyen en un único <code class="inl">main.c</code>, evita choques de nombres al enlazar.
+      (<code class="inl">static inline</code>, además, sugiere al compilador «pegar» el cuerpo en la llamada.)</p>
+    </div>
+  </div>
+
+  <div class="box pista">
+    <p class="box-label">Pista &middot; el molde vuelve a aparecer</p>
+    <p><code class="inl">(double)cam-&gt;image_width / cam-&gt;image_height</code>: ambos son <code class="inl">int</code>,
+    y sin el molde la relación de aspecto real (p. ej. 400/225 = 1.78) se truncaría a 1.</p>
+  </div>
+</section>
+
+<section class="tarea" id="c-math" data-num="C9" data-title="math.h y -lm">
+  <h3 class="sec">C · Bloque 9 &mdash; Funciones de <code>&lt;math.h&gt;</code> que usamos (Tareas 7&ndash;10)</h3>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Función / macro</th><th>Qué hace</th><th>Dónde la usamos</th></tr></thead>
+      <tbody>
+        <tr><td><code>sqrt(x)</code></td><td>Raíz cuadrada</td><td>Normalizar, gamma, discriminante</td></tr>
+        <tr><td><code>fabs(x)</code></td><td>Valor absoluto de un <code>double</code> (¡no <code>abs</code>, que es para <code>int</code>!)</td><td><code>vec3_near_zero</code>, <code>refract</code></td></tr>
+        <tr><td><code>fmin(a, b)</code></td><td>El menor de dos <code>double</code></td><td><code>cos_theta</code> en <code>refract</code></td></tr>
+        <tr><td><code>pow(x, y)</code></td><td><code>x<sup>y</sup></code></td><td>Schlick: <code>pow(1 - cosine, 5)</code></td></tr>
+        <tr><td><code>tan(x)</code></td><td>Tangente (en <strong>radianes</strong>)</td><td>Altura del viewport desde <code>vfov</code></td></tr>
+        <tr><td><code>INFINITY</code></td><td>Infinito en coma flotante</td><td><code>tmax</code> de <code>world_hit</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="box nota">
+    <p class="box-label">Recuerda</p>
+    <p>Todas necesitan <code class="inl">#include &lt;math.h&gt;</code> y enlazar con <code class="inl">-lm</code> <strong>al
+    final</strong>. Si falta, el enlazador dice «undefined reference to <code>pow</code>». Y las funciones trigonométricas
+    trabajan en radianes: por eso existe <code class="inl">degrees_to_radians</code>.</p>
+  </div>
+</section>
+
+<section class="tarea" id="linux" data-num="Lx" data-title="Terminal">
+  <h3 class="sec">Linux &mdash; Medir el tiempo y separar las salidas</h3>
+  <p>Con antialiasing y rebotes el render ya tarda segundos o minutos. Dos herramientas útiles:</p>
+  <pre class="shell"><span class="p">$</span> gcc -Wall -O2 main.c -o rt -lm              <span class="c"># como siempre (pow, tan... necesitan -lm)</span>
+<span class="p">$</span> time ./rt <span class="p">&gt;</span> img.ppm                          <span class="c"># mide cuánto tarda el render</span>
+Filas restantes: 1
+&iexcl;Listo!
+real    0m12.4s
+<span class="p">$</span> ./rt <span class="p">&gt;</span> img.ppm 2<span class="p">&gt;</span> /dev/null                  <span class="c"># descarta el progreso (stderr)</span></pre>
+  <div class="box concepto">
+    <p class="box-label">Ideas clave</p>
+    <ul>
+      <li><code class="inl">time</code> antepuesto a una orden informa del tiempo empleado. Sirve para comprobar que el coste
+      crece <strong>linealmente</strong> con <code class="inl">samples_per_pixel</code>.</li>
+      <li><code class="inl">fflush(stderr)</code> tras el mensaje con <code class="inl">\r</code> obliga a mostrarlo ya, sin esperar
+      a un salto de línea.</li>
+      <li>La imagen sigue saliendo por <code class="inl">stdout</code> (<code class="inl">printf</code>/<code class="inl">write_color(stdout, ...)</code>)
+      y el progreso por <code class="inl">stderr</code>: ahora todo vive en <code class="inl">camera_render</code>.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="tarea" id="fisica" data-num="&fnof;" data-title="Física y matemáticas">
+  <h3 class="sec">Física y matemáticas que debes reconocer en el código</h3>
+  <div class="grid2">
+    <div class="box fisica">
+      <p class="box-label">Antialiasing (T6)</p>
+      <p>Cada píxel es un <em>área</em>, no un punto: promediamos <span class="math">N</span> rayos a posiciones aleatorias
+      dentro de él (desplazamiento en <span class="math">[&minus;0.5, 0.5]</span>). Es una integración de Monte Carlo.</p>
+    </div>
+    <div class="box fisica">
+      <p class="box-label">Difuso y gamma (T7)</p>
+      <p>Rebote lambertiano: dirección <span class="math">n + û</span>. Cada rebote multiplica por la reflectividad
+      (albedo). Ignoramos <span class="math">t &lt; 0.001</span> (acné de sombra). Gamma 2: escribir
+      <span class="math">&radic;color</span>.</p>
+    </div>
+    <div class="box fisica">
+      <p class="box-label">Metal (T8)</p>
+      <p>Reflexión especular <span class="math">r = d &minus; 2(d&middot;n)n</span>. <code class="inl">fuzz</code> añade un
+      vector aleatorio a <span class="math">r</span>: 0 = espejo, 1 = muy difuminado.</p>
+    </div>
+    <div class="box fisica">
+      <p class="box-label">Vidrio (T9)</p>
+      <p>Snell <span class="math">η sen θ = η′ sen θ′</span>. Si <span class="math">(η/η′) sen θ &gt; 1</span>:
+      reflexión total interna. Schlick aproxima la reflectancia según el ángulo. Fuera&rarr;dentro usa
+      <span class="math">1/n</span>; dentro&rarr;fuera, <span class="math">n</span> (de ahí <code class="inl">front_face</code>).</p>
+    </div>
+    <div class="box fisica">
+      <p class="box-label">Cámara (T10)</p>
+      <p>Altura del viewport <span class="math">2&middot;tan(θ/2)&middot;d</span>, con <span class="math">θ</span> =
+      <code class="inl">vfov</code>. Base ortonormal: <span class="math">w</span> = unit(lookfrom&minus;lookat),
+      <span class="math">u</span> = unit(vup × w), <span class="math">v</span> = w × u.</p>
+    </div>
+    <div class="box fisica">
+      <p class="box-label">Índices de refracción</p>
+      <p>Aire &asymp; 1, agua 1.33, vidrio 1.5, diamante 2.4. Una esfera de índice <span class="math">1/1.5</span> dentro de otra
+      de vidrio hace de burbuja de aire.</p>
+    </div>
+  </div>
+</section>
+
+<section class="tarea" id="errores" data-num="!" data-title="Errores frecuentes">
+  <h3 class="sec">Errores frecuentes (repásalos antes del examen)</h3>
+  <ul class="checklist">
+    <li><b><code>rand() / RAND_MAX</code></b> sin <code class="inl">1.0</code> &rarr; división entera, casi siempre 0. Usa <code class="inl">rand() / (RAND_MAX + 1.0)</code>.</li>
+    <li><b><code>1 / samples_per_pixel</code></b> &rarr; 0 por división entera. Usa <code class="inl">1.0 / samples_per_pixel</code>.</li>
+    <li><b>Recursión sin caso base</b> (o que no se acerca a él) &rarr; desbordamiento de pila.</li>
+    <li><b>Olvidar <code>break</code></b> en un <code class="inl">case</code> &rarr; se ejecutan también los casos siguientes.</li>
+    <li><b>Pasar un struct por valor</b> a una función que debe modificarlo &rarr; se modifica la copia y el original no cambia. Pasa un puntero (<code class="inl">&amp;cam</code>).</li>
+    <li><b>Puntero colgante:</b> apuntar a una variable local que ya ha salido de su bloque.</li>
+    <li><b><code>.</code> frente a <code>-&gt;</code>:</b> <code class="inl">cam.vfov</code> en <code class="inl">main</code>, <code class="inl">cam-&gt;vfov</code> dentro de <code class="inl">camera_initialize</code>.</li>
+    <li><b><code>tmin = 0</code></b> en vez de <code class="inl">0.001</code> &rarr; moteado oscuro (acné de sombra).</li>
+    <li><b>Grados en <code>tan</code>:</b> hay que convertir con <code class="inl">degrees_to_radians</code>.</li>
+    <li><b><code>abs</code> en lugar de <code>fabs</code></b> con un <code class="inl">double</code> &rarr; se trunca a entero.</li>
+    <li><b>Orden de los campos</b> al inicializar <code class="inl">{ METAL, albedo, fuzz, ri }</code>: si los cambias de sitio, el compilador no se queja y el material sale mal.</li>
+  </ul>
+</section>
+
+<section class="tarea" id="test" data-num="?" data-title="Autoevaluación">
+  <h3 class="sec">Autoevaluación &mdash; intenta responder antes de abrir</h3>
+  <div class="qa">
+    <details>
+      <summary>¿Qué devuelve <code>rand()</code>? ¿Cómo obtienes un real en [0,1) y luego en [a,b)?</summary>
+      <p>Un entero entre <code class="inl">0</code> y <code class="inl">RAND_MAX</code>. Real en [0,1):
+      <code class="inl">rand() / (RAND_MAX + 1.0)</code>. En [a,b): <code class="inl">a + (b - a) * random_double()</code>.</p>
+    </details>
+    <details>
+      <summary>Ejecutas el trazador dos veces y sale exactamente la misma imagen. ¿Por qué? ¿Cómo lo cambiarías?</summary>
+      <p>Sin <code class="inl">srand</code>, <code class="inl">rand()</code> usa siempre la misma semilla y produce la misma
+      secuencia. Para variar: <code class="inl">srand(time(NULL));</code> al principio de <code class="inl">main</code>.</p>
+    </details>
+    <details>
+      <summary>¿Cuáles son los dos ingredientes de toda recursión? Señálalos en <code>ray_color</code>.</summary>
+      <p>Un <strong>caso base</strong> (<code class="inl">if (depth &lt;= 0) return negro;</code>, y también cuando el rayo va al
+      cielo) y una <strong>llamada recursiva que se acerca</strong> a él (<code class="inl">ray_color(scattered, depth - 1, world)</code>).</p>
+    </details>
+    <details>
+      <summary>¿Qué pasaría si quitaras el límite de profundidad?</summary>
+      <p>Un rayo atrapado entre superficies podría rebotar indefinidamente; cada llamada ocupa pila y el programa acabaría
+      con un desbordamiento de pila (<em>segmentation fault</em>).</p>
+    </details>
+    <details>
+      <summary>¿Cómo emulamos en C la herencia y los métodos virtuales del <code>material</code> de C++?</summary>
+      <p>Con un único <code class="inl">struct material</code> que lleva una etiqueta <code class="inl">enum material_type</code>
+      y una sola función <code class="inl">scatter</code> que hace <code class="inl">switch (mat-&gt;type)</code>. La alternativa
+      es guardar un puntero a función en cada material (como la <em>vtable</em> de C++).</p>
+    </details>
+    <details>
+      <summary>¿Qué valor numérico tiene <code>DIELECTRIC</code> en <code>enum { LAMBERTIAN, METAL, DIELECTRIC }</code>?</summary>
+      <p><code class="inl">2</code>. Los valores de un <code class="inl">enum</code> empiezan en 0 y aumentan de uno en uno.</p>
+    </details>
+    <details>
+      <summary>¿Qué ocurre si un <code>case</code> de un <code>switch</code> no termina en <code>break</code> ni <code>return</code>?</summary>
+      <p>La ejecución «cae» al <code class="inl">case</code> siguiente y ejecuta también su código (<em>fall-through</em>).</p>
+    </details>
+    <details>
+      <summary>¿Para qué sirve <code>struct material;</code> en <code>hittable.h</code>?</summary>
+      <p>Es una <strong>declaración adelantada</strong>: anuncia que el tipo existe para poder declarar
+      <code class="inl">const struct material *mat</code> en <code class="inl">hit_record</code> sin incluir
+      <code class="inl">material.h</code>, que a su vez necesita <code class="inl">hit_record</code>. Rompe la dependencia circular.</p>
+    </details>
+    <details>
+      <summary>¿Qué es un puntero colgante? Da un ejemplo del trazador.</summary>
+      <p>Un puntero a una variable que ya no existe. Ejemplo: crear un <code class="inl">material</code> local dentro de una
+      función, guardar <code class="inl">&amp;m</code> en una esfera y devolver la esfera: al volver, <code class="inl">m</code>
+      ha muerto y <code class="inl">s.mat</code> apunta a basura.</p>
+    </details>
+    <details>
+      <summary>¿Por qué <code>camera_initialize</code> recibe <code>camera *</code> y <code>get_ray</code> recibe <code>const camera *</code>?</summary>
+      <p><code class="inl">camera_initialize</code> debe <em>escribir</em> los campos derivados de la cámara del que llama: necesita
+      su dirección. <code class="inl">get_ray</code> solo <em>lee</em>; el <code class="inl">const</code> promete no modificarla y
+      pasar un puntero evita copiar un struct grande en cada uno de los millones de rayos.</p>
+    </details>
+    <details>
+      <summary>¿Qué escribe <code>write_color</code> (con gamma) para el color (0.25, 1.7, &minus;0.2)?</summary>
+      <p>Gamma: <code class="inl">√0.25 = 0.5</code>, <code class="inl">√1.7 ≈ 1.30</code>, y <code class="inl">0</code> para el negativo.
+      Tras <code class="inl">clamp</code> a [0, 0.999] y <code class="inl">(int)(256·x)</code>: <code class="inl">128 255 0</code>.</p>
+    </details>
+    <details>
+      <summary>¿Qué efecto tiene reducir <code>vfov</code> de 90 a 20?</summary>
+      <p>Estrecha el campo de visión: la altura del viewport <code class="inl">2·tan(θ/2)·d</code> disminuye y la escena se ve
+      ampliada («zoom», como un teleobjetivo).</p>
+    </details>
+  </div>
+</section>
+
+      <nav class="pager bottom"><a class="pg prev" href="tarea-10.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tarea 10 &middot; Cámara posicionable</span></a><a class="pg next" href="tarea-11.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tarea 11 &middot; Desenfoque</span></a></nav>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="shell">
+    <p>Material docente derivado y adaptado de <a href="https://raytracing.github.io/books/RayTracingInOneWeekend.html">«Ray Tracing in One Weekend»</a>
+    de Peter Shirley, Trevor David Black y Steve Hollasch (licencia CC0). Esta versión reescribe todo el código en
+    <strong>C puro</strong> y reorganiza el contenido como tareas de curso, con toda la explicación en español.</p>
+    <p>Hoja de repaso de las Tareas 5&ndash;10 para el segundo examen escrito. Compila con
+    <code class="inl">gcc -O2 main.c -o rt -lm</code> y visualiza con <code class="inl">./rt &gt; imagen.ppm</code>.</p>
+  </div>
+</footer>
+<script src="app.js"></script>
+<script>
+/* Scrollspy propio del repaso (el toc() de app.js solo actúa si existe #tocList) */
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('#repasoToc a[href^="#"]'));
+  if(!links.length || !('IntersectionObserver' in window)) return;
+  var byId = {};
+  links.forEach(function(a){ byId[a.getAttribute('href').slice(1)] = a; });
+  var secs = links.map(function(a){ return document.getElementById(a.getAttribute('href').slice(1)); }).filter(Boolean);
+  var obs = new IntersectionObserver(function(ents){
+    ents.forEach(function(e){
+      if(e.isIntersecting){
+        links.forEach(function(a){ a.classList.remove('active'); });
+        var a = byId[e.target.id]; if(a) a.classList.add('active');
+      }
+    });
+  }, { rootMargin:'-12% 0px -78% 0px', threshold:0 });
+  secs.forEach(function(s){ obs.observe(s); });
+})();
+</script>
+</body>
+</html>

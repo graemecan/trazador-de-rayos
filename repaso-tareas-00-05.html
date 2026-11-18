@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Repaso Tareas 0&ndash;5 &mdash; Trazador de Rayos en C</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,600&display=swap">
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* ---- Extras propios de la página de repaso (usan los tokens de styles.css) ---- */
+  .repaso-num{background:linear-gradient(135deg,var(--accent-soft),var(--indigo-soft))}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.4rem 0}
+  @media (max-width:720px){.grid2{grid-template-columns:1fr}}
+  .grid2 .box{margin:0}
+  .keys{display:flex;flex-wrap:wrap;gap:.4rem;margin:1rem 0}
+  .keys code{font-family:"IBM Plex Mono",monospace;font-size:.78rem;background:var(--surface-2);
+    border:1px solid var(--line);border-radius:6px;padding:.22em .5em;color:var(--accent-ink);white-space:nowrap}
+  h3.sec{font-family:"IBM Plex Mono",monospace;font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);border-top:1px solid var(--line);padding-top:1.4rem;margin-top:2.4rem}
+  .qa details{border:1px solid var(--line);border-left:4px solid var(--indigo);border-radius:10px;
+    background:var(--surface);margin:.7rem 0;padding:.2rem .95rem}
+  .qa summary{cursor:pointer;font-weight:600;color:var(--ink);padding:.65rem 0;list-style:none}
+  .qa summary::-webkit-details-marker{display:none}
+  .qa summary::before{content:"?";display:inline-flex;align-items:center;justify-content:center;
+    width:1.35em;height:1.35em;margin-right:.55em;border-radius:6px;background:var(--indigo-soft);
+    color:var(--indigo);font-family:"IBM Plex Mono",monospace;font-size:.8em;font-weight:600}
+  .qa details[open] summary{border-bottom:1px solid var(--line)}
+  .qa details > p, .qa details > ul{margin:.7rem 0 .85rem;color:var(--ink-soft)}
+  .qa details ul{padding-left:1.2rem}
+  .num-badge{font-family:"IBM Plex Mono",monospace;color:var(--muted);font-size:.85em}
+  .checklist{list-style:none;padding:0;margin:1rem 0}
+  .checklist li{position:relative;padding:.4rem 0 .4rem 1.9rem;border-bottom:1px solid var(--line)}
+  .checklist li:last-child{border-bottom:none}
+  .checklist li::before{content:"\2713";position:absolute;left:0;top:.4rem;
+    color:var(--teal);font-weight:700;font-family:"IBM Plex Mono",monospace}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><b>Trazador de Rayos en C</b></a>
+    <div class="spacer"></div>
+    <button class="theme-btn" id="themeBtn" aria-label="Cambiar tema">
+      <span id="themeIcon">&#9680;</span><span id="themeLabel">Tema</span>
+    </button>
+  </div>
+</div>
+<div class="shell">
+  <div class="layout">
+    <div class="toc-wrap"><nav class="toc" id="repasoToc" aria-label="Contenido del repaso"><p class="toc-title">Contenido del repaso</p><ol>
+<li><a href="index.html"><span class="n">&#9632;</span><span>Volver al inicio</span></a></li>
+<li><a href="#resumen"><span class="n">&#9635;</span><span>Tabla resumen</span></a></li>
+<li><a href="#c-compilar"><span class="n">C1</span><span>Compilar y ejecutar</span></a></li>
+<li><a href="#c-tipos"><span class="n">C2</span><span>Tipos y el molde</span></a></li>
+<li><a href="#c-flujo"><span class="n">C3</span><span>Bucles y booleanos</span></a></li>
+<li><a href="#c-struct"><span class="n">C4</span><span>struct y typedef</span></a></li>
+<li><a href="#c-cabeceras"><span class="n">C5</span><span>Cabeceras y módulos</span></a></li>
+<li><a href="#c-punteros"><span class="n">C6</span><span>Punteros y arrays</span></a></li>
+<li><a href="#linux"><span class="n">Lx</span><span>Terminal, redirección y tuberías</span></a></li>
+<li><a href="#fisica"><span class="n">&fnof;</span><span>Física y matemáticas</span></a></li>
+<li><a href="#errores"><span class="n">!</span><span>Errores frecuentes</span></a></li>
+<li><a href="#test"><span class="n">?</span><span>Autoevaluación</span></a></li>
+    </ol></nav></div>
+    <main class="solo">
+      <nav class="pager top"><a class="pg prev" href="tarea-05.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tarea 5 &middot; Normales y varios objetos</span></a><a class="pg next" href="index.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Ruta del curso</span></a></nav>
+
+      <section class="tarea" id="intro" data-num="R" data-title="Repaso 0-5">
+  <div class="tarea-head">
+    <div class="tarea-num repaso-num">Repaso<span>0&ndash;5</span></div>
+    <div class="titles">
+      <p class="tarea-kicker">Antes del examen escrito</p>
+      <h2>Repaso de las Tareas 0 a 5: C, la terminal y la redirección</h2>
+    </div>
+  </div>
+
+  <div class="box objetivo">
+    <p class="box-label">Cómo usar este repaso</p>
+    <p>Este documento resume <strong>todo lo que hemos visto en las Tareas 0&ndash;5</strong>: los conceptos de
+    <strong>C</strong> y las ideas de <strong>Linux</strong> (la terminal, la redirección <code class="inl">&gt;</code>
+    y las tuberías <code class="inl">|</code>). No hay física nueva: repasa primero la <em>tabla resumen</em>, luego
+    cada bloque, y termina con los <em>errores frecuentes</em> y la <em>autoevaluación</em>. Si sabes explicar cada
+    caja con tus palabras y responder al test sin mirar, estás listo.</p>
+  </div>
+
+  <h3 class="sec" id="resumen">Tabla resumen &mdash; qué introdujo cada tarea</h3>
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr><th>Tarea</th><th>Conceptos de C</th><th>Física / mates</th><th>Linux / terminal</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>0</b> · Entorno</td>
+          <td>Compilado vs. interpretado · <code>main</code> · <code>#include</code> · <code>printf</code> · <code>return 0</code></td>
+          <td>&mdash;</td>
+          <td><code>gcc -Wall -O2 -o</code> · ejecutar con <code>./</code></td>
+        </tr>
+        <tr>
+          <td><b>1</b> · Imagen PPM</td>
+          <td>Bucle <code>for</code> · <code>int</code> vs <code>double</code> · el molde <code>(double)</code> · <code>fprintf</code> · <code>\r</code></td>
+          <td>Formato PPM (P3) · degradado</td>
+          <td>Redirección <code>&gt;</code> · <code>stdout</code> vs <code>stderr</code></td>
+        </tr>
+        <tr>
+          <td><b>2</b> · <code>vec3</code></td>
+          <td><code>struct</code> · <code>typedef</code> · paso por valor · cabeceras <code>.h</code> · guarda <code>#ifndef</code> · <code>static inline</code></td>
+          <td>Producto escalar · norma · vector unitario</td>
+          <td>Enlazar libm con <code>-lm</code></td>
+        </tr>
+        <tr>
+          <td><b>3</b> · Rayos</td>
+          <td>Funciones que devuelven <code>struct</code> · módulos · inicializar con <code>{ }</code> y campos designados</td>
+          <td>Rayo <code>P(t)=A+t·b</code> · interpolación (lerp)</td>
+          <td>&mdash;</td>
+        </tr>
+        <tr>
+          <td><b>4</b> · Esfera</td>
+          <td>Booleanos (<code>int</code>: 0/&ne;0) · <code>if</code> · <code>&lt;stdbool.h&gt;</code></td>
+          <td>Intersección rayo&ndash;esfera · discriminante</td>
+          <td>&mdash;</td>
+        </tr>
+        <tr>
+          <td><b>5</b> · Normales</td>
+          <td>Punteros <code>*</code> · <code>-&gt;</code> vs <code>.</code> · <code>&amp;</code> · arrays · salida por parámetro · <code>NULL</code></td>
+          <td>Normal <code>n=(P&minus;C)/r</code> · cara frontal/trasera</td>
+          <td>&mdash;</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="tarea" id="c-compilar" data-num="C1" data-title="Compilar y ejecutar">
+  <h3 class="sec">C · Bloque 1 &mdash; Compilar y ejecutar (Tarea 0)</h3>
+  <p>C es un lenguaje <strong>compilado</strong>: no hay intérprete como en Python. Siempre hay <strong>dos pasos</strong>:
+  primero el <em>compilador</em> (<code class="inl">gcc</code>) traduce tu archivo <code class="inl">.c</code> a un
+  <em>ejecutable</em>, y después tú ejecutas ese archivo.</p>
+
+  <script type="text/plain" class="srccode" data-file="hola.c">
+#include <stdio.h>          // da acceso a printf
+
+int main(void) {            // la ejecución SIEMPRE empieza en main
+    printf("Trazador de rayos: preparado.\n");
+    return 0;               // 0 = todo fue bien; distinto de 0 = error
+}
+</script>
+
+  <div class="box concepto">
+    <p class="box-label">Recuerda</p>
+    <ul>
+      <li>Todo programa arranca en la función <code class="inl">main</code>.</li>
+      <li>Para usar <code class="inl">printf</code> hay que incluir su cabecera: <code class="inl">#include &lt;stdio.h&gt;</code>.</li>
+      <li><code class="inl">return 0;</code> es el <strong>código de salida</strong> que <code class="inl">main</code> le da al sistema operativo.</li>
+      <li>Las banderas de <code class="inl">gcc</code>: <code class="inl">-Wall</code> (todos los avisos, úsalo siempre),
+      <code class="inl">-O2</code> (optimiza), <code class="inl">-o nombre</code> (nombra el ejecutable),
+      <code class="inl">-lm</code> (enlaza la biblioteca matemática; <strong>va al final</strong>).</li>
+    </ul>
+  </div>
+
+  <div class="box pista">
+    <p class="box-label">Pista &middot; el <code>./</code></p>
+    <p>Para ejecutar escribimos <code class="inl">./rt</code>, no <code class="inl">rt</code>. El <code class="inl">./</code>
+    significa «el archivo que está <em>aquí</em>, en esta carpeta». Si lo olvidas, la terminal responde
+    «orden no encontrada».</p>
+  </div>
+</section>
+
+<section class="tarea" id="c-tipos" data-num="C2" data-title="Tipos y el molde">
+  <h3 class="sec">C · Bloque 2 &mdash; Tipos numéricos y el molde <code>(double)</code> (Tarea 1)</h3>
+  <p>C distingue números <strong>enteros</strong> (<code class="inl">int</code>) de números <strong>reales</strong>
+  (<code class="inl">double</code>). Esta distinción es la fuente de error número uno para quien empieza.</p>
+
+  <script type="text/plain" class="srccode" data-file="el problema de la división entera">
+int i = 3, n = 4;
+double malo  = i / n;              // división ENTERA: 3/4 = 0  -> malo = 0.0
+double bueno = (double)i / n;      // el molde fuerza reales: 0.75
+</script>
+
+  <div class="box concepto">
+    <p class="box-label">El molde (cast)</p>
+    <p>Si divides dos <code class="inl">int</code>, C hace <strong>división entera</strong> y descarta los decimales
+    (<code class="inl">3/4</code> da <code class="inl">0</code>). Escribiendo <code class="inl">(double)i</code>
+    <em>conviertes</em> el valor a real antes de dividir, y el resultado ya es <code class="inl">0.75</code>. A eso se le
+    llama <strong>molde</strong> o <em>cast</em>.</p>
+  </div>
+
+  <div class="box pista">
+    <p class="box-label">Pista &middot; el retorno de carro <code>\r</code></p>
+    <p>En el mensaje de progreso, <code class="inl">\r</code> mueve el cursor al <em>inicio</em> de la línea sin bajar,
+    así el contador se sobrescribe en el sitio en vez de imprimir miles de líneas. <code class="inl">\n</code>, en cambio,
+    sí baja de línea.</p>
+  </div>
+</section>
+
+<section class="tarea" id="c-flujo" data-num="C3" data-title="Bucles y booleanos">
+  <h3 class="sec">C · Bloque 3 &mdash; Bucles, condicionales y booleanos (Tareas 1 y 4)</h3>
+  <p>Recorremos filas y columnas de píxeles con dos bucles <code class="inl">for</code> anidados. Para decidir si un rayo
+  toca una esfera usamos un <code class="inl">if</code>.</p>
+
+  <div class="box concepto">
+    <p class="box-label">Booleanos «a la C»</p>
+    <p>C (antes de C99) <strong>no tenía tipo booleano</strong>. Se usa un <code class="inl">int</code> donde
+    <strong>0 es falso</strong> y <strong>cualquier otro valor es verdadero</strong>. Por eso una función como
+    <code class="inl">hit_sphere</code> devuelve un <code class="inl">int</code> que actúa como «¿golpea?». Existe también
+    <code class="inl">&lt;stdbool.h&gt;</code> con <code class="inl">bool</code>, <code class="inl">true</code> y
+    <code class="inl">false</code> para mayor claridad.</p>
+  </div>
+
+  <div class="keys">
+    <code>for (int i = 0; i &lt; n; i++)</code>
+    <code>if (cond) { ... }</code>
+    <code>== igualdad</code>
+    <code>= asignación</code>
+    <code>&lt;= &gt;= != </code>
+    <code>&amp;&amp; (y)</code>
+    <code>|| (o)</code>
+  </div>
+
+  <div class="box nota">
+    <p class="box-label">Ojo</p>
+    <p>Dentro de un <code class="inl">if</code>, <code class="inl">==</code> <strong>compara</strong> y
+    <code class="inl">=</code> <strong>asigna</strong>. <code class="inl">if (x = 0)</code> no compara: asigna 0 a
+    <code class="inl">x</code> y siempre es falso. Es un error clásico.</p>
+  </div>
+</section>
+
+<section class="tarea" id="c-struct" data-num="C4" data-title="struct y typedef">
+  <h3 class="sec">C · Bloque 4 &mdash; <code>struct</code>, <code>typedef</code> y paso por valor (Tareas 2 y 3)</h3>
+  <p>Un <strong>trazador de rayos vive de vectores de 3 componentes</strong> (puntos, direcciones, colores RGB). En C++
+  se usaría una clase con operadores <code class="inl">+</code>, <code class="inl">*</code>&hellip;; en C <strong>no hay
+  sobrecarga de operadores</strong>, así que definimos un <code class="inl">struct</code> y <em>una función por cada
+  operación</em>.</p>
+
+  <script type="text/plain" class="srccode" data-file="vec3.h (idea)">
+typedef struct { double x, y, z; } vec3;   // typedef: escribir "vec3", no "struct vec3"
+typedef vec3 point3;                        // mismo tipo, otro nombre para leer mejor
+typedef vec3 color;
+
+// Una función por operación (reciben y devuelven vec3 POR VALOR = una copia)
+static inline vec3 vec3_add(vec3 a, vec3 b) {
+    return (vec3){ a.x + b.x, a.y + b.y, a.z + b.z };
+}
+</script>
+
+  <div class="box concepto">
+    <p class="box-label">Ideas clave</p>
+    <ul>
+      <li>Un <code class="inl">struct</code> agrupa varias variables bajo un mismo nombre; accedes a un campo con el
+      <strong>punto</strong>: <code class="inl">a.x</code>.</li>
+      <li><code class="inl">typedef</code> le da un nombre corto al tipo para no escribir <code class="inl">struct vec3</code> cada vez.</li>
+      <li>Nuestras funciones pasan y devuelven <code class="inl">vec3</code> <strong>por valor</strong> (una copia). Para
+      3 <code class="inl">double</code> es barato, y el código se lee como la fórmula matemática. Con
+      <code class="inl">-O2</code> el compilador elimina casi todas las copias: <em>devolver structs no es «lento»</em>.</li>
+    </ul>
+  </div>
+
+  <script type="text/plain" class="srccode" data-file="inicializar un struct (Tarea 3)">
+ray r = { camera_center, ray_direction };            // por orden de los campos
+ray r = { .orig = camera_center, .dir = ray_direction }; // campos designados (más claro)
+</script>
+</section>
+
+<section class="tarea" id="c-cabeceras" data-num="C5" data-title="Cabeceras y módulos">
+  <h3 class="sec">C · Bloque 5 &mdash; Cabeceras, guardas de inclusión y módulos (Tareas 2 y 3)</h3>
+  <p>Ponemos cada tipo y sus funciones en su propia <strong>cabecera</strong> (<code class="inl">vec3.h</code>,
+  <code class="inl">ray.h</code>, <code class="inl">color.h</code>) y <code class="inl">main.c</code> las junta con
+  <code class="inl">#include</code>. Así crecen los programas en C sin volverse inmanejables.</p>
+
+  <script type="text/plain" class="srccode" data-file="guarda de inclusión">
+#ifndef VEC3_H          // ¿aún no está definido VEC3_H?
+#define VEC3_H          // márcalo como definido
+// ... contenido de la cabecera ...
+#endif                  // fin de la guarda
+</script>
+
+  <div class="box concepto">
+    <p class="box-label">Por qué importa</p>
+    <ul>
+      <li>La <strong>guarda de inclusión</strong> (<code class="inl">#ifndef / #define / #endif</code>) evita que el
+      archivo se procese <em>dos veces</em> si se incluye desde varios sitios (lo que daría errores de «redefinición»).</li>
+      <li><code class="inl">static inline</code> permite <em>definir</em> las funciones dentro de la cabecera sin provocar
+      errores de «símbolo duplicado» al enlazar.</li>
+      <li>Los archivos <code class="inl">.h</code> <strong>se incluyen, no se compilan aparte</strong>: solo compilamos
+      <code class="inl">main.c</code>. (La compilación separada en varios <code class="inl">.c</code> llega en la Tarea&nbsp;13.)</li>
+      <li>Como <code class="inl">vec3.h</code> usa <code class="inl">sqrt</code>, hay que enlazar libm con
+      <code class="inl">-lm</code> <strong>al final</strong> de la orden de <code class="inl">gcc</code>.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="tarea" id="c-punteros" data-num="C6" data-title="Punteros y arrays">
+  <h3 class="sec">C · Bloque 6 &mdash; Punteros, arrays, <code>&amp;</code> y <code>-&gt;</code> (Tarea 5)</h3>
+  <p>Una función en C <strong>solo devuelve un valor</strong>. Pero al detectar un impacto queremos varios datos a la vez:
+  el punto, la normal, la distancia <code class="inl">t</code>&hellip; La solución idiomática es la
+  <strong>salida por parámetro</strong>: pasar un <em>puntero</em> a una estructura y que la función la rellene.</p>
+
+  <script type="text/plain" class="srccode" data-file="salida por parámetro (Tarea 5)">
+// La función rellena *rec y devuelve un int: "¿hubo impacto?"
+int sphere_hit(sphere s, ray r, double tmin, double tmax, hit_record *rec) {
+    // ...
+    rec->t = root;              // con un PUNTERO se usa la flecha ->
+    rec->p = ray_at(r, root);   // rec->t es azúcar para (*rec).t
+    return 1;
+}
+
+hit_record temp;
+if (sphere_hit(s, r, 0, 1e9, &temp))   // &temp = "la dirección de temp"
+    color_px = temp.normal;            // con una VARIABLE normal se usa el punto .
+</script>
+
+  <div class="grid2">
+    <div class="box concepto">
+      <p class="box-label"><code>.</code> frente a <code>-&gt;</code></p>
+      <p>Con una <strong>variable</strong> (o una copia) accedes al campo con el <strong>punto</strong>:
+      <code class="inl">temp.t</code>. Con un <strong>puntero</strong> usas la <strong>flecha</strong>:
+      <code class="inl">rec-&gt;t</code>, que es exactamente lo mismo que <code class="inl">(*rec).t</code>.</p>
+    </div>
+    <div class="box concepto">
+      <p class="box-label"><code>&amp;</code>, arrays y <code>NULL</code></p>
+      <p><code class="inl">&amp;temp</code> es «la dirección de <code class="inl">temp</code>». El <em>mundo</em> es un
+      <strong>array</strong> de <code class="inl">sphere</code> (un bloque contiguo) más un contador.
+      <code class="inl">NULL</code> es un puntero «a nada» (aquí, un material aún sin asignar).</p>
+    </div>
+  </div>
+
+  <div class="box nota">
+    <p class="box-label">Traducción de C++ a C</p>
+    <p>El libro original usa una clase <code class="inl">interval</code> para el rango <code class="inl">[t_min, t_max]</code>.
+    En C lo pasamos como <strong>dos parámetros <code class="inl">double</code></strong>: menos maquinaria, mismo resultado.</p>
+  </div>
+</section>
+
+<section class="tarea" id="linux" data-num="Lx" data-title="Terminal y redirección">
+  <h3 class="sec">Linux &mdash; La terminal, la redirección <code>&gt;</code> y las tuberías <code>|</code></h3>
+  <p>Todo programa en la terminal tiene <strong>tres canales</strong>. Entenderlos es la clave de por qué la imagen y el
+  progreso no se mezclan.</p>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Canal</th><th>Número</th><th>Para qué</th><th>En nuestro código</th></tr></thead>
+      <tbody>
+        <tr><td>Entrada estándar (<b>stdin</b>)</td><td><code>0</code></td><td>Datos que <em>entran</em> al programa</td><td>(no lo usamos aún)</td></tr>
+        <tr><td>Salida estándar (<b>stdout</b>)</td><td><code>1</code></td><td>El resultado «bueno»</td><td>La imagen PPM: <code>printf</code>, <code>write_color</code></td></tr>
+        <tr><td>Salida de error (<b>stderr</b>)</td><td><code>2</code></td><td>Mensajes, avisos, progreso</td><td>El progreso: <code>fprintf(stderr, ...)</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="box concepto">
+    <p class="box-label">Redirección con <code>&gt;</code></p>
+    <p>El operador <code class="inl">&gt;</code> desvía la <strong>salida estándar</strong> a un archivo (lo crea o lo
+    sobrescribe). Por eso <code class="inl">./rt &gt; imagen.ppm</code> guarda la imagen en el archivo, <strong>pero el
+    progreso sigue viéndose en pantalla</strong>: lo imprimimos por <code class="inl">stderr</code>, que
+    <code class="inl">&gt;</code> no toca. Si hubiéramos mandado el progreso por <code class="inl">stdout</code>, se
+    habría colado dentro del <code class="inl">.ppm</code> y la imagen no abriría.</p>
+  </div>
+
+  <div class="keys">
+    <code>&gt; archivo</code>
+    <code>&gt;&gt; añade al final</code>
+    <code>&lt; archivo (entrada)</code>
+    <code>2&gt; solo errores</code>
+    <code>| tubería</code>
+    <code># comentario en shell</code>
+  </div>
+
+  <div class="box concepto">
+    <p class="box-label">Tuberías con <code>|</code></p>
+    <p>Una <strong>tubería</strong> conecta el <code class="inl">stdout</code> de un programa directamente con el
+    <code class="inl">stdin</code> del siguiente, <em>sin archivo intermedio</em>. Así podemos convertir la imagen a PNG
+    de un tirón, o encadenar comandos pequeños que hacen una cosa cada uno.</p>
+  </div>
+
+  <pre class="shell"><span class="p">$</span> gcc -Wall -O2 main.c -o rt -lm      <span class="c"># compilar (libm con -lm, al final)</span>
+<span class="p">$</span> ./rt <span class="p">&gt;</span> imagen.ppm                  <span class="c"># stdout -&gt; archivo; el progreso (stderr) sigue en pantalla</span>
+Filas restantes: 0
+&iexcl;Listo!
+<span class="p">$</span> ./rt <span class="p">|</span> pnmtopng <span class="p">&gt;</span> imagen.png      <span class="c"># tubería: PPM directo a PNG, sin archivo intermedio</span>
+<span class="p">$</span> ./rt <span class="p">&gt;</span> imagen.ppm 2<span class="p">&gt;</span> avance.txt    <span class="c"># además, el progreso va a otro archivo</span>
+<span class="p">$</span> convert imagen.ppm imagen.png       <span class="c"># alternativa con ImageMagick</span></pre>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Comando</th><th>Qué hace</th></tr></thead>
+      <tbody>
+        <tr><td><code>gcc ... -o rt -lm</code></td><td>Compila el/los <code>.c</code> y produce el ejecutable <code>rt</code></td></tr>
+        <tr><td><code>./rt</code></td><td>Ejecuta el programa <code>rt</code> de la carpeta actual</td></tr>
+        <tr><td><code>ls</code></td><td>Lista los archivos de la carpeta</td></tr>
+        <tr><td><code>cat archivo</code></td><td>Muestra el contenido de un archivo de texto</td></tr>
+        <tr><td><code>convert</code> / <code>pnmtopng</code></td><td>Convierten el <code>.ppm</code> a <code>.png</code> (visor común)</td></tr>
+        <tr><td><code>sudo apt install build-essential</code></td><td>Instala <code>gcc</code> y herramientas en Linux (Debian/Ubuntu)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="tarea" id="fisica" data-num="&fnof;" data-title="Física y matemáticas">
+  <h3 class="sec">Física y matemáticas que debes reconocer</h3>
+  <p>No entra materia nueva de física, pero sí debes saber leer estas fórmulas en el código:</p>
+  <div class="grid2">
+    <div class="box fisica">
+      <p class="box-label">Vectores</p>
+      <p>Producto escalar <span class="math">a&middot;b = a<sub>x</sub>b<sub>x</sub> + a<sub>y</sub>b<sub>y</sub> + a<sub>z</sub>b<sub>z</sub></span>,
+      norma <span class="math">|a| = &radic;(a&middot;a)</span>, unitario <span class="math">a/|a|</span>.
+      (<code class="inl">length_squared</code> evita la raíz cuando solo comparamos longitudes.)</p>
+    </div>
+    <div class="box fisica">
+      <p class="box-label">Rayo</p>
+      <p>Semirrecta <span class="math">P(t) = A + t&middot;b</span>: origen <span class="math">A</span> (la cámara),
+      dirección <span class="math">b</span>, parámetro <span class="math">t</span>. Con <span class="math">t&gt;0</span> se avanza «hacia delante».</p>
+    </div>
+    <div class="box fisica">
+      <p class="box-label">Cielo (lerp)</p>
+      <p>Interpolación lineal: <span class="math">color = (1&minus;a)&middot;blanco + a&middot;azul</span>, con
+      <span class="math">a</span> según la altura de la dirección del rayo.</p>
+    </div>
+    <div class="box fisica">
+      <p class="box-label">Esfera y normal</p>
+      <p>Intersección: cuadrática <span class="math">a t² &minus; 2h t + c = 0</span>; el <strong>discriminante</strong>
+      <span class="math">h² &minus; a&middot;c</span> dice si hay impacto (&ge;0) o no (&lt;0). Normal
+      <span class="math">n = (P &minus; C)/r</span>.</p>
+    </div>
+  </div>
+</section>
+
+<section class="tarea" id="errores" data-num="!" data-title="Errores frecuentes">
+  <h3 class="sec">Errores frecuentes (repásalos antes del examen)</h3>
+  <ul class="checklist">
+    <li><b>División entera:</b> <code class="inl">i/(n-1)</code> con enteros da 0. Usa <code class="inl">(double)i/(n-1)</code>.</li>
+    <li><b>Olvidar <code>-lm</code></b> al usar <code class="inl">sqrt</code>/<code class="inl">tan</code> &rarr; error de enlazado
+      «undefined reference to <code>sqrt</code>». Y debe ir <em>al final</em>.</li>
+    <li><b>Olvidar el <code>./</code></b> al ejecutar &rarr; «orden no encontrada».</li>
+    <li><b>Confundir <code>.</code> y <code>-&gt;</code>:</b> variable usa <code class="inl">.</code>, puntero usa <code class="inl">-&gt;</code>.</li>
+    <li><b><code>=</code> en vez de <code>==</code></b> dentro de un <code class="inl">if</code>: uno asigna, el otro compara.</li>
+    <li><b>Progreso por <code>stdout</code>:</b> ensucia el <code class="inl">.ppm</code> y la imagen no abre. Va por <code class="inl">stderr</code>.</li>
+    <li><b>Falta un <code>#include</code></b> (<code class="inl">&lt;stdio.h&gt;</code> para <code class="inl">printf</code>, <code class="inl">&lt;math.h&gt;</code> para <code class="inl">sqrt</code>).</li>
+    <li><b>Sin guarda de inclusión</b> &rarr; errores de «redefinición» al incluir una cabecera dos veces.</li>
+  </ul>
+</section>
+
+<section class="tarea" id="test" data-num="?" data-title="Autoevaluación">
+  <h3 class="sec">Autoevaluación &mdash; intenta responder antes de abrir</h3>
+  <div class="qa">
+    <details>
+      <summary>¿En qué se diferencia compilar de interpretar? ¿Cuántos pasos hay en C?</summary>
+      <p>Interpretar ejecuta el código directamente (como Python). Compilar lo traduce antes a un ejecutable. En C hay
+      <strong>dos pasos</strong>: compilar (<code class="inl">gcc</code>) y luego ejecutar (<code class="inl">./rt</code>).</p>
+    </details>
+    <details>
+      <summary>¿Qué imprime <code>printf("%d\n", 3/2);</code>? ¿Cómo obtienes <code>1.5</code>?</summary>
+      <p>Imprime <code class="inl">1</code>: <code class="inl">3</code> y <code class="inl">2</code> son enteros, así que hay
+      división entera. Para obtener <code class="inl">1.5</code> usa un molde: <code class="inl">(double)3/2</code> e imprime
+      con <code class="inl">%f</code>.</p>
+    </details>
+    <details>
+      <summary>¿Para qué sirve <code>(double)</code> en <code>(double)i/(n-1)</code>?</summary>
+      <p>Convierte <code class="inl">i</code> a real <em>antes</em> de dividir, forzando una división real en vez de entera.
+      Sin él, para <code class="inl">i &lt; n-1</code> el resultado sería 0.</p>
+    </details>
+    <details>
+      <summary>¿Por qué el progreso se imprime por <code>stderr</code> y no por <code>stdout</code>?</summary>
+      <p>Porque redirigimos <code class="inl">stdout</code> al archivo <code class="inl">.ppm</code>
+      (<code class="inl">./rt &gt; imagen.ppm</code>). Si el progreso fuera por <code class="inl">stdout</code>, se metería
+      dentro de la imagen. Por <code class="inl">stderr</code> aparece en pantalla y no ensucia el archivo.</p>
+    </details>
+    <details>
+      <summary>¿Qué hace <code>./rt &gt; imagen.ppm</code>? ¿Y <code>./rt | pnmtopng &gt; imagen.png</code>?</summary>
+      <p>El primero guarda la salida estándar (la imagen) en <code class="inl">imagen.ppm</code>. El segundo usa una
+      <strong>tubería</strong>: envía el PPM directamente a <code class="inl">pnmtopng</code>, que produce el PNG, sin
+      crear el <code class="inl">.ppm</code> intermedio.</p>
+    </details>
+    <details>
+      <summary>¿Por qué <code>sqrt</code> necesita <code>-lm</code> y dónde va la bandera?</summary>
+      <p>Las funciones matemáticas están en la biblioteca <em>libm</em>, que hay que enlazar explícitamente con
+      <code class="inl">-lm</code>. Va <strong>al final</strong> de la orden de <code class="inl">gcc</code>.</p>
+    </details>
+    <details>
+      <summary>¿Qué es una guarda de inclusión y qué problema evita?</summary>
+      <p>El bloque <code class="inl">#ifndef X / #define X / ... / #endif</code>. Evita que una cabecera se procese dos
+      veces cuando se incluye desde varios sitios, lo que causaría errores de «redefinición».</p>
+    </details>
+    <details>
+      <summary>Diferencia entre <code>.</code> y <code>-&gt;</code>. ¿A qué equivale <code>rec-&gt;t</code>?</summary>
+      <p>Con una variable/copia se usa el punto (<code class="inl">temp.t</code>); con un puntero, la flecha
+      (<code class="inl">rec-&gt;t</code>). <code class="inl">rec-&gt;t</code> equivale a <code class="inl">(*rec).t</code>.</p>
+    </details>
+    <details>
+      <summary>En C89 no hay <code>bool</code>. ¿Cómo se representa verdadero/falso?</summary>
+      <p>Con un <code class="inl">int</code>: <strong>0 es falso</strong> y <strong>cualquier otro valor es verdadero</strong>.
+      Desde C99 existe <code class="inl">&lt;stdbool.h&gt;</code> con <code class="inl">bool</code>/<code class="inl">true</code>/<code class="inl">false</code>.</p>
+    </details>
+    <details>
+      <summary>Una función solo devuelve un valor. ¿Cómo entregamos punto, normal y <code>t</code> a la vez?</summary>
+      <p>Con <strong>salida por parámetro</strong>: pasamos un puntero a un <code class="inl">hit_record</code>
+      (<code class="inl">hit_record *rec</code>) y la función lo rellena; el <code class="inl">return</code> queda para el
+      <code class="inl">int</code> «¿hubo impacto?». Al llamar pasamos <code class="inl">&amp;temp</code>.</p>
+    </details>
+  </div>
+</section>
+
+      <nav class="pager bottom"><a class="pg prev" href="tarea-05.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tarea 5 &middot; Normales y varios objetos</span></a><a class="pg next" href="index.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Ruta del curso</span></a></nav>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="shell">
+    <p>Material docente derivado y adaptado de <a href="https://raytracing.github.io/books/RayTracingInOneWeekend.html">«Ray Tracing in One Weekend»</a>
+    de Peter Shirley, Trevor David Black y Steve Hollasch (licencia CC0). Esta versión reescribe todo el código en
+    <strong>C puro</strong> y reorganiza el contenido como tareas de curso, con toda la explicación en español.</p>
+    <p>Hoja de repaso de las Tareas 0&ndash;5 para el examen escrito. Compila con
+    <code class="inl">gcc -O2 main.c -o rt -lm</code> y visualiza con <code class="inl">./rt &gt; imagen.ppm</code>.</p>
+  </div>
+</footer>
+<script src="app.js"></script>
+<script>
+/* Scrollspy propio del repaso (el toc() de app.js solo actúa si existe #tocList) */
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll('#repasoToc a[href^="#"]'));
+  if(!links.length || !('IntersectionObserver' in window)) return;
+  var byId = {};
+  links.forEach(function(a){ byId[a.getAttribute('href').slice(1)] = a; });
+  var secs = links.map(function(a){ return document.getElementById(a.getAttribute('href').slice(1)); }).filter(Boolean);
+  var obs = new IntersectionObserver(function(ents){
+    ents.forEach(function(e){
+      if(e.isIntersecting){
+        links.forEach(function(a){ a.classList.remove('active'); });
+        var a = byId[e.target.id]; if(a) a.classList.add('active');
+      }
+    });
+  }, { rootMargin:'-12% 0px -78% 0px', threshold:0 });
+  secs.forEach(function(s){ obs.observe(s); });
+})();
+</script>
+</body>
+</html>

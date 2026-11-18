@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Examen escrito &middot; Tareas 0&ndash;4 &mdash; Programación en C</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,600&display=swap">
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* ===== Página de examen (usa los tokens de styles.css en pantalla) ===== */
+  .toolbar{max-width:840px;margin:1.4rem auto 0;padding:0 clamp(1rem,4vw,2rem);
+    display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
+  .toolbar .btn{font-family:"IBM Plex Mono",monospace;font-size:.78rem;cursor:pointer;
+    border:1px solid var(--line-strong);background:var(--surface);color:var(--ink-soft);
+    border-radius:8px;padding:.4rem .8rem}
+  .toolbar .btn:hover{border-color:var(--accent);color:var(--accent)}
+  .toolbar .hint{font-family:"IBM Plex Mono",monospace;font-size:.72rem;color:var(--muted)}
+
+  .sheet{max-width:840px;margin:1.2rem auto 3rem;background:var(--surface);
+    border:1px solid var(--line);border-radius:14px;padding:clamp(1.4rem,4vw,2.8rem);
+    box-shadow:var(--shadow)}
+  .sheet h1{font-family:"Spectral",Georgia,serif;font-size:1.7rem;margin:0 0 .2rem;color:var(--ink)}
+  .exam-kicker{font-family:"IBM Plex Mono",monospace;font-size:.72rem;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--accent);margin:0 0 .5rem}
+  .exam-sub{color:var(--ink-soft);margin:.1rem 0 1.1rem}
+
+  .idbox{display:grid;grid-template-columns:1fr 1fr;gap:.4rem 1.6rem;margin:1rem 0;
+    padding:1rem 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .idbox .fld{display:flex;align-items:flex-end;gap:.5rem;font-size:.92rem}
+  .idbox .fld b{white-space:nowrap;color:var(--ink)}
+  .idbox .fld .line{flex:1;border-bottom:1px solid var(--line-strong);height:1.2rem}
+  .idbox .full{grid-column:1 / -1}
+
+  .meta{display:flex;flex-wrap:wrap;gap:.5rem 1.4rem;font-family:"IBM Plex Mono",monospace;
+    font-size:.78rem;color:var(--ink-soft);margin:.4rem 0 0}
+  .meta b{color:var(--accent-ink)}
+
+  .instr{margin:1rem 0 0;padding:.9rem 1.1rem;border-left:4px solid var(--accent);
+    background:var(--accent-soft);border-radius:8px;font-size:.9rem}
+  .instr ul{margin:.4rem 0 0;padding-left:1.15rem}
+  .instr li{margin:.15rem 0}
+
+  .marks{width:100%;border-collapse:collapse;margin:1.1rem 0 .2rem;font-family:"IBM Plex Mono",monospace;font-size:.74rem}
+  .marks th,.marks td{border:1px solid var(--line-strong);padding:.35rem .4rem;text-align:center}
+  .marks th{background:var(--surface-2);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
+  .marks td.note{color:var(--muted)}
+
+  .part{margin:2.2rem 0 0;break-inside:avoid}
+  .part-head{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;
+    border-bottom:2px solid var(--ink);padding-bottom:.35rem;margin-bottom:.4rem}
+  .part-head h2{font-family:"IBM Plex Mono",monospace;font-size:.95rem;letter-spacing:.02em;
+    text-transform:uppercase;margin:0;color:var(--ink)}
+  .part-head .pp{font-family:"IBM Plex Mono",monospace;font-size:.74rem;color:var(--muted);white-space:nowrap}
+  .part > .lead{font-size:.88rem;color:var(--ink-soft);margin:.45rem 0 .9rem}
+
+  ol.q{list-style:none;counter-reset:qq;margin:0;padding:0}
+  ol.q > li{counter-increment:qq;position:relative;padding:.55rem 0;border-bottom:1px dashed var(--line);break-inside:avoid}
+  ol.q > li:last-child{border-bottom:none}
+  ol.q > li::before{content:counter(qq) ".";position:absolute;left:0;top:.55rem;
+    font-family:"IBM Plex Mono",monospace;color:var(--accent);font-weight:600;font-size:.9rem}
+  ol.q > li{padding-left:2rem}
+  .qtext{display:block}
+  .qpts{font-family:"IBM Plex Mono",monospace;font-size:.7rem;color:var(--muted);margin-left:.4rem}
+
+  /* Verdadero / Falso */
+  .vf{float:right;font-family:"IBM Plex Mono",monospace;font-weight:600;letter-spacing:.25em;
+    color:var(--ink-soft);border:1px solid var(--line-strong);border-radius:6px;padding:.12rem .6rem;margin-left:1rem}
+
+  /* Opción múltiple */
+  .opts{list-style:none;margin:.5rem 0 0;padding:0}
+  .opts li{padding:.15rem 0 .15rem 1.9rem;position:relative;font-size:.92rem}
+  .opts li .lt{position:absolute;left:0;top:.15rem;font-family:"IBM Plex Mono",monospace;
+    color:var(--ink-soft);border:1px solid var(--line-strong);border-radius:50%;
+    width:1.4em;height:1.4em;display:inline-flex;align-items:center;justify-content:center;font-size:.78rem}
+
+  /* Bloques de código para leer (claros, aptos para imprimir) */
+  pre.examcode{margin:.6rem 0;padding:.8rem 1rem;border:1px solid var(--line-strong);
+    border-radius:8px;background:var(--surface-2);overflow-x:auto;
+    font-family:"IBM Plex Mono",monospace;font-size:.82rem;line-height:1.55;color:var(--ink)}
+  pre.examcode code{font-family:inherit;white-space:pre}
+
+  /* Líneas para escribir a mano */
+  .write{margin:.55rem 0 .3rem}
+  .write .ln{height:1.85rem;border-bottom:1px solid var(--line-strong)}
+  .write.short .ln{width:60%}
+
+  code.k{font-family:"IBM Plex Mono",monospace;font-size:.86em;background:var(--surface-2);
+    border:1px solid var(--line);border-radius:5px;padding:.05em .35em;color:var(--accent-ink);white-space:nowrap}
+
+  /* Solucionario (nunca se imprime) */
+  .solucionario{max-width:840px;margin:0 auto 4rem;padding:0 clamp(1rem,4vw,2rem)}
+  .solucionario .inner{border:1px dashed var(--indigo);border-radius:12px;background:var(--indigo-soft);
+    padding:1.2rem 1.4rem}
+  .solucionario h2{font-family:"IBM Plex Mono",monospace;font-size:.9rem;letter-spacing:.05em;
+    text-transform:uppercase;color:var(--indigo);margin:0 0 .3rem}
+  .solucionario h3{font-family:"IBM Plex Mono",monospace;font-size:.78rem;letter-spacing:.04em;
+    text-transform:uppercase;color:var(--ink-soft);margin:1.1rem 0 .3rem}
+  .solucionario ol{margin:.2rem 0;padding-left:1.3rem}
+  .solucionario li{margin:.28rem 0;font-size:.9rem;color:var(--ink-soft)}
+  .solucionario code{font-family:"IBM Plex Mono",monospace;font-size:.86em;color:var(--accent-ink)}
+
+  /* ===== Impresión: tinta mínima, blanco y negro ===== */
+  @media print {
+    :root, :root[data-theme="dark"], :root[data-theme="light"]{
+      --paper:#fff;--surface:#fff;--surface-2:#fff;--ink:#000;--ink-soft:#111;--muted:#333;
+      --line:#c4c4c4;--line-strong:#7a7a7a;--accent:#000;--accent-ink:#000;--accent-soft:#fff;
+      --indigo:#000;--teal:#000;--shadow:none;
+    }
+    body{background:#fff;color:#000}
+    .topbar,.toolbar,.solucionario,.foot{display:none !important}
+    .sheet{box-shadow:none;border:none;border-radius:0;margin:0 auto;max-width:none;padding:0}
+    .part{break-inside:auto}
+    ol.q > li, .part-head{break-inside:avoid}
+    pre.examcode{background:#fff}
+    a{color:#000;text-decoration:none}
+    @page{margin:1.6cm}
+  }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><b>Trazador de Rayos en C</b></a>
+    <div class="spacer"></div>
+    <button class="theme-btn" id="themeBtn" aria-label="Cambiar tema">
+      <span id="themeIcon">&#9680;</span><span id="themeLabel">Tema</span>
+    </button>
+  </div>
+</div>
+
+<div class="toolbar noprint">
+  <button class="btn" id="printBtn" type="button">&#128424; Imprimir examen</button>
+  <button class="btn" id="solBtn" type="button">Mostrar solucionario</button>
+  <span class="hint">El solucionario nunca se imprime &mdash; solo se ve en pantalla.</span>
+</div>
+
+<article class="sheet">
+  <p class="exam-kicker">Curso de Programación en C &middot; 2.º de Física</p>
+  <h1>Examen escrito &mdash; Fundamentos de C y de la terminal</h1>
+  <p class="exam-sub">Tareas 0 a 4: compilación, tipos, <code class="k">struct</code>, rayos y esferas, y la terminal de Linux (redirección y tuberías).</p>
+
+  <div class="meta">
+    <span>Duración: <b>1 hora</b></span>
+    <span>Puntuación: <b>100 puntos</b></span>
+    <span>Sin ordenador, apuntes ni calculadora</span>
+  </div>
+
+  <div class="idbox">
+    <div class="fld full"><b>Nombre y apellidos:</b><span class="line"></span></div>
+    <div class="fld full"><b>Fecha:</b><span class="line"></span></div>
+  </div>
+
+  <div class="instr">
+    <strong>Instrucciones.</strong>
+    <ul>
+      <li>Escribe con bolígrafo, de forma legible. Responde en los espacios previstos.</li>
+      <li>En Verdadero/Falso y en las opciones múltiples, <strong>rodea con un círculo</strong> tu respuesta.</li>
+      <li>En las respuestas breves basta con 1&ndash;3 frases claras; no hace falta escribir código largo salvo donde se pida.</li>
+      <li>Se valora la precisión de los términos técnicos (<code class="k">stdout</code>, molde, guarda de inclusión, discriminante&hellip;).</li>
+    </ul>
+  </div>
+
+  <table class="marks">
+    <thead>
+      <tr><th>Parte</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>Total</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="note">Máx.</td><td>10</td><td>18</td><td>30</td><td>24</td><td>18</td><td>100</td></tr>
+      <tr><td class="note">Nota</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    </tbody>
+  </table>
+
+  <!-- ============ PARTE 1 ============ -->
+  <section class="part">
+    <div class="part-head"><h2>Parte 1 &middot; Verdadero o Falso</h2><span class="pp">10 preguntas &middot; 1 pt c/u &middot; 10 pts</span></div>
+    <p class="lead">Rodea <b>V</b> (verdadero) o <b>F</b> (falso). No hay que justificar.</p>
+    <ol class="q">
+      <li><span class="vf">V &middot; F</span><span class="qtext">En C, la ejecución de un programa empieza siempre en la función <code class="k">main</code>.</span></li>
+      <li><span class="vf">V &middot; F</span><span class="qtext">C es un lenguaje interpretado: se ejecuta directamente, sin compilar.</span></li>
+      <li><span class="vf">V &middot; F</span><span class="qtext">Entre números enteros, la operación <code class="k">7 / 2</code> vale <code class="k">3</code>.</span></li>
+      <li><span class="vf">V &middot; F</span><span class="qtext">El operador <code class="k">&gt;</code> redirige la salida estándar (<code class="k">stdout</code>) a un archivo.</span></li>
+      <li><span class="vf">V &middot; F</span><span class="qtext">Conviene imprimir el progreso por <code class="k">stderr</code> para no mezclarlo con la imagen que va por <code class="k">stdout</code>.</span></li>
+      <li><span class="vf">V &middot; F</span><span class="qtext">En una imagen PPM «P3», cada píxel se escribe como tres enteros (R, G y B) con valores entre <code class="k">0</code> y <code class="k">255</code>.</span></li>
+      <li><span class="vf">V &middot; F</span><span class="qtext">La bandera <code class="k">-lm</code> se escribe al final de la orden de <code class="k">gcc</code>.</span></li>
+      <li><span class="vf">V &middot; F</span><span class="qtext">Una guarda de inclusión (<code class="k">#ifndef/#define/#endif</code>) evita que una cabecera se procese dos veces.</span></li>
+      <li><span class="vf">V &middot; F</span><span class="qtext">Un <code class="k">struct</code> permite agrupar varias variables bajo un mismo nombre.</span></li>
+      <li><span class="vf">V &middot; F</span><span class="qtext">Una tubería <code class="k">|</code> conecta la salida de un programa con la entrada del siguiente.</span></li>
+    </ol>
+  </section>
+
+  <!-- ============ PARTE 2 ============ -->
+  <section class="part">
+    <div class="part-head"><h2>Parte 2 &middot; Opción múltiple</h2><span class="pp">6 preguntas &middot; 3 pts c/u &middot; 18 pts</span></div>
+    <p class="lead">Rodea la <b>única</b> opción correcta.</p>
+    <ol class="q">
+      <li><span class="qtext">¿Qué imprime <code class="k">printf("%d", 7/2);</code>?</span>
+        <ul class="opts">
+          <li><span class="lt">a</span>3.5</li>
+          <li><span class="lt">b</span>3</li>
+          <li><span class="lt">c</span>4</li>
+          <li><span class="lt">d</span>Un error de compilación</li>
+        </ul></li>
+      <li><span class="qtext">¿Qué orden compila <code class="k">main.c</code> enlazando la biblioteca matemática y crea el ejecutable <code class="k">rt</code>?</span>
+        <ul class="opts">
+          <li><span class="lt">a</span><code class="k">gcc main.c</code></li>
+          <li><span class="lt">b</span><code class="k">gcc -lm main.c</code></li>
+          <li><span class="lt">c</span><code class="k">gcc main.c -o rt -lm</code></li>
+          <li><span class="lt">d</span><code class="k">gcc main.c -o -lm rt</code></li>
+        </ul></li>
+      <li><span class="qtext">¿Cuál inicializa un <code class="k">struct</code> de tipo <code class="k">ray</code> usando <em>campos designados</em>?</span>
+        <ul class="opts">
+          <li><span class="lt">a</span><code class="k">ray r = (A, b);</code></li>
+          <li><span class="lt">b</span><code class="k">ray r = { A, b };</code></li>
+          <li><span class="lt">c</span><code class="k">ray r = { .orig = A, .dir = b };</code></li>
+          <li><span class="lt">d</span><code class="k">ray r = new ray(A, b);</code></li>
+        </ul></li>
+      <li><span class="qtext">Al ejecutar <code class="k">./rt &gt; imagen.ppm</code>, ¿qué se guarda en el archivo?</span>
+        <ul class="opts">
+          <li><span class="lt">a</span>Los mensajes de progreso</li>
+          <li><span class="lt">b</span>Los mensajes de error</li>
+          <li><span class="lt">c</span>La salida estándar (la imagen)</li>
+          <li><span class="lt">d</span>Nada; el archivo queda vacío</li>
+        </ul></li>
+      <li><span class="qtext">¿Para qué sirve <code class="k">typedef</code>?</span>
+        <ul class="opts">
+          <li><span class="lt">a</span>Reservar memoria en el montón</li>
+          <li><span class="lt">b</span>Dar un nombre corto a un tipo</li>
+          <li><span class="lt">c</span>Incluir una cabecera</li>
+          <li><span class="lt">d</span>Crear un puntero</li>
+        </ul></li>
+      <li><span class="qtext">En C (antes de C99, sin <code class="k">&lt;stdbool.h&gt;</code>), se considera <em>verdadero</em>:</span>
+        <ul class="opts">
+          <li><span class="lt">a</span>Únicamente el valor <code class="k">1</code></li>
+          <li><span class="lt">b</span>Únicamente <code class="k">true</code></li>
+          <li><span class="lt">c</span>Cualquier valor distinto de <code class="k">0</code></li>
+          <li><span class="lt">d</span>El valor <code class="k">0</code></li>
+        </ul></li>
+    </ol>
+  </section>
+
+  <!-- ============ PARTE 3 ============ -->
+  <section class="part">
+    <div class="part-head"><h2>Parte 3 &middot; Respuesta breve</h2><span class="pp">6 preguntas &middot; 5 pts c/u &middot; 30 pts</span></div>
+    <p class="lead">Responde en <b>1&ndash;3 frases</b>. Usa los términos técnicos correctos.</p>
+    <ol class="q">
+      <li><span class="qtext">Explica la diferencia entre un lenguaje <em>compilado</em> y uno <em>interpretado</em>. ¿Cuántos pasos hay que dar en C para ver el resultado de un programa?</span>
+        <div class="write"><div class="ln"></div><div class="ln"></div></div></li>
+      <li><span class="qtext">¿Por qué <code class="k">(double)i / (n-1)</code> puede dar un resultado distinto de <code class="k">i / (n-1)</code>? ¿Cómo se llama la conversión <code class="k">(double)</code>?</span>
+        <div class="write"><div class="ln"></div><div class="ln"></div></div></li>
+      <li><span class="qtext">¿Qué son <code class="k">stdout</code> y <code class="k">stderr</code>? ¿Por qué enviamos el mensaje de progreso a <code class="k">stderr</code> y no a <code class="k">stdout</code>?</span>
+        <div class="write"><div class="ln"></div><div class="ln"></div></div></li>
+      <li><span class="qtext">Explica qué hace <code class="k">./rt | pnmtopng &gt; imagen.png</code>. Describe por dónde van los datos.</span>
+        <div class="write"><div class="ln"></div><div class="ln"></div></div></li>
+      <li><span class="qtext">Nuestras funciones de <code class="k">vec3</code> reciben y devuelven un <code class="k">vec3</code> <em>por valor</em>. Explica qué significa «por valor» y por qué el material afirma que, con la optimización <code class="k">-O2</code>, esto no resulta lento.</span>
+        <div class="write"><div class="ln"></div><div class="ln"></div></div></li>
+      <li><span class="qtext">¿Qué es una <em>guarda de inclusión</em> y qué problema evita? Nombra las tres directivas del preprocesador que la forman.</span>
+        <div class="write"><div class="ln"></div><div class="ln"></div></div></li>
+    </ol>
+  </section>
+
+  <!-- ============ PARTE 4 ============ -->
+  <section class="part">
+    <div class="part-head"><h2>Parte 4 &middot; Lee el código</h2><span class="pp">4 apartados &middot; 6 pts c/u &middot; 24 pts</span></div>
+    <p class="lead">Lee cada fragmento y responde. No necesitas un ordenador.</p>
+    <ol class="q">
+      <li><span class="qtext">¿Qué imprime este fragmento? Escribe las dos líneas de salida.</span>
+<pre class="examcode"><code>int a = 5, b = 2;
+printf("%d\n", a / b);
+printf("%.1f\n", (double)a / b);</code></pre>
+        <div class="write short"><div class="ln"></div><div class="ln"></div></div></li>
+      <li><span class="qtext">Este programa da error al construirlo. Indica <em>qué falta</em> y cómo se corrige (cabecera y compilación).</span>
+<pre class="examcode"><code>#include &lt;stdio.h&gt;
+int main(void) {
+    double x = sqrt(16.0);
+    printf("%f\n", x);
+    return 0;
+}</code></pre>
+        <div class="write"><div class="ln"></div><div class="ln"></div></div></li>
+      <li><span class="qtext">Hay un error en este condicional. Señálalo y escríbelo corregido.</span>
+<pre class="examcode"><code>if (impacto = 0) {
+    printf("No toca\n");
+}</code></pre>
+        <div class="write short"><div class="ln"></div></div></li>
+      <li><span class="qtext">¿Qué imprime exactamente este bucle?</span>
+<pre class="examcode"><code>for (int i = 0; i &lt; 3; i++)
+    printf("fila %d\n", i);</code></pre>
+        <div class="write short"><div class="ln"></div><div class="ln"></div></div></li>
+    </ol>
+  </section>
+
+  <!-- ============ PARTE 5 ============ -->
+  <section class="part">
+    <div class="part-head"><h2>Parte 5 &middot; Escribe</h2><span class="pp">3 apartados &middot; 6 pts c/u &middot; 18 pts</span></div>
+    <p class="lead">Respuestas cortas y exactas. Cuida la sintaxis.</p>
+    <ol class="q">
+      <li><span class="qtext">Escribe un programa en C <em>completo</em> y lo más corto posible que imprima por pantalla el texto <code class="k">Listo</code> (incluye la cabecera, <code class="k">main</code> y <code class="k">return</code>).</span>
+        <div class="write"><div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div></li>
+      <li><span class="qtext">Escribe las órdenes de terminal para: <b>(i)</b> compilar <code class="k">main.c</code> enlazando <em>libm</em> y creando el ejecutable <code class="k">rt</code>; <b>(ii)</b> ejecutarlo guardando su salida estándar en <code class="k">imagen.ppm</code>.</span>
+        <div class="write"><div class="ln"></div><div class="ln"></div></div></li>
+      <li><span class="qtext">Escribe la <em>guarda de inclusión</em> completa (las tres líneas) para un archivo llamado <code class="k">ray.h</code>.</span>
+        <div class="write"><div class="ln"></div><div class="ln"></div><div class="ln"></div></div></li>
+    </ol>
+  </section>
+
+  <p style="text-align:center;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--muted);margin-top:2rem">&mdash; Fin del examen &middot; revisa tus respuestas &mdash;</p>
+</article>
+
+<!-- ============ SOLUCIONARIO (no se imprime) ============ -->
+<div class="solucionario noprint" id="solucionario" hidden>
+  <div class="inner">
+    <h2>Solucionario &middot; para el profesor</h2>
+    <p style="font-size:.85rem;color:var(--ink-soft);margin:.2rem 0 .6rem">Criterio orientativo. En Parte 3 se acepta cualquier redacción equivalente que use bien los términos.</p>
+
+    <h3>Parte 1 &middot; Verdadero / Falso (1 pt c/u)</h3>
+    <ol>
+      <li>1. <b>V</b> &nbsp; 2. <b>F</b> (es compilado) &nbsp; 3. <b>V</b> (división entera) &nbsp; 4. <b>V</b> &nbsp; 5. <b>V</b></li>
+      <li>6. <b>V</b> (PPM «P3»: R G B, enteros 0&ndash;255) &nbsp; 7. <b>V</b> &nbsp; 8. <b>V</b> &nbsp; 9. <b>V</b> &nbsp; 10. <b>V</b></li>
+    </ol>
+
+    <h3>Parte 2 &middot; Opción múltiple (3 pts c/u)</h3>
+    <ol>
+      <li>1 &rarr; <b>b</b> &nbsp;&middot;&nbsp; 2 &rarr; <b>c</b> &nbsp;&middot;&nbsp; 3 &rarr; <b>c</b> &nbsp;&middot;&nbsp; 4 &rarr; <b>c</b> &nbsp;&middot;&nbsp; 5 &rarr; <b>b</b> &nbsp;&middot;&nbsp; 6 &rarr; <b>c</b></li>
+      <li style="list-style:none;margin-left:-1.3rem;color:var(--muted);font-size:.82rem">(En la 3, la opción <b>b</b> también es válida en C, pero inicializa <em>por orden</em>, no con campos designados.)</li>
+    </ol>
+
+    <h3>Parte 3 &middot; Respuesta breve (5 pts c/u)</h3>
+    <ol>
+      <li><b>Compilado vs. interpretado:</b> el compilado se traduce antes a un ejecutable (C); el interpretado se ejecuta directamente (Python). En C hay <b>dos pasos</b>: compilar y ejecutar.</li>
+      <li><b>El molde:</b> <code>i/(n-1)</code> con enteros hace <i>división entera</i> (descarta decimales, suele dar 0); <code>(double)i</code> convierte a real y la división es real. La conversión se llama <b>molde</b> (o <i>cast</i>).</li>
+      <li><b>Canales:</b> <code>stdout</code> es la salida estándar (el resultado, aquí la imagen) y <code>stderr</code> la salida de error (mensajes/progreso). El progreso va por <code>stderr</code> para no mezclarse con el <code>.ppm</code>, ya que redirigimos <code>stdout</code> al archivo.</li>
+      <li><b>Tubería:</b> <code>./rt</code> genera el PPM por <code>stdout</code>; la tubería <code>|</code> lo envía a <code>pnmtopng</code>, que lo convierte y su salida se redirige con <code>&gt;</code> a <code>imagen.png</code>. Sin archivo intermedio.</li>
+      <li><b>Paso por valor:</b> la función recibe una <em>copia</em> del <code>vec3</code> (no el original), y devuelve otra copia; el que llama no ve modificado su argumento. No es lento porque para 3 <code>double</code> la copia es barata y, con <code>-O2</code>, el compilador elimina casi todas esas copias. Se prioriza la claridad (el código se lee como la fórmula).</li>
+      <li><b>Guarda de inclusión:</b> bloque <code>#ifndef / #define / #endif</code> que impide procesar dos veces la cabecera (evita errores de redefinición).</li>
+    </ol>
+
+    <h3>Parte 4 &middot; Lee el código (6 pts c/u)</h3>
+    <ol>
+      <li>Imprime <code>2</code> y <code>2.5</code> (primero división entera <code>5/2=2</code>; luego, con el molde, <code>2.5</code>).</li>
+      <li>Falta <code>#include &lt;math.h&gt;</code> (declara <code>sqrt</code>) y enlazar la biblioteca matemática: compilar con <code>gcc ... -lm</code> (al final).</li>
+      <li>Usa <code>=</code> (asignación) en vez de <code>==</code> (comparación); además siempre sería falso. Correcto: <code>if (impacto == 0) { ... }</code>.</li>
+      <li>Imprime tres líneas: <code>fila 0</code>, <code>fila 1</code>, <code>fila 2</code> (cada una en su renglón).</li>
+    </ol>
+
+    <h3>Parte 5 &middot; Escribe (6 pts c/u)</h3>
+    <ol>
+      <li>Programa mínimo:
+<pre class="examcode"><code>#include &lt;stdio.h&gt;
+int main(void) {
+    printf("Listo\n");
+    return 0;
+}</code></pre></li>
+      <li>Órdenes: <code>gcc -Wall -O2 main.c -o rt -lm</code> &nbsp;y&nbsp; <code>./rt &gt; imagen.ppm</code> (se acepta sin <code>-Wall -O2</code>; imprescindibles <code>-o rt</code>, <code>-lm</code> y la redirección <code>&gt;</code>).</li>
+      <li>Guarda de inclusión:
+<pre class="examcode"><code>#ifndef RAY_H
+#define RAY_H
+/* ... contenido ... */
+#endif</code></pre></li>
+    </ol>
+  </div>
+</div>
+
+<footer class="foot">
+  <div class="shell">
+    <p>Examen de la asignatura basada en el material «Trazador de Rayos en C», adaptado de
+    <a href="https://raytracing.github.io/books/RayTracingInOneWeekend.html">«Ray Tracing in One Weekend»</a> (CC0).
+    Cubre las Tareas 0&ndash;4.</p>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+<script>
+(function(){
+  var pb = document.getElementById('printBtn');
+  if(pb) pb.addEventListener('click', function(){ window.print(); });
+  var sb = document.getElementById('solBtn');
+  var sol = document.getElementById('solucionario');
+  if(sb && sol){
+    sb.addEventListener('click', function(){
+      sol.hidden = !sol.hidden;
+      sb.textContent = sol.hidden ? 'Mostrar solucionario' : 'Ocultar solucionario';
+      if(!sol.hidden) sol.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  }
+})();
+</script>
+</body>
+</html>
