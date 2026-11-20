@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tarea 12 &middot; Escena final y memoria dinámica &mdash; Trazador de Rayos en C</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,600&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><b>Trazador de Rayos en C</b></a>
+    <div class="spacer"></div>
+    <button class="theme-btn" id="themeBtn" aria-label="Cambiar tema">
+      <span id="themeIcon">&#9680;</span><span id="themeLabel">Tema</span>
+    </button>
+  </div>
+</div>
+<div class="shell">
+  <div class="layout">
+    <div class="toc-wrap"><nav class="toc" aria-label="Ruta del curso"><p class="toc-title">Ruta del curso</p><ol>
+<li><a class="" href="index.html"><span class="n">&#9632;</span><span>Inicio</span></a></li>
+<li><a class="" href="tarea-00.html"><span class="n">0</span><span>Preparar el entorno</span></a></li>
+<li><a class="" href="tarea-01.html"><span class="n">1</span><span>Generar una imagen (PPM)</span></a></li>
+<li><a class="" href="tarea-02.html"><span class="n">2</span><span>El tipo vec3 (structs)</span></a></li>
+<li><a class="" href="tarea-03.html"><span class="n">3</span><span>Rayos y un fondo</span></a></li>
+<li><a class="" href="tarea-04.html"><span class="n">4</span><span>Añadir una esfera</span></a></li>
+<li><a class="" href="tarea-05.html"><span class="n">5</span><span>Normales y varios objetos</span></a></li>
+<li><a class="" href="tarea-06.html"><span class="n">6</span><span>Antialiasing y aleatoriedad</span></a></li>
+<li><a class="" href="tarea-07.html"><span class="n">7</span><span>Materiales difusos (recursión)</span></a></li>
+<li><a class="" href="tarea-08.html"><span class="n">8</span><span>Materiales: metal</span></a></li>
+<li><a class="" href="tarea-09.html"><span class="n">9</span><span>Dieléctricos (vidrio)</span></a></li>
+<li><a class="" href="tarea-10.html"><span class="n">10</span><span>Cámara posicionable</span></a></li>
+<li><a class="" href="tarea-11.html"><span class="n">11</span><span>Desenfoque (profundidad de campo)</span></a></li>
+<li><a class="active" href="tarea-12.html"><span class="n">12</span><span>Escena final y memoria dinámica</span></a></li>
+<li><a class="" href="tarea-13.html"><span class="n">13</span><span>Compilación separada y Makefile</span></a></li>
+<li><a class="" href="tarea-14.html"><span class="n">14</span><span>¿Qué sigue?</span></a></li>
+    </ol></nav></div>
+    <main class="solo">
+      <nav class="pager top"><a class="pg prev" href="tarea-11.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tarea 11 &middot; Desenfoque (profundidad de campo)</span></a><a class="pg next" href="tarea-13.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tarea 13 &middot; Compilación separada y Makefile</span></a></nav>
+      <section class="tarea" id="tarea-12" data-num="12" data-title="Escena final y memoria dinámica">
+  <div class="tarea-head">
+    <div class="tarea-num">Tarea<span>12</span></div>
+    <div class="titles">
+      <p class="tarea-kicker">malloc / free</p>
+      <h2>La escena final y la memoria dinámica</h2>
+    </div>
+  </div>
+
+  <div class="box objetivo">
+    <p class="box-label">Objetivo</p>
+    <p>Generar la escena de portada del libro: cientos de esferas colocadas al azar. Como no sabemos el número
+    exacto de antemano, reservamos memoria en tiempo de ejecución con <code class="inl">malloc</code> y la
+    liberamos con <code class="inl">free</code>.</p>
+  </div>
+
+  <div class="box concepto">
+    <p class="box-label">Concepto de C · el montón (<em>heap</em>), <code>malloc</code> y <code>free</code></p>
+    <p>Un array como <code class="inl">sphere spheres[5]</code> tiene tamaño fijo conocido en compilación. Para
+    un número variable de objetos usamos el <strong>montón</strong>: <code class="inl">malloc(n * sizeof(sphere))</code>
+    reserva espacio para <code class="inl">n</code> esferas y devuelve un puntero. Cuando terminamos, hay que
+    devolver esa memoria con <code class="inl">free</code>, o el programa la «pierde» (fuga de memoria). Cada
+    <code class="inl">malloc</code> necesita su <code class="inl">free</code>.</p>
+  </div>
+
+  <div class="box pista">
+    <p class="box-label">Pista · punteros estables: no uses <code>realloc</code> aquí</p>
+    <p>Nuestras esferas guardan <strong>punteros</strong> a materiales que también están en un array del montón.
+    Si redimensionáramos ese array con <code class="inl">realloc</code>, podría <em>moverse</em> de sitio y todos
+    esos punteros quedarían inválidos. Por eso reservamos de golpe una capacidad suficiente y no la movemos. Es
+    una lección real sobre punteros y ciclo de vida de los datos.</p>
+  </div>
+
+  <script type="text/plain" class="srccode" data-file="main.c (escena final)">
+#include <stdlib.h>   // malloc, free
+#include "rtweekend.h"
+#include "hittable.h"
+#include "material.h"
+#include "camera.h"
+
+int main(void) {
+    // Capacidad de sobra: 22*22 = 484 posibles + unas pocas fijas.
+    int capacity = 500;
+    sphere   *spheres   = malloc(capacity * sizeof(sphere));
+    material *materials = malloc(capacity * sizeof(material));
+    if (!spheres || !materials) {           // malloc puede fallar: comprobar
+        fprintf(stderr, "Sin memoria\n");
+        return 1;
+    }
+    int n = 0;   // cuantas esferas llevamos
+
+    // Suelo gigante
+    materials[n] = (material){ LAMBERTIAN, v3(0.5, 0.5, 0.5), 0, 0 };
+    spheres[n]   = (sphere){ v3(0, -1000, 0), 1000, &materials[n] };
+    n++;
+
+    // Rejilla de esferitas aleatorias
+    for (int a = -11; a < 11; a++) {
+        for (int b = -11; b < 11; b++) {
+            double choose = random_double();
+            point3 center = v3(a + 0.9 * random_double(), 0.2,
+                               b + 0.9 * random_double());
+
+            // Evita solapar con las tres esferas grandes
+            if (vec3_length(vec3_sub(center, v3(4, 0.2, 0))) > 0.9) {
+                if (choose < 0.8) {                     // 80% mate
+                    color albedo = vec3_mul(vec3_random(), vec3_random());
+                    materials[n] = (material){ LAMBERTIAN, albedo, 0, 0 };
+                } else if (choose < 0.95) {             // 15% metal
+                    color albedo = vec3_random_range(0.5, 1);
+                    double fuzz  = random_double_range(0, 0.5);
+                    materials[n] = (material){ METAL, albedo, fuzz, 0 };
+                } else {                                // 5% vidrio
+                    materials[n] = (material){ DIELECTRIC, v3(0,0,0), 0, 1.5 };
+                }
+                spheres[n] = (sphere){ center, 0.2, &materials[n] };
+                n++;
+            }
+        }
+    }
+
+    // Tres esferas grandes protagonistas
+    materials[n] = (material){ DIELECTRIC, v3(0,0,0), 0, 1.5 };
+    spheres[n]   = (sphere){ v3(0, 1, 0), 1.0, &materials[n] }; n++;
+
+    materials[n] = (material){ LAMBERTIAN, v3(0.4, 0.2, 0.1), 0, 0 };
+    spheres[n]   = (sphere){ v3(-4, 1, 0), 1.0, &materials[n] }; n++;
+
+    materials[n] = (material){ METAL, v3(0.7, 0.6, 0.5), 0.0, 0 };
+    spheres[n]   = (sphere){ v3(4, 1, 0), 1.0, &materials[n] }; n++;
+
+    hittable_list world = { spheres, n };
+
+    // Camara de la portada
+    camera cam;
+    cam.aspect_ratio      = 16.0 / 9.0;
+    cam.image_width       = 1200;
+    cam.samples_per_pixel = 500;
+    cam.max_depth         = 50;
+    cam.vfov              = 20;
+    cam.lookfrom          = v3(13, 2, 3);
+    cam.lookat            = v3(0, 0, 0);
+    cam.vup               = v3(0, 1, 0);
+    cam.defocus_angle     = 0.6;
+    cam.focus_dist        = 10.0;
+
+    camera_render(&cam, world);
+
+    // Devolvemos la memoria reservada
+    free(spheres);
+    free(materials);
+    return 0;
+}
+</script>
+
+  <div class="box nota">
+    <p class="box-label">Rendimiento y comprobación de fugas</p>
+    <p>A 1200 px y 500 muestras el render tarda bastante (¡minutos!). Para probar, baja a
+    <code class="inl">image_width = 400</code> y <code class="inl">samples_per_pixel = 50</code>. Compila con
+    <code class="inl">-O2</code>. Si tienes Valgrind, <code class="inl">valgrind ./rt &gt; /dev/null</code>
+    confirmará que no hay fugas: cada <code class="inl">malloc</code> tiene su <code class="inl">free</code>.</p>
+  </div>
+
+  <div class="box reto">
+    <p class="box-label">Entrega</p>
+    <ul class="entrega">
+      <li>La imagen final de la escena (a la resolución que tu tiempo permita).</li>
+      <li>Salida de <code>time</code> con el tiempo de render, y de <code>valgrind</code> si lo tienes.</li>
+      <li><strong>Reto:</strong> escribe una función <code>free_world</code> y una <code>build_world</code> para separar la creación y liberación de la escena de <code>main</code>.</li>
+    </ul>
+  </div>
+</section>
+      <nav class="pager bottom"><a class="pg prev" href="tarea-11.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tarea 11 &middot; Desenfoque (profundidad de campo)</span></a><a class="pg next" href="tarea-13.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tarea 13 &middot; Compilación separada y Makefile</span></a></nav>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="shell">
+    <p>Material docente derivado y adaptado de <a href="https://raytracing.github.io/books/RayTracingInOneWeekend.html">«Ray Tracing in One Weekend»</a>
+    de Peter Shirley, Trevor David Black y Steve Hollasch (licencia CC0). Esta versión reescribe todo el código en
+    <strong>C puro</strong> y reorganiza el contenido como tareas de curso, con toda la explicación en español.</p>
+    <p>Compila los ejemplos con <code class="inl">gcc -O2 main.c -o rt -lm</code> y visualiza con <code class="inl">./rt &gt; imagen.ppm</code>.</p>
+  </div>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tarea 13 &middot; Compilación separada y Makefile &mdash; Trazador de Rayos en C</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,600&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><b>Trazador de Rayos en C</b></a>
+    <div class="spacer"></div>
+    <button class="theme-btn" id="themeBtn" aria-label="Cambiar tema">
+      <span id="themeIcon">&#9680;</span><span id="themeLabel">Tema</span>
+    </button>
+  </div>
+</div>
+<div class="shell">
+  <div class="layout">
+    <div class="toc-wrap"><nav class="toc" aria-label="Ruta del curso"><p class="toc-title">Ruta del curso</p><ol>
+<li><a class="" href="index.html"><span class="n">&#9632;</span><span>Inicio</span></a></li>
+<li><a class="" href="tarea-00.html"><span class="n">0</span><span>Preparar el entorno</span></a></li>
+<li><a class="" href="tarea-01.html"><span class="n">1</span><span>Generar una imagen (PPM)</span></a></li>
+<li><a class="" href="tarea-02.html"><span class="n">2</span><span>El tipo vec3 (structs)</span></a></li>
+<li><a class="" href="tarea-03.html"><span class="n">3</span><span>Rayos y un fondo</span></a></li>
+<li><a class="" href="tarea-04.html"><span class="n">4</span><span>Añadir una esfera</span></a></li>
+<li><a class="" href="tarea-05.html"><span class="n">5</span><span>Normales y varios objetos</span></a></li>
+<li><a class="" href="tarea-06.html"><span class="n">6</span><span>Antialiasing y aleatoriedad</span></a></li>
+<li><a class="" href="tarea-07.html"><span class="n">7</span><span>Materiales difusos (recursión)</span></a></li>
+<li><a class="" href="tarea-08.html"><span class="n">8</span><span>Materiales: metal</span></a></li>
+<li><a class="" href="tarea-09.html"><span class="n">9</span><span>Dieléctricos (vidrio)</span></a></li>
+<li><a class="" href="tarea-10.html"><span class="n">10</span><span>Cámara posicionable</span></a></li>
+<li><a class="" href="tarea-11.html"><span class="n">11</span><span>Desenfoque (profundidad de campo)</span></a></li>
+<li><a class="" href="tarea-12.html"><span class="n">12</span><span>Escena final y memoria dinámica</span></a></li>
+<li><a class="active" href="tarea-13.html"><span class="n">13</span><span>Compilación separada y Makefile</span></a></li>
+<li><a class="" href="tarea-14.html"><span class="n">14</span><span>¿Qué sigue?</span></a></li>
+    </ol></nav></div>
+    <main class="solo">
+      <nav class="pager top"><a class="pg prev" href="tarea-12.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tarea 12 &middot; Escena final y memoria dinámica</span></a><a class="pg next" href="tarea-14.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tarea 14 &middot; ¿Qué sigue?</span></a></nav>
+      <section class="tarea" id="tarea-13" data-num="13" data-title="Compilación separada y Makefile">
+  <div class="tarea-head">
+    <div class="tarea-num">Tarea<span>13</span></div>
+    <div class="titles">
+      <p class="tarea-kicker">Ingeniería del proyecto</p>
+      <h2>Compilación separada y un <span class="math">Makefile</span></h2>
+    </div>
+  </div>
+
+  <div class="box objetivo">
+    <p class="box-label">Objetivo</p>
+    <p>Convertir el proyecto en una estructura profesional: separar cada módulo en <strong>declaración</strong>
+    (<code class="inl">.h</code>) y <strong>definición</strong> (<code class="inl">.c</code>), compilarlos por
+    separado a archivos objeto <code class="inl">.o</code> y enlazarlos, todo automatizado con un
+    <code class="inl">Makefile</code>.</p>
+  </div>
+
+  <p>Hasta ahora todo el código vivía en cabeceras (con <code class="inl">static inline</code>) y compilábamos
+  con un único comando <code class="inl">gcc main.c …</code>. Fue una simplificación deliberada para no pelearnos
+  con el sistema de compilación mientras aprendíamos el lenguaje. Ahora que el proyecto tiene ocho archivos, toca
+  organizarlo como se hace en la práctica.</p>
+
+  <div class="box concepto">
+    <p class="box-label">Concepto de C · qué hace realmente el compilador</p>
+    <p>Traducir un <code class="inl">.c</code> a ejecutable tiene fases:</p>
+    <ol>
+      <li><strong>Preprocesado</strong>: se resuelven los <code class="inl">#include</code> y
+      <code class="inl">#define</code> (se «pega» el texto de las cabeceras).</li>
+      <li><strong>Compilación</strong>: cada <code class="inl">.c</code> (una <em>unidad de traducción</em>) se
+      convierte en un archivo objeto <code class="inl">.o</code> con código máquina.</li>
+      <li><strong>Enlazado</strong> (<em>linking</em>): todos los <code class="inl">.o</code> se combinan,
+      resolviendo las referencias entre ellos, en un único ejecutable. La bandera <code class="inl">-lm</code>
+      añade la biblioteca matemática en este paso.</li>
+    </ol>
+    <p>La ventaja de separar: si cambias un solo <code class="inl">.c</code>, basta recompilar <em>ese</em>
+    <code class="inl">.o</code> y volver a enlazar; no hace falta recompilar todo. En proyectos grandes esto
+    ahorra muchísimo tiempo.</p>
+  </div>
+
+  <div class="box concepto">
+    <p class="box-label">Concepto de C · declaración frente a definición</p>
+    <p>La clave de la compilación separada es dividir cada módulo en dos:</p>
+    <ul>
+      <li>El <code class="inl">.h</code> contiene <strong>declaraciones</strong>: tipos y
+      <em>prototipos</em> de funciones (la firma, sin cuerpo). Dice <em>qué</em> existe.</li>
+      <li>El <code class="inl">.c</code> contiene las <strong>definiciones</strong>: el cuerpo de esas
+      funciones. Dice <em>cómo</em> funcionan.</li>
+    </ul>
+    <p>Cualquier <code class="inl">.c</code> que incluya el <code class="inl">.h</code> sabe cómo llamar a la
+    función; el enlazador encuentra el cuerpo en el <code class="inl">.o</code> correspondiente. Y quitamos el
+    <code class="inl">static</code> de las funciones públicas: <code class="inl">static</code> significa «visible
+    solo en este archivo», justo lo contrario de lo que queremos ahora.</p>
+  </div>
+
+  <p>Veámoslo con el módulo más pequeño, <code class="inl">color</code>. La cabecera solo declara:</p>
+
+  <script type="text/plain" class="srccode" data-file="color.h">
+#ifndef COLOR_H
+#define COLOR_H
+#include <stdio.h>
+#include "vec3.h"
+
+// Declaracion (prototipo): que hace, no como.
+void write_color(FILE *out, color pixel_color);
+
+#endif
+</script>
+
+  <p>Y el <code class="inl">.c</code> define el cuerpo (el ayudante <code class="inl">linear_to_gamma</code> se
+  queda <code class="inl">static</code>, porque es un detalle interno):</p>
+
+  <script type="text/plain" class="srccode" data-file="color.c">
+#include "color.h"
+#include "rtweekend.h"
+
+// static = solo visible dentro de color.c (detalle interno)
+static double linear_to_gamma(double linear) {
+    return (linear > 0) ? sqrt(linear) : 0;
+}
+
+// Definicion de la funcion declarada en color.h
+void write_color(FILE *out, color pixel_color) {
+    double r = linear_to_gamma(pixel_color.x);
+    double g = linear_to_gamma(pixel_color.y);
+    double b = linear_to_gamma(pixel_color.z);
+    int ir = (int)(256 * clamp(r, 0.0, 0.999));
+    int ig = (int)(256 * clamp(g, 0.0, 0.999));
+    int ib = (int)(256 * clamp(b, 0.0, 0.999));
+    fprintf(out, "%d %d %d\n", ir, ig, ib);
+}
+</script>
+
+  <p>Aplica el mismo patrón a los demás módulos con lógica: <code class="inl">hittable</code>,
+  <code class="inl">material</code> y <code class="inl">camera</code>. La cabecera se queda con los tipos y los
+  prototipos <strong>públicos</strong>; el <code class="inl">.c</code> se lleva los cuerpos. Un detalle bonito de
+  <code class="inl">camera</code>: como solo <code class="inl">camera_render</code> se usa desde fuera, es la
+  única función pública; <code class="inl">camera_initialize</code>, <code class="inl">get_ray</code> y
+  <code class="inl">ray_color</code> se quedan <code class="inl">static</code> dentro de
+  <code class="inl">camera.c</code>. Esto es <strong>encapsulación</strong>: el <code class="inl">.h</code>
+  muestra lo justo.</p>
+
+  <script type="text/plain" class="srccode" data-file="camera.h (solo lo público)">
+#ifndef CAMERA_H
+#define CAMERA_H
+#include "vec3.h"
+#include "hittable.h"
+
+typedef struct { /* ...todos los campos, como en la Tarea 11... */ } camera;
+
+// Unica funcion publica; el resto son internas (static) de camera.c
+void camera_render(camera *cam, hittable_list world);
+
+#endif
+</script>
+
+  <div class="box nota">
+    <p class="box-label">¿Qué archivos siguen siendo solo cabecera?</p>
+    <p><code class="inl">vec3.h</code> y <code class="inl">rtweekend.h</code> se quedan como están, con
+    <code class="inl">static inline</code>. Son funciones matemáticas diminutas y muy llamadas: interesa que el
+    compilador las «incruste» (<em>inline</em>) en cada sitio. <code class="inl">static inline</code> en una
+    cabecera es la forma correcta y estándar de compartir esas mini-funciones entre varias unidades sin violar la
+    <strong>regla de una sola definición</strong>. No todo tiene que ir a un <code class="inl">.c</code>.</p>
+  </div>
+
+  <div class="box pista">
+    <p class="box-label">Pista · «incluye lo que usas»</p>
+    <p>Al separar módulos aparece un fallo típico: <code class="inl">main.c</code> usaba
+    <code class="inl">fprintf</code> y <code class="inl">stderr</code>, pero <em>funcionaba</em> solo porque
+    <code class="inl">&lt;stdio.h&gt;</code> llegaba «de rebote» a través de otra cabecera. Al reorganizar, ese
+    rebote desaparece y el compilador protesta:
+    <code class="inl">error: 'stderr' undeclared</code>. La regla de oro: <strong>cada archivo debe incluir
+    directamente las cabeceras de lo que usa</strong>, sin depender de inclusiones indirectas. Solución: añade
+    <code class="inl">#include &lt;stdio.h&gt;</code> al principio de <code class="inl">main.c</code>.</p>
+  </div>
+
+  <h3>Compilar a mano (para entender qué automatiza <span class="math">make</span>)</h3>
+  <p>Primero, cada <code class="inl">.c</code> a su <code class="inl">.o</code> con la bandera
+  <code class="inl">-c</code> («compila, pero no enlaces»). Luego, enlazamos todos los objetos:</p>
+
+  <div class="term">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="c"># Un objeto por cada unidad de traduccion</span>
+<span class="p">$</span> gcc -std=c11 -Wall -O2 -c main.c     -o main.o
+<span class="p">$</span> gcc -std=c11 -Wall -O2 -c color.c    -o color.o
+<span class="p">$</span> gcc -std=c11 -Wall -O2 -c hittable.c -o hittable.o
+<span class="p">$</span> gcc -std=c11 -Wall -O2 -c material.c -o material.o
+<span class="p">$</span> gcc -std=c11 -Wall -O2 -c camera.c   -o camera.o
+<span class="c"># Enlazado final: todos los .o -> ejecutable "rt" (con -lm al final)</span>
+<span class="p">$</span> gcc main.o color.o hittable.o material.o camera.o -o rt -lm</pre>
+  </div>
+
+  <p>Hacer esto a mano cada vez es tedioso y propenso a errores. <strong>make</strong> lo automatiza: describes
+  las <em>reglas</em> (qué depende de qué y cómo construirlo) en un archivo llamado <code class="inl">Makefile</code>,
+  y <code class="inl">make</code> recompila solo lo necesario.</p>
+
+  <div class="box concepto">
+    <p class="box-label">Concepto de herramientas · anatomía de un <code>Makefile</code></p>
+    <p>Una <strong>regla</strong> tiene la forma <code class="inl">objetivo: prerrequisitos</code> y debajo, los
+    <strong>comandos</strong> para construirlo. <code class="inl">make</code> reconstruye un objetivo solo si algún
+    prerrequisito es más reciente que él. Usamos <strong>variables</strong> (<code class="inl">CC</code>,
+    <code class="inl">CFLAGS</code>) para no repetirnos, una <strong>regla-patrón</strong>
+    (<code class="inl">%.o: %.c</code>) que sirve para todos los objetos, y <strong>variables automáticas</strong>:
+    <code class="inl">$&lt;</code> es el primer prerrequisito (el <code class="inl">.c</code>) y
+    <code class="inl">$@</code> es el objetivo (el <code class="inl">.o</code>).</p>
+  </div>
+
+  <div class="codewrap">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">archivo · <b>Makefile</b></span></div>
+<pre class="code"><code><span class="c-com"># Compilador y banderas: variables reutilizables</span>
+CC      = gcc
+CFLAGS  = -std=c11 -Wall -Wextra -O2
+LDFLAGS = -lm
+
+<span class="c-com"># Los objetos que forman el programa y las cabeceras de las que dependen</span>
+OBJ = main.o color.o hittable.o material.o camera.o
+HDR = vec3.h ray.h rtweekend.h color.h hittable.h material.h camera.h
+
+<span class="c-com"># Objetivo por defecto (el primero): enlazar todos los .o en "rt"</span>
+rt: $(OBJ)
+<span class="c-com">→</span>$(CC) $(CFLAGS) $(OBJ) -o rt $(LDFLAGS)
+
+<span class="c-com"># Regla-patron: cada X.o se compila de X.c. Si cambia alguna</span>
+<span class="c-com"># cabecera (HDR), se rehacen todos los objetos que dependen de ella.</span>
+%.o: %.c $(HDR)
+<span class="c-com">→</span>$(CC) $(CFLAGS) -c $&lt; -o $@
+
+<span class="c-com"># Atajos utiles</span>
+run: rt
+<span class="c-com">→</span>./rt &gt; imagen.ppm
+
+clean:
+<span class="c-com">→</span>rm -f $(OBJ) rt
+
+<span class="c-com"># Objetivos que no producen un archivo con su nombre</span>
+.PHONY: run clean</code></pre>
+  </div>
+  <p style="font-size:.85rem;color:var(--muted);margin-top:-.6rem">El símbolo <b>→</b> marca dónde va un
+  <strong>TAB</strong> real (ver la pista de abajo). No lo escribas: es solo para señalar la sangría.</p>
+
+  <div class="box pista">
+    <p class="box-label">Pista · el error más famoso de make: <code>missing separator</code></p>
+    <p>Las líneas de comandos bajo cada regla <strong>deben empezar por un carácter de tabulación (TAB)</strong>,
+    no por espacios. Si usas espacios, verás
+    <code class="inl">Makefile:9: *** missing separator. Stop.</code> Configura tu editor para insertar un TAB
+    de verdad en los Makefiles (muchos editores convierten TAB en espacios por defecto).</p>
+  </div>
+
+  <p>Con esto, construir y ejecutar es inmediato:</p>
+
+  <div class="term">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="p">$</span> make            <span class="c"># compila lo necesario y enlaza "rt"</span>
+gcc -std=c11 -Wall -Wextra -O2 -c main.c -o main.o
+...
+gcc -std=c11 -Wall -Wextra -O2 main.o color.o hittable.o material.o camera.o -o rt -lm
+<span class="p">$</span> make            <span class="c"># nada ha cambiado</span>
+make: 'rt' is up to date.
+<span class="p">$</span> touch material.h <span class="c"># simula editar una cabecera compartida...</span>
+<span class="p">$</span> make            <span class="c"># ...y make recompila lo que depende de ella</span>
+<span class="p">$</span> make run         <span class="c"># compila si hace falta y renderiza a imagen.ppm</span>
+<span class="p">$</span> make clean       <span class="c"># borra los .o y el ejecutable</span></pre>
+  </div>
+
+  <div class="box reto">
+    <p class="box-label">Entrega y retos</p>
+    <ul class="entrega">
+      <li>El proyecto reorganizado en <code>.h</code> + <code>.c</code>, tu <code>Makefile</code>, y una captura de <code>make</code> construyéndolo.</li>
+      <li>Ejecuta <code>make</code> dos veces seguidas y muestra que la segunda dice «up to date».</li>
+      <li><strong>Reto:</strong> añade un objetivo <code>debug</code> que compile con <code>-g -O0</code> (para depurar con <code>gdb</code>) en lugar de <code>-O2</code>.</li>
+      <li><strong>Reto:</strong> las dependencias de cabecera son «gruesas» (todo depende de todo el <code>HDR</code>). Investiga <code>gcc -MMD</code> para generar dependencias automáticas y precisas.</li>
+    </ul>
+  </div>
+</section>
+      <nav class="pager bottom"><a class="pg prev" href="tarea-12.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tarea 12 &middot; Escena final y memoria dinámica</span></a><a class="pg next" href="tarea-14.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tarea 14 &middot; ¿Qué sigue?</span></a></nav>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="shell">
+    <p>Material docente derivado y adaptado de <a href="https://raytracing.github.io/books/RayTracingInOneWeekend.html">«Ray Tracing in One Weekend»</a>
+    de Peter Shirley, Trevor David Black y Steve Hollasch (licencia CC0). Esta versión reescribe todo el código en
+    <strong>C puro</strong> y reorganiza el contenido como tareas de curso, con toda la explicación en español.</p>
+    <p>Compila los ejemplos con <code class="inl">gcc -O2 main.c -o rt -lm</code> y visualiza con <code class="inl">./rt &gt; imagen.ppm</code>.</p>
+  </div>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tarea 14 &middot; ¿Qué sigue? &mdash; Trazador de Rayos en C</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,600&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><b>Trazador de Rayos en C</b></a>
+    <div class="spacer"></div>
+    <button class="theme-btn" id="themeBtn" aria-label="Cambiar tema">
+      <span id="themeIcon">&#9680;</span><span id="themeLabel">Tema</span>
+    </button>
+  </div>
+</div>
+<div class="shell">
+  <div class="layout">
+    <div class="toc-wrap"><nav class="toc" aria-label="Ruta del curso"><p class="toc-title">Ruta del curso</p><ol>
+<li><a class="" href="index.html"><span class="n">&#9632;</span><span>Inicio</span></a></li>
+<li><a class="" href="tarea-00.html"><span class="n">0</span><span>Preparar el entorno</span></a></li>
+<li><a class="" href="tarea-01.html"><span class="n">1</span><span>Generar una imagen (PPM)</span></a></li>
+<li><a class="" href="tarea-02.html"><span class="n">2</span><span>El tipo vec3 (structs)</span></a></li>
+<li><a class="" href="tarea-03.html"><span class="n">3</span><span>Rayos y un fondo</span></a></li>
+<li><a class="" href="tarea-04.html"><span class="n">4</span><span>Añadir una esfera</span></a></li>
+<li><a class="" href="tarea-05.html"><span class="n">5</span><span>Normales y varios objetos</span></a></li>
+<li><a class="" href="tarea-06.html"><span class="n">6</span><span>Antialiasing y aleatoriedad</span></a></li>
+<li><a class="" href="tarea-07.html"><span class="n">7</span><span>Materiales difusos (recursión)</span></a></li>
+<li><a class="" href="tarea-08.html"><span class="n">8</span><span>Materiales: metal</span></a></li>
+<li><a class="" href="tarea-09.html"><span class="n">9</span><span>Dieléctricos (vidrio)</span></a></li>
+<li><a class="" href="tarea-10.html"><span class="n">10</span><span>Cámara posicionable</span></a></li>
+<li><a class="" href="tarea-11.html"><span class="n">11</span><span>Desenfoque (profundidad de campo)</span></a></li>
+<li><a class="" href="tarea-12.html"><span class="n">12</span><span>Escena final y memoria dinámica</span></a></li>
+<li><a class="" href="tarea-13.html"><span class="n">13</span><span>Compilación separada y Makefile</span></a></li>
+<li><a class="active" href="tarea-14.html"><span class="n">14</span><span>¿Qué sigue?</span></a></li>
+    </ol></nav></div>
+    <main class="solo">
+      <nav class="pager top"><a class="pg prev" href="tarea-13.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tarea 13 &middot; Compilación separada y Makefile</span></a><a class="pg next" href="index.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Volver al inicio</span></a></nav>
+      <section class="tarea" id="tarea-14" data-num="14" data-title="¿Qué sigue?">
+  <div class="tarea-head">
+    <div class="tarea-num">Tarea<span>14</span></div>
+    <div class="titles">
+      <p class="tarea-kicker">Cierre y ampliaciones</p>
+      <h2>¿Qué has aprendido y qué sigue?</h2>
+    </div>
+  </div>
+
+  <p>Si has llegado hasta aquí, has construido un motor de <em>ray tracing</em> completo en C puro y, por el
+  camino, has usado casi todo lo esencial del lenguaje:</p>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Concepto de C</th><th>Dónde apareció</th></tr></thead>
+      <tbody>
+        <tr><td>Compilación, <code>main</code>, <code>printf</code></td><td>Tareas 0–1</td></tr>
+        <tr><td>Tipos <code>int</code>/<code>double</code>, <em>casts</em>, bucles</td><td>Tarea 1</td></tr>
+        <tr><td><code>struct</code>, <code>typedef</code>, cabeceras, <code>static inline</code></td><td>Tarea 2–3</td></tr>
+        <tr><td>Funciones que devuelven estructuras</td><td>Tareas 2–3</td></tr>
+        <tr><td>Condicionales y booleanos (<code>int</code>)</td><td>Tarea 4</td></tr>
+        <tr><td>Punteros, <code>-&gt;</code>, salida por parámetro, arrays</td><td>Tarea 5</td></tr>
+        <tr><td>Números aleatorios, <code>clamp</code>, promedios</td><td>Tarea 6</td></tr>
+        <tr><td>Recursión con caso base</td><td>Tarea 7</td></tr>
+        <tr><td><code>enum</code> + <code>switch</code> (polimorfismo)</td><td>Tarea 8</td></tr>
+        <tr><td>Punteros a datos con tiempo de vida</td><td>Tareas 8–9</td></tr>
+        <tr><td>Encapsular estado en <code>struct</code></td><td>Tareas 10–11</td></tr>
+        <tr><td><code>malloc</code>/<code>free</code>, el montón, fugas</td><td>Tarea 12</td></tr>
+        <tr><td>Compilación separada, <code>.o</code>, enlazado, <code>Makefile</code></td><td>Tarea 13</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Ideas para seguir</h3>
+  <ul>
+    <li><strong>Rendimiento con hilos:</strong> el render es «vergonzosamente paralelo». Investiga
+    <code class="inl">OpenMP</code> (una sola directiva <code class="inl">#pragma omp parallel for</code>) para
+    repartir las filas entre núcleos.</li>
+    <li><strong>Más formas:</strong> añade planos, triángulos o cajas ampliando el <code class="inl">enum</code>
+    de objetos, igual que hicimos con los materiales.</li>
+    <li><strong>Salida en PNG:</strong> integra una biblioteca de una sola cabecera como
+    <code class="inl">stb_image_write.h</code> para escribir PNG directamente (aunque sea C++/C compatible,
+    aprenderás a enlazar bibliotecas de terceros).</li>
+    <li><strong>Los siguientes libros:</strong> «Ray Tracing: The Next Week» y «The Rest of Your Life» añaden
+    texturas, luces, volúmenes y muestreo por importancia. Todo es traducible a C con las mismas técnicas de
+    este curso.</li>
+    <li><strong>Punteros a función:</strong> reimplementa <code class="inl">scatter</code> con punteros a
+    función en vez de <code class="inl">enum</code> y compara ambos diseños.</li>
+  </ul>
+
+  <div class="box objetivo">
+    <p class="box-label">Proyecto final sugerido</p>
+    <p>Diseña tu propia escena (composición, materiales y cámara originales), paralelízala con OpenMP, y entrega:
+    el código, la imagen final en PNG y un informe breve explicando <strong>tres decisiones de C</strong> que
+    tomaste (por ejemplo: gestión de memoria, organización en módulos, o el diseño de los materiales) y por qué.</p>
+  </div>
+
+  <hr class="rule">
+  <p style="color:var(--muted);font-size:.92rem">Adaptación docente en C puro de «Ray Tracing in One Weekend»
+  (Peter Shirley, Trevor David Black, Steve Hollasch), publicado bajo licencia CC0. El texto original en C++
+  y las imágenes de referencia están en <a href="https://raytracing.github.io">raytracing.github.io</a>.</p>
+</section>
+      <nav class="pager bottom"><a class="pg prev" href="tarea-13.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tarea 13 &middot; Compilación separada y Makefile</span></a><a class="pg next" href="index.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Volver al inicio</span></a></nav>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="shell">
+    <p>Material docente derivado y adaptado de <a href="https://raytracing.github.io/books/RayTracingInOneWeekend.html">«Ray Tracing in One Weekend»</a>
+    de Peter Shirley, Trevor David Black y Steve Hollasch (licencia CC0). Esta versión reescribe todo el código en
+    <strong>C puro</strong> y reorganiza el contenido como tareas de curso, con toda la explicación en español.</p>
+    <p>Compila los ejemplos con <code class="inl">gcc -O2 main.c -o rt -lm</code> y visualiza con <code class="inl">./rt &gt; imagen.ppm</code>.</p>
+  </div>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>

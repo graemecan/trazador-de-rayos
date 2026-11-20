@@ -1,0 +1,1067 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ejercicios de C &mdash; Trazador de Rayos en C</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,600&display=swap">
+<link rel="stylesheet" href="styles.css">
+<style>
+  /* ---- Extras propios de la página de ejercicios (usan los tokens de styles.css) ---- */
+  .ej-num-big{background:linear-gradient(135deg,var(--teal-soft,var(--accent-soft)),var(--indigo-soft))}
+  h3.sec{font-family:"IBM Plex Mono",monospace;font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);border-top:1px solid var(--line);padding-top:1.4rem;margin-top:2.6rem}
+  .ej{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:1.1rem 1.25rem .6rem;margin:1.4rem 0}
+  .ej-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:.5rem .8rem;margin-bottom:.4rem}
+  .ej-head h4{margin:0;font-family:"Spectral",Georgia,serif;font-size:1.25rem;color:var(--ink)}
+  .ej-id{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:.82rem;color:var(--accent-ink);
+    background:var(--accent-soft);border-radius:6px;padding:.15em .5em}
+  .lvl{font-family:"IBM Plex Mono",monospace;font-size:.78rem;color:var(--muted);white-space:nowrap}
+  .lvl b{color:var(--accent)}
+  .nuevo{font-family:"IBM Plex Mono",monospace;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--indigo);background:var(--indigo-soft);border-radius:999px;padding:.2em .7em;white-space:nowrap}
+  .keys{display:flex;flex-wrap:wrap;gap:.35rem;margin:.3rem 0 .8rem}
+  .keys code{font-family:"IBM Plex Mono",monospace;font-size:.74rem;background:var(--surface-2);
+    border:1px solid var(--line);border-radius:6px;padding:.18em .45em;color:var(--accent-ink);white-space:nowrap}
+  .ej ol, .ej ul{padding-left:1.25rem}
+  .ej details{border:1px solid var(--line);border-left:4px solid var(--indigo);border-radius:10px;
+    background:var(--surface-2);margin:.8rem 0;padding:.1rem .9rem}
+  .ej summary{cursor:pointer;font-weight:600;color:var(--ink);padding:.55rem 0}
+  .ej details[open] summary{border-bottom:1px solid var(--line)}
+  .ej details > p, .ej details > ul{margin:.6rem 0 .75rem;color:var(--ink-soft)}
+  .amp{color:var(--ink-soft);font-size:.95em}
+  .amp b{color:var(--ink)}
+  .tablewrap td:first-child{white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><b>Trazador de Rayos en C</b></a>
+    <div class="spacer"></div>
+    <button class="theme-btn" id="themeBtn" aria-label="Cambiar tema">
+      <span id="themeIcon">&#9680;</span><span id="themeLabel">Tema</span>
+    </button>
+  </div>
+</div>
+<div class="shell">
+  <div class="layout">
+    <div class="toc-wrap"><nav class="toc" aria-label="Contenido de los ejercicios"><p class="toc-title">Ejercicios</p><ol>
+<li><a href="index.html"><span class="n">&#9632;</span><span>Volver al inicio</span></a></li>
+<li><a href="#mapa"><span class="n">&#9635;</span><span>Mapa de conceptos</span></a></li>
+<li><a href="#b1"><span class="n">B1</span><span>Fundamentos</span></a></li>
+<li><a href="#b2"><span class="n">B2</span><span>Funciones y recursión</span></a></li>
+<li><a href="#b3"><span class="n">B3</span><span>Arrays y punteros</span></a></li>
+<li><a href="#b4"><span class="n">B4</span><span>Cadenas de caracteres</span></a></li>
+<li><a href="#b5"><span class="n">B5</span><span>struct, enum y union</span></a></li>
+<li><a href="#b6"><span class="n">B6</span><span>Memoria dinámica</span></a></li>
+<li><a href="#b7"><span class="n">B7</span><span>Ficheros</span></a></li>
+<li><a href="#b8"><span class="n">B8</span><span>Bits y representación</span></a></li>
+<li><a href="#b9"><span class="n">B9</span><span>Preprocesador y herramientas</span></a></li>
+    </ol></nav></div>
+    <main class="solo">
+
+<section class="tarea" id="intro" data-num="E" data-title="Ejercicios">
+  <div class="tarea-head">
+    <div class="tarea-num ej-num-big">Prácticas<span>C</span></div>
+    <div class="titles">
+      <p class="tarea-kicker">32 ejercicios independientes</p>
+      <h2>Ejercicios para practicar C</h2>
+    </div>
+  </div>
+
+  <div class="box objetivo">
+    <p class="box-label">Cómo usar estos ejercicios</p>
+    <p>Cada ejercicio es un <strong>programa completo e independiente</strong>: no necesitas el código del trazador de
+    rayos. Están agrupados por tema y repasan lo visto en las tareas. También incluyen las partes importantes de C que
+    el proyecto <strong>no</strong> llegó a necesitar: cadenas, entrada por teclado, <code class="inl">argc</code>/<code class="inl">argv</code>,
+    ficheros, <code class="inl">union</code>, listas enlazadas, operadores de bits, funciones variádicas y depuración. Esos
+    ejercicios llevan la etiqueta <span class="nuevo">Nuevo</span>; antes de empezarlos, busca en la documentación las
+    funciones que se citan (<code class="inl">man 3 fgets</code>, por ejemplo).</p>
+    <p>La dificultad va de <span class="lvl"><b>&#9679;</b>&#9675;&#9675;</span> (calentamiento) a
+    <span class="lvl"><b>&#9679;&#9679;&#9679;</b></span> (pequeño proyecto). Las <em>pistas</em> están plegadas: intenta
+    el ejercicio antes de abrirlas.</p>
+  </div>
+
+  <div class="box concepto">
+    <p class="box-label">Normas para todos los ejercicios</p>
+    <ul>
+      <li>Compila siempre con avisos: <code class="inl">gcc -std=c11 -Wall -Wextra -g ej.c -o ej -lm</code>. Un ejercicio
+      no está terminado mientras salga algún aviso.</li>
+      <li>Si usas memoria dinámica, comprueba que no hay fugas con <code class="inl">valgrind ./ej</code> o compilando con
+      <code class="inl">-fsanitize=address,undefined</code>.</li>
+      <li>Comprueba siempre lo que puede fallar: el valor de retorno de <code class="inl">malloc</code>,
+      <code class="inl">fopen</code>, <code class="inl">scanf</code>&hellip;</li>
+      <li>Como en el curso: identificadores en inglés, comentarios en español.</li>
+    </ul>
+  </div>
+
+  <h3 class="sec" id="mapa">Mapa de conceptos &mdash; dónde se practica cada cosa</h3>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Concepto de C</th><th>Ejercicios</th><th>En el curso</th></tr></thead>
+      <tbody>
+        <tr><td>Tipos, operadores, <code>printf</code>, bucles</td><td>E1, E2, E3</td><td>Tareas 0&ndash;1</td></tr>
+        <tr><td><code>unsigned</code>, desbordamiento, <code>limits.h</code>, <code>float.h</code></td><td>E3, E27</td><td><span class="nuevo">Nuevo</span></td></tr>
+        <tr><td>Entrada con <code>scanf</code>, <code>do</code>&hellip;<code>while</code></td><td>E4, E15</td><td><span class="nuevo">Nuevo</span></td></tr>
+        <tr><td>Funciones, salida por parámetro</td><td>E5, E10, E17</td><td>Tareas 2&ndash;5</td></tr>
+        <tr><td>Recursión</td><td>E6, E24</td><td>Tarea 7</td></tr>
+        <tr><td>Punteros a función</td><td>E7, E20</td><td>Tarea 8 (ampliación)</td></tr>
+        <tr><td>Ámbito, <code>static</code>, tiempo de vida</td><td>E8, E32</td><td>Tareas 8&ndash;10</td></tr>
+        <tr><td>Arrays 1D, <code>bool</code></td><td>E9, E10</td><td>Tarea 5</td></tr>
+        <tr><td>Aritmética de punteros</td><td>E10, E13</td><td><span class="nuevo">Nuevo</span></td></tr>
+        <tr><td>Arrays bidimensionales</td><td>E11, E12</td><td><span class="nuevo">Nuevo</span></td></tr>
+        <tr><td>Cadenas, <code>string.h</code>, <code>ctype.h</code>, <code>getchar</code>/<code>EOF</code></td><td>E13&ndash;E16</td><td><span class="nuevo">Nuevo</span></td></tr>
+        <tr><td><code>argc</code>/<code>argv</code>, <code>strtod</code></td><td>E16, E25</td><td><span class="nuevo">Nuevo</span></td></tr>
+        <tr><td><code>struct</code>, <code>typedef</code>, <code>enum</code>, <code>switch</code></td><td>E5, E17, E18, E19</td><td>Tareas 2, 8</td></tr>
+        <tr><td><code>union</code>, relleno (<em>padding</em>)</td><td>E18, E19, E28</td><td><span class="nuevo">Nuevo</span></td></tr>
+        <tr><td><code>void *</code>, <code>qsort</code></td><td>E20</td><td><span class="nuevo">Nuevo</span></td></tr>
+        <tr><td><code>malloc</code>/<code>free</code></td><td>E11, E21&ndash;E24</td><td>Tarea 12</td></tr>
+        <tr><td><code>realloc</code>, <code>calloc</code></td><td>E21, E11</td><td><span class="nuevo">Nuevo</span></td></tr>
+        <tr><td>Listas enlazadas, árboles, pilas</td><td>E22, E23, E24</td><td><span class="nuevo">Nuevo</span></td></tr>
+        <tr><td>Ficheros de texto y binarios, <code>perror</code></td><td>E25, E26</td><td><span class="nuevo">Nuevo</span></td></tr>
+        <tr><td>Operadores de bits, <code>stdint.h</code></td><td>E27, E28</td><td><span class="nuevo">Nuevo</span></td></tr>
+        <tr><td>Macros, compilación condicional, <code>assert</code></td><td>E29</td><td>Tareas 2, 6 (parcial)</td></tr>
+        <tr><td>Módulos, tipo opaco, <code>Makefile</code></td><td>E30</td><td>Tarea 13</td></tr>
+        <tr><td>Funciones variádicas, <code>stdarg.h</code></td><td>E31</td><td><span class="nuevo">Nuevo</span></td></tr>
+        <tr><td>Depuración: sanitizadores, Valgrind, <code>gdb</code></td><td>E32</td><td><span class="nuevo">Nuevo</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- =========================================================== -->
+<section class="tarea" id="b1" data-num="B1" data-title="Fundamentos">
+  <h3 class="sec">Bloque 1 &mdash; Fundamentos: tipos, operadores y control de flujo</h3>
+
+  <article class="ej" id="e1">
+    <div class="ej-head"><span class="ej-id">E1</span><h4>Tabla de conversión de unidades</h4><span class="lvl"><b>&#9679;</b>&#9675;&#9675;</span></div>
+    <div class="keys"><code>for</code><code>double</code><code>printf</code><code>#define</code></div>
+    <p>Escribe un programa que imprima una tabla de conversión de temperaturas de Celsius a Fahrenheit y Kelvin, desde
+    &minus;40&nbsp;&deg;C hasta 100&nbsp;&deg;C en pasos de 10&nbsp;&deg;C. Las columnas deben quedar alineadas.</p>
+    <ul>
+      <li>Usa <code class="inl">F = 9/5·C + 32</code> y <code class="inl">K = C + 273.15</code>.</li>
+      <li>Define el inicio, el final y el paso con <code class="inl">#define</code>.</li>
+      <li>Imprime una cabecera y usa anchos fijos en <code class="inl">printf</code> (por ejemplo <code class="inl">%8.2f</code>).</li>
+    </ul>
+    <div class="term">
+      <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">salida esperada (inicio)</span></div>
+<pre class="shell">       C        F        K
+  -40.00   -40.00   233.15
+  -30.00   -22.00   243.15
+  -20.00    -4.00   253.15
+...</pre>
+    </div>
+    <details><summary>Pista</summary>
+      <p>Cuidado con <code class="inl">9/5</code>: entre enteros vale <strong>1</strong>. Escribe <code class="inl">9.0/5.0</code>.
+      Es el mismo error de división entera que viste en la Tarea 1.</p>
+    </details>
+    <p class="amp"><b>Ampliación:</b> haz que la tabla vaya de Fahrenheit a Celsius y comprueba en qué temperatura coinciden
+    ambas escalas.</p>
+  </article>
+
+  <article class="ej" id="e2">
+    <div class="ej-head"><span class="ej-id">E2</span><h4>La conjetura de Collatz</h4><span class="lvl"><b>&#9679;</b>&#9675;&#9675;</span></div>
+    <div class="keys"><code>while</code><code>%</code><code>long</code><code>?:</code></div>
+    <p>Dado un entero positivo <em>n</em>: si es par, divídelo entre 2; si es impar, sustitúyelo por 3<em>n</em>+1. Se
+    conjetura que siempre se llega a 1. Escribe:</p>
+    <ol>
+      <li>Una función <code class="inl">int collatz_steps(long n)</code> que devuelva cuántos pasos hacen falta para llegar a 1.</li>
+      <li>Un <code class="inl">main</code> que busque, entre 1 y <code class="inl">N&minus;1</code>, el número con la secuencia más larga.</li>
+    </ol>
+    <div class="term">
+      <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">resultados para comprobar</span></div>
+<pre class="shell">collatz_steps(27) = 111
+N = 10       -&gt; el número 9 necesita 19 pasos
+N = 1000000  -&gt; el número 837799 necesita 524 pasos</pre>
+    </div>
+    <details><summary>Pista</summary>
+      <p>Los valores intermedios crecen mucho más que <em>n</em>: con <code class="inl">int</code> de 32 bits puedes desbordar.
+      Por eso se pide <code class="inl">long</code>. El cuerpo del bucle cabe en una línea con el operador ternario:
+      <code class="inl">n = (n % 2) ? 3*n + 1 : n / 2;</code></p>
+    </details>
+  </article>
+
+  <article class="ej" id="e3">
+    <div class="ej-head"><span class="ej-id">E3</span><h4>Los límites de los tipos numéricos</h4><span class="lvl"><b>&#9679;</b>&#9675;&#9675;</span><span class="nuevo">Nuevo</span></div>
+    <div class="keys"><code>sizeof</code><code>unsigned</code><code>limits.h</code><code>float.h</code><code>%zu</code></div>
+    <p>Escribe un programa que investigue cómo representa tu máquina los números:</p>
+    <ol>
+      <li>Imprime el <code class="inl">sizeof</code> de <code class="inl">char</code>, <code class="inl">short</code>,
+      <code class="inl">int</code>, <code class="inl">long</code>, <code class="inl">long long</code>, <code class="inl">float</code>,
+      <code class="inl">double</code> y <code class="inl">void *</code> (usa <code class="inl">%zu</code>).</li>
+      <li>Imprime <code class="inl">INT_MIN</code>, <code class="inl">INT_MAX</code>, <code class="inl">UINT_MAX</code> y
+      <code class="inl">DBL_EPSILON</code>.</li>
+      <li>Guarda <code class="inl">0</code> en una variable <code class="inl">unsigned int</code> y réstale 1. ¿Qué sale? ¿Por qué?</li>
+      <li>Calcula tú mismo el <em>épsilon de máquina</em>: empieza con <code class="inl">eps = 1.0</code> y divide entre 2
+      mientras <code class="inl">1.0 + eps/2 != 1.0</code>. Compáralo con <code class="inl">DBL_EPSILON</code>.</li>
+      <li>Suma <code class="inl">0.1</code> diez veces en un <code class="inl">double</code> y en un <code class="inl">float</code>,
+      e imprime los resultados con 17 cifras (<code class="inl">%.17g</code>). ¿Es exactamente 1?</li>
+    </ol>
+    <div class="term">
+      <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">resultados típicos en Linux de 64 bits</span></div>
+<pre class="shell">int: 4 bytes   long: 8 bytes   double: 8 bytes   void*: 8 bytes
+0u - 1       = 4294967295
+DBL_EPSILON  = 2.2204460492503131e-16
+10 x 0.1     = 0.99999999999999989   (double)</pre>
+    </div>
+    <details><summary>Pista</summary>
+      <p>La aritmética de los enteros <code class="inl">unsigned</code> es «módulo 2<sup>n</sup>»: dar la vuelta está
+      definido. En cambio, desbordar un <code class="inl">int</code> <em>con</em> signo es <strong>comportamiento
+      indefinido</strong>: el compilador puede hacer cualquier cosa. Nunca compares <code class="inl">double</code> con
+      <code class="inl">==</code>; usa <code class="inl">fabs(a - b) &lt; tol</code>.</p>
+    </details>
+  </article>
+
+  <article class="ej" id="e4">
+    <div class="ej-head"><span class="ej-id">E4</span><h4>Adivina el número</h4><span class="lvl"><b>&#9679;&#9679;</b>&#9675;</span><span class="nuevo">Nuevo</span></div>
+    <div class="keys"><code>scanf</code><code>do … while</code><code>rand</code><code>srand(time(NULL))</code></div>
+    <p>El programa elige un número secreto entre 1 y 100 y el usuario intenta adivinarlo. Tras cada intento responde
+    «mayor», «menor» o «¡correcto!», y al final dice cuántos intentos hicieron falta.</p>
+    <ul>
+      <li>Usa un bucle <code class="inl">do … while</code>: al menos se pide un número.</li>
+      <li><strong>Valida la entrada.</strong> <code class="inl">scanf</code> devuelve cuántos datos ha leído. Si el usuario
+      escribe <code class="inl">hola</code>, avisa y vuelve a pedir el número en lugar de entrar en un bucle infinito.
+      Si devuelve <code class="inl">EOF</code> (Ctrl+D), termina.</li>
+      <li>Al acabar, pregunta «¿Otra partida? (s/n)».</li>
+    </ul>
+    <div class="term">
+      <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="p">$</span> ./adivina
+Intento: 50
+Mayor.
+Intento: hola
+Eso no es un número.
+Intento: 75
+Menor.
+...
+¡Correcto! Lo has adivinado en 6 intentos.</pre>
+    </div>
+    <details><summary>Pista</summary>
+      <p>Cuando <code class="inl">scanf("%d", &amp;x)</code> falla, los caracteres erróneos se quedan en la entrada. Hay que
+      descartarlos antes de reintentar: <code class="inl">while ((c = getchar()) != '\n' &amp;&amp; c != EOF) ;</code>
+      Para leer la respuesta s/n usa <code class="inl">scanf(" %c", &amp;r)</code>. El espacio delante de
+      <code class="inl">%c</code> se salta los blancos pendientes.</p>
+    </details>
+    <p class="amp"><b>Ampliación:</b> invierte los papeles. Tú piensas el número y el programa lo adivina con búsqueda
+    binaria. ¿Cuántos intentos necesita como máximo?</p>
+  </article>
+</section>
+
+<!-- =========================================================== -->
+<section class="tarea" id="b2" data-num="B2" data-title="Funciones y recursión">
+  <h3 class="sec">Bloque 2 &mdash; Funciones, salida por parámetro y recursión</h3>
+
+  <article class="ej" id="e5">
+    <div class="ej-head"><span class="ej-id">E5</span><h4>Ecuación de segundo grado</h4><span class="lvl"><b>&#9679;</b>&#9675;&#9675;</span></div>
+    <div class="keys"><code>punteros</code><code>salida por parámetro</code><code>enum</code><code>sqrt</code></div>
+    <p>Implementa una función que resuelva <em>ax</em>&sup2; + <em>bx</em> + <em>c</em> = 0. Devuelve, mediante un
+    <code class="inl">enum</code>, qué tipo de solución hay, y entrega las raíces por parámetro:</p>
+    <script type="text/plain" class="srccode" data-file="cuadratica.c (prototipo)">
+typedef enum { TWO_REAL, ONE_REAL, COMPLEX, NOT_QUADRATIC } root_kind;
+
+// Si hay raíces reales, las escribe en *x1 y *x2.
+// Si son complejas, escribe la parte real en *x1 y la imaginaria en *x2.
+root_kind solve_quadratic(double a, double b, double c, double *x1, double *x2);
+</script>
+    <p>En <code class="inl">main</code>, lee <em>a</em>, <em>b</em> y <em>c</em> con <code class="inl">scanf</code> y usa un
+    <code class="inl">switch</code> sobre el resultado para imprimir la solución. Prueba al menos:
+    (1, &minus;3, 2) &rarr; 2 y 1; (1, 2, 1) &rarr; &minus;1 doble; (1, 0, 1) &rarr; &plusmn;<em>i</em>; (0, 2, 1) &rarr; no es cuadrática.</p>
+    <details><summary>Pista</summary>
+      <p>Es el mismo patrón que <code class="inl">sphere_hit</code> en la Tarea 4: el discriminante decide el caso.
+      ¿Por qué no basta con comprobar <code class="inl">disc == 0.0</code> cuando los coeficientes vienen de cálculos
+      previos?</p>
+    </details>
+  </article>
+
+  <article class="ej" id="e6">
+    <div class="ej-head"><span class="ej-id">E6</span><h4>Tres problemas recursivos</h4><span class="lvl"><b>&#9679;&#9679;</b>&#9675;</span></div>
+    <div class="keys"><code>recursión</code><code>caso base</code><code>static</code><code>long long</code></div>
+    <ol>
+      <li><strong>Torres de Hanói.</strong> Escribe <code class="inl">void hanoi(int n, char from, char to, char via)</code>,
+      que imprima cada movimiento («Mueve disco 1 de A a C»). Con 3 discos hay 7 movimientos. Modifícala para que solo
+      cuente: con 20 discos deben salir 1&nbsp;048&nbsp;575.</li>
+      <li><strong>Potencia rápida.</strong> Escribe <code class="inl">double power(double x, int n)</code> usando
+      <em>x</em><sup>n</sup> = (<em>x</em><sup>n/2</sup>)&sup2; si <em>n</em> es par. Trata también los exponentes
+      negativos. Cuenta las llamadas para <em>n</em> = 1000.</li>
+      <li><strong>Fibonacci con memoria.</strong> La versión ingenua <code class="inl">fib(n) = fib(n-1) + fib(n-2)</code>
+      tarda muchísimo con <em>n</em> = 45. Escribe una versión que guarde los resultados ya calculados en un array
+      <code class="inl">static long long memo[93]</code> dentro de la función. Mide ambas con <code class="inl">time</code>.</li>
+    </ol>
+    <details><summary>Pista</summary>
+      <p>Hanói: para mover <em>n</em> discos de A a C, mueve <em>n</em>&minus;1 de A a B, el grande de A a C, y los
+      <em>n</em>&minus;1 de B a C. El caso base es <em>n</em> = 0, que no hace nada. ¿Por qué el array de memoria tiene 93
+      posiciones? Mira <code class="inl">LLONG_MAX</code>.</p>
+    </details>
+  </article>
+
+  <article class="ej" id="e7">
+    <div class="ej-head"><span class="ej-id">E7</span><h4>Integración numérica con punteros a función</h4><span class="lvl"><b>&#9679;&#9679;</b>&#9675;</span></div>
+    <div class="keys"><code>double (*f)(double)</code><code>math.h</code><code>array de punteros a función</code></div>
+    <p>Escribe dos funciones que integren <em>cualquier</em> función matemática en [<em>a</em>, <em>b</em>] con
+    <em>n</em> subintervalos:</p>
+    <script type="text/plain" class="srccode" data-file="integra.c (prototipos)">
+double trapezoid(double (*f)(double), double a, double b, int n);
+double simpson  (double (*f)(double), double a, double b, int n);   // n par
+</script>
+    <p>Pruébalas con <code class="inl">sin</code> de <code class="inl">math.h</code> y con una función tuya
+    <code class="inl">square(x)</code>. Después, haz una tabla con el error frente al valor exacto para
+    <em>n</em> = 10, 100 y 1000. ¿Cuánto baja el error al multiplicar <em>n</em> por 10 en cada método?</p>
+    <div class="term">
+      <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">resultados para comprobar (n = 10)</span></div>
+<pre class="shell">∫ sin x  en [0, π] : trapecio = 1.983523538   Simpson = 2.000109517
+∫ x²     en [0, 1] : trapecio = 0.335000000   Simpson = 0.333333333</pre>
+    </div>
+    <details><summary>Pista</summary>
+      <p>El nombre de una función, sin paréntesis, ya es un puntero a ella: <code class="inl">trapezoid(sin, 0, M_PI, 10)</code>.
+      Para recorrer varias funciones, declara un array <code class="inl">double (*funcs[])(double) = { sin, cos, square };</code>
+      junto a otro array con sus nombres. Si <code class="inl">M_PI</code> no está definido con <code class="inl">-std=c11</code>,
+      usa <code class="inl">acos(-1.0)</code>.</p>
+    </details>
+  </article>
+
+  <article class="ej" id="e8">
+    <div class="ej-head"><span class="ej-id">E8</span><h4>Ámbito, <code>static</code> y tiempo de vida</h4><span class="lvl"><b>&#9679;</b>&#9675;&#9675;</span></div>
+    <div class="keys"><code>static</code><code>variables globales</code><code>ocultación</code><code>bloques</code></div>
+    <p><strong>Sin ejecutarlo</strong>, escribe en papel lo que imprime este programa. Después compílalo y compara. Explica
+    cada línea en la que te hayas equivocado.</p>
+    <script type="text/plain" class="srccode" data-file="ambito.c">
+#include <stdio.h>
+
+int x = 10;                 // global
+
+int counter(void) {
+    static int calls = 0;   // se inicializa una sola vez
+    int local = 0;          // se crea en cada llamada
+    calls++;
+    local++;
+    return calls * 10 + local;
+}
+
+void shadow(int x) {
+    printf("A: %d\n", x);
+    {
+        int x = 99;
+        printf("B: %d\n", x);
+    }
+    printf("C: %d\n", x);
+}
+
+int main(void) {
+    printf("%d\n", counter());
+    printf("%d\n", counter());
+    printf("%d\n", counter());
+    shadow(5);
+    printf("D: %d\n", x);
+    for (int x = 0; x < 2; x++)
+        printf("E: %d\n", x);
+    printf("F: %d\n", x);
+    return 0;
+}
+</script>
+    <p>Después escribe una función <code class="inl">int next_id(void)</code> que devuelva 1, 2, 3&hellip; en llamadas
+    sucesivas <em>sin</em> usar variables globales.</p>
+    <details><summary>Pista</summary>
+      <p>Una variable local <code class="inl">static</code> vive durante todo el programa, pero solo se puede usar
+      dentro de su función. Compila con <code class="inl">-Wshadow</code> para que gcc avise de cada ocultación.</p>
+    </details>
+  </article>
+</section>
+
+<!-- =========================================================== -->
+<section class="tarea" id="b3" data-num="B3" data-title="Arrays y punteros">
+  <h3 class="sec">Bloque 3 &mdash; Arrays, aritmética de punteros y matrices</h3>
+
+  <article class="ej" id="e9">
+    <div class="ej-head"><span class="ej-id">E9</span><h4>La criba de Eratóstenes</h4><span class="lvl"><b>&#9679;</b>&#9675;&#9675;</span></div>
+    <div class="keys"><code>arrays</code><code>bool</code><code>stdbool.h</code><code>bucles anidados</code></div>
+    <p>Calcula todos los primos hasta <em>N</em> con la criba: marca como compuestos los múltiplos de cada primo, empezando
+    por su cuadrado. Imprime los primos hasta 50 y cuenta cuántos hay hasta 1&nbsp;000&nbsp;000.</p>
+    <div class="term">
+      <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">salida esperada</span></div>
+<pre class="shell">Primos hasta 50: 2 3 5 7 11 13 17 19 23 29 31 37 41 43 47
+Hay 78498 primos menores o iguales que 1000000</pre>
+    </div>
+    <details><summary>Pista</summary>
+      <p>Un array local de un millón de <code class="inl">bool</code> puede no caber en la pila. Decláralo
+      <code class="inl">static</code> o pídelo con <code class="inl">calloc</code>, que además lo deja a cero. Ojo:
+      <code class="inl">i*i</code> puede desbordar un <code class="inl">int</code> si <em>N</em> es grande.</p>
+    </details>
+  </article>
+
+  <article class="ej" id="e10">
+    <div class="ej-head"><span class="ej-id">E10</span><h4>Estadística con aritmética de punteros</h4><span class="lvl"><b>&#9679;&#9679;</b>&#9675;</span><span class="nuevo">Nuevo</span></div>
+    <div class="keys"><code>p + i</code><code>*p++</code><code>const double *</code><code>ptrdiff_t</code></div>
+    <p>Escribe estas funciones. Ninguna puede usar la notación <code class="inl">v[i]</code>: recorre el array
+    <strong>moviendo un puntero</strong> desde <code class="inl">v</code> hasta <code class="inl">v + n</code>.</p>
+    <script type="text/plain" class="srccode" data-file="estadistica.c (prototipos)">
+double mean(const double *v, int n);
+double stddev(const double *v, int n);                 // desviación típica muestral
+void   min_max(const double *v, int n, double *min, double *max);
+const double *find(const double *v, int n, double x);  // NULL si no está
+void   reverse(double *v, int n);                      // con dos punteros que se cruzan
+</script>
+    <p>En <code class="inl">main</code>, usa un array de medidas (por ejemplo, diez periodos de un péndulo). Imprime los
+    resultados y la <strong>posición</strong> de un valor encontrado con <code class="inl">find</code>, calculada como
+    <code class="inl">p - v</code>.</p>
+    <details><summary>Pista</summary>
+      <p><code class="inl">v[i]</code> es exactamente <code class="inl">*(v + i)</code>. Un bucle típico es
+      <code class="inl">for (const double *p = v; p &lt; v + n; p++) suma += *p;</code>. Para invertir:
+      <code class="inl">double *ini = v, *fin = v + n - 1;</code> y avanza ambos hasta que se crucen.
+      ¿Por qué <code class="inl">find</code> devuelve <code class="inl">const double *</code>?</p>
+    </details>
+  </article>
+
+  <article class="ej" id="e11">
+    <div class="ej-head"><span class="ej-id">E11</span><h4>Matrices: estáticas y dinámicas</h4><span class="lvl"><b>&#9679;&#9679;</b>&#9675;</span><span class="nuevo">Nuevo</span></div>
+    <div class="keys"><code>double m[3][3]</code><code>double **</code><code>calloc</code><code>m[i*cols + j]</code></div>
+    <ol>
+      <li>Con arrays <strong>bidimensionales fijos</strong> <code class="inl">double a[3][3]</code>, escribe funciones para
+      multiplicar dos matrices, transponer y calcular el determinante. Comprueba que det(<em>AB</em>) = det(<em>A</em>)·det(<em>B</em>).</li>
+      <li>Ahora con tamaño leído en tiempo de ejecución, implementa la matriz de <strong>dos formas</strong>:
+        <ul>
+          <li>(a) <code class="inl">double **</code>: un array de punteros a filas, cada fila con su propio <code class="inl">malloc</code>.</li>
+          <li>(b) un único bloque contiguo <code class="inl">double *</code> de <code class="inl">rows*cols</code>
+          elementos, al que accedes como <code class="inl">m[i*cols + j]</code>.</li>
+        </ul>
+      </li>
+      <li>Escribe para cada versión su función de crear y su función de liberar. Multiplica dos matrices de 500×500 con cada
+      una y compara tiempos.</li>
+    </ol>
+    <details><summary>Pista</summary>
+      <p>Al pasar un array 2D fijo a una función hay que dar todas las dimensiones salvo la primera:
+      <code class="inl">void print(double m[][3], int rows)</code>. En la versión (a), liberar exige un
+      <code class="inl">free</code> por fila <em>y</em> otro para el array de punteros, en el orden correcto. La versión (b)
+      solo necesita un <code class="inl">free</code> y suele ser más rápida. ¿Por qué? Piensa en la caché.</p>
+    </details>
+  </article>
+
+  <article class="ej" id="e12">
+    <div class="ej-head"><span class="ej-id">E12</span><h4>El juego de la vida de Conway</h4><span class="lvl"><b>&#9679;&#9679;&#9679;</b></span></div>
+    <div class="keys"><code>arrays 2D</code><code>doble búfer</code><code>módulo %</code><code>PPM</code></div>
+    <p>Simula el autómata celular de Conway en una rejilla de 40×20 con bordes periódicos (el mundo es un toro). Cada
+    célula viva con 2 o 3 vecinas sobrevive; cada célula muerta con exactamente 3 vecinas nace; las demás mueren.</p>
+    <ul>
+      <li>Muestra cada generación en la terminal con <code class="inl">#</code> y <code class="inl">.</code>.</li>
+      <li>Empieza con un <em>planeador</em> y comprueba que, a las 4 generaciones, ha avanzado una casilla en diagonal.</li>
+      <li>Usa <strong>dos</strong> rejillas: calcula la siguiente generación en la segunda a partir de la primera y después
+      intercámbialas. ¿Qué pasa si lo haces sobre una sola?</li>
+    </ul>
+    <details><summary>Pista</summary>
+      <p>Vecino con bordes periódicos: <code class="inl">(i + di + ROWS) % ROWS</code>. Para intercambiar rejillas sin
+      copiar, usa dos punteros y cámbialos. Para animarlo en la terminal, imprime <code class="inl">"\033[H"</code> antes de
+      cada generación y espera con <code class="inl">usleep</code> (<code class="inl">&lt;unistd.h&gt;</code>).</p>
+    </details>
+    <p class="amp"><b>Ampliación:</b> guarda cada generación como imagen PPM, como en la Tarea 1, para hacer una animación.</p>
+  </article>
+</section>
+
+<!-- =========================================================== -->
+<section class="tarea" id="b4" data-num="B4" data-title="Cadenas">
+  <h3 class="sec">Bloque 4 &mdash; Cadenas de caracteres y línea de órdenes</h3>
+
+  <div class="box concepto">
+    <p class="box-label">Concepto de C · qué es una cadena</p>
+    <p>En C no existe un tipo «cadena». Una cadena es un array de <code class="inl">char</code> terminado por el carácter
+    nulo <code class="inl">'\0'</code>. <code class="inl">"hola"</code> ocupa <strong>5</strong> bytes. Ninguna función
+    de <code class="inl">&lt;string.h&gt;</code> sabe el tamaño del array: todas van leyendo hasta encontrar ese
+    <code class="inl">'\0'</code>. Por eso se escribe fuera del array tan fácilmente.</p>
+  </div>
+
+  <article class="ej" id="e13">
+    <div class="ej-head"><span class="ej-id">E13</span><h4>Tu propia <code>string.h</code></h4><span class="lvl"><b>&#9679;&#9679;</b>&#9675;</span><span class="nuevo">Nuevo</span></div>
+    <div class="keys"><code>char *</code><code>'\0'</code><code>const char *</code><code>punteros</code></div>
+    <p>Reimplementa, sin usar <code class="inl">&lt;string.h&gt;</code>:</p>
+    <script type="text/plain" class="srccode" data-file="micadena.c (prototipos)">
+size_t my_strlen(const char *s);
+char  *my_strcpy(char *dst, const char *src);
+int    my_strcmp(const char *a, const char *b);      // <0, 0 o >0
+char  *my_strchr(const char *s, int c);              // NULL si no está
+size_t my_strlcpy(char *dst, const char *src, size_t size);  // nunca desborda dst
+</script>
+    <p>Escribe un <code class="inl">main</code> de pruebas que compare tus resultados con los de la biblioteca estándar en
+    varios casos, incluida la cadena vacía <code class="inl">""</code>.</p>
+    <details><summary>Pista</summary>
+      <p><code class="inl">my_strlen</code> cabe en dos líneas: avanza un puntero hasta <code class="inl">*p == '\0'</code> y
+      devuelve <code class="inl">p - s</code>. <code class="inl">my_strlcpy</code> copia como mucho
+      <code class="inl">size - 1</code> caracteres, siempre termina en <code class="inl">'\0'</code> y devuelve la longitud
+      de <code class="inl">src</code>. Así quien llama puede saber si la cadena se ha truncado.</p>
+    </details>
+  </article>
+
+  <article class="ej" id="e14">
+    <div class="ej-head"><span class="ej-id">E14</span><h4>Palíndromos y cifrado César</h4><span class="lvl"><b>&#9679;</b>&#9675;&#9675;</span><span class="nuevo">Nuevo</span></div>
+    <div class="keys"><code>ctype.h</code><code>fgets</code><code>tolower</code><code>isalpha</code></div>
+    <ol>
+      <li>Lee una línea con <code class="inl">fgets</code> y di si es un palíndromo ignorando espacios, signos de puntuación
+      y mayúsculas. «Dábale arroz a la zorra el abad» debe dar que sí (de momento, escríbela sin tildes).</li>
+      <li>Escribe <code class="inl">void caesar(char *s, int k)</code>, que desplace cada letra <em>k</em> posiciones de forma
+      circular (<em>z</em>+1 = <em>a</em>) y respete mayúsculas y minúsculas. Comprueba que
+      <code class="inl">caesar(s, k)</code> seguido de <code class="inl">caesar(s, -k)</code> devuelve el original.</li>
+    </ol>
+    <details><summary>Pista</summary>
+      <p><code class="inl">fgets</code> guarda también el <code class="inl">'\n'</code> final; quítalo con
+      <code class="inl">s[strcspn(s, "\n")] = '\0';</code>. Las funciones de <code class="inl">ctype.h</code> esperan un
+      <code class="inl">unsigned char</code>: escribe <code class="inl">tolower((unsigned char)c)</code>. Las letras con
+      tilde ocupan más de un byte en UTF-8. ¿Qué crees que pasará con ellas?</p>
+    </details>
+  </article>
+
+  <article class="ej" id="e15">
+    <div class="ej-head"><span class="ej-id">E15</span><h4>Contar letras, palabras y líneas</h4><span class="lvl"><b>&#9679;&#9679;</b>&#9675;</span><span class="nuevo">Nuevo</span></div>
+    <div class="keys"><code>getchar</code><code>EOF</code><code>int c</code><code>redirección &lt;</code></div>
+    <p>Escribe una versión simplificada de <code class="inl">wc</code>: lee la entrada estándar carácter a carácter hasta
+    <code class="inl">EOF</code> y cuenta líneas, palabras y caracteres. Además, muestra un histograma horizontal con la
+    frecuencia de cada letra (a&ndash;z, sin distinguir mayúsculas).</p>
+    <div class="term">
+      <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal (cifras orientativas)</span></div>
+<pre class="shell"><span class="p">$</span> ./cuenta &lt; quijote.txt
+lineas: 37861  palabras: 384260  caracteres: 2141987
+a ################################ 12.1%
+b ######                            2.0%
+...
+<span class="p">$</span> wc quijote.txt        <span class="c"># compara tus cifras</span></pre>
+    </div>
+    <details><summary>Pista</summary>
+      <p>La variable que recibe <code class="inl">getchar()</code> debe ser <code class="inl">int</code>, no
+      <code class="inl">char</code>: <code class="inl">EOF</code> es un valor que no cabe en un <code class="inl">char</code>.
+      Para contar palabras, guarda un estado «dentro / fuera de palabra» y suma una al pasar de fuera a dentro.
+      Usa un array <code class="inl">int freq[26]</code> indexado con <code class="inl">c - 'a'</code>.</p>
+    </details>
+  </article>
+
+  <article class="ej" id="e16">
+    <div class="ej-head"><span class="ej-id">E16</span><h4>Calculadora en notación polaca inversa</h4><span class="lvl"><b>&#9679;&#9679;</b>&#9675;</span><span class="nuevo">Nuevo</span></div>
+    <div class="keys"><code>int main(int argc, char *argv[])</code><code>strtod</code><code>strcmp</code><code>pila</code></div>
+    <p>Escribe una calculadora que reciba la expresión en los <strong>argumentos de la línea de órdenes</strong>, en notación
+    polaca inversa (RPN): primero los operandos y después el operador. Usa una pila de <code class="inl">double</code>
+    (un array y un índice).</p>
+    <div class="term">
+      <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="p">$</span> ./rpn 3 4 + 2 x
+14
+<span class="p">$</span> ./rpn 2 sqrt 1 +
+2.41421
+<span class="p">$</span> ./rpn 1 +
+error: faltan operandos para '+'
+<span class="p">$</span> ./rpn 3 4abc +
+error: '4abc' no es un número</pre>
+    </div>
+    <ul>
+      <li>Admite <code class="inl">+ - x /</code> y funciones de un operando como <code class="inl">sqrt</code> y <code class="inl">sin</code>.</li>
+      <li>Usa <code class="inl">strtod</code> y su segundo argumento para detectar números mal escritos.</li>
+      <li>Ante cualquier error, escribe en <code class="inl">stderr</code> y termina con <code class="inl">return 1</code>
+      (o <code class="inl">EXIT_FAILURE</code>). Compruébalo con <code class="inl">echo $?</code>.</li>
+    </ul>
+    <details><summary>Pista</summary>
+      <p>Se usa <code class="inl">x</code> en vez de <code class="inl">*</code> porque la shell expande el asterisco a los
+      nombres de los ficheros del directorio. Pruébalo: <code class="inl">./rpn 3 4 *</code>. <code class="inl">argv[0]</code>
+      es el nombre del programa; los datos empiezan en <code class="inl">argv[1]</code>. Para comparar cadenas usa
+      <code class="inl">strcmp(argv[i], "+") == 0</code>, nunca <code class="inl">argv[i] == "+"</code>.</p>
+    </details>
+  </article>
+</section>
+
+<!-- =========================================================== -->
+<section class="tarea" id="b5" data-num="B5" data-title="struct, enum, union">
+  <h3 class="sec">Bloque 5 &mdash; struct, enum, union y algoritmos genéricos</h3>
+
+  <article class="ej" id="e17">
+    <div class="ej-head"><span class="ej-id">E17</span><h4>Un tipo para fracciones</h4><span class="lvl"><b>&#9679;</b>&#9675;&#9675;</span></div>
+    <div class="keys"><code>typedef struct</code><code>devolver structs</code><code>mcd</code></div>
+    <p>Define <code class="inl">typedef struct { long num, den; } fraction;</code> y escribe
+    <code class="inl">frac_make</code>, <code class="inl">frac_add</code>, <code class="inl">frac_sub</code>,
+    <code class="inl">frac_mul</code>, <code class="inl">frac_div</code> y <code class="inl">frac_print</code>. Toda fracción
+    debe quedar <strong>simplificada</strong> y con denominador positivo; usa el algoritmo de Euclides para el mcd.</p>
+    <div class="term">
+      <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">resultados para comprobar</span></div>
+<pre class="shell">1/2 + 1/3 = 5/6
+3/4 x 2/9 = 1/6
+2/-4      = -1/2
+1 + 1/2 + 1/3 + ... + 1/10 = 7381/2520</pre>
+    </div>
+    <details><summary>Pista</summary>
+      <p>Es el mismo estilo que <code class="inl">vec3</code> en la Tarea 2: funciones que reciben y devuelven structs por
+      valor. Haz que solo <code class="inl">frac_make</code> simplifique y que todas las demás la llamen. ¿Qué debe hacer
+      <code class="inl">frac_make(1, 0)</code>?</p>
+    </details>
+  </article>
+
+  <article class="ej" id="e18">
+    <div class="ej-head"><span class="ej-id">E18</span><h4>Sistema de partículas y el tamaño de un struct</h4><span class="lvl"><b>&#9679;&#9679;</b>&#9675;</span></div>
+    <div class="keys"><code>arrays de struct</code><code>-&gt;</code><code>sizeof</code><code>offsetof</code><code>relleno</code></div>
+    <ol>
+      <li>Define un struct <code class="inl">particle</code> con nombre (<code class="inl">char name[16]</code>), masa,
+      posición y velocidad (ambas con un struct <code class="inl">vec2</code>). Crea un array de 5 partículas y calcula el
+      centro de masas y el momento lineal total.</li>
+      <li>Escribe <code class="inl">void step(particle *p, double dt, vec2 g)</code>, que avance una partícula con el método
+      de Euler bajo gravedad. Aplícala a todo el array durante 1&nbsp;s con <code class="inl">dt = 0.01</code>.</li>
+      <li><strong>Investiga el relleno.</strong> Imprime <code class="inl">sizeof</code> de estos dos structs y el
+      <code class="inl">offsetof</code> de cada campo (<code class="inl">&lt;stddef.h&gt;</code>). ¿Por qué ocupan distinto
+      si tienen los mismos campos?</li>
+    </ol>
+    <script type="text/plain" class="srccode" data-file="relleno.c">
+struct A { char c; double d; int i; };   // ¿cuánto ocupa?
+struct B { double d; int i; char c; };   // ¿y este?
+</script>
+    <details><summary>Pista</summary>
+      <p>Cada tipo tiene un <em>alineamiento</em>: en x86-64, un <code class="inl">double</code> debe empezar en una
+      dirección múltiplo de 8. El compilador mete bytes de relleno entre los campos y al final. En una máquina típica,
+      <code class="inl">struct A</code> ocupa 24 bytes y <code class="inl">struct B</code>, 16.</p>
+    </details>
+  </article>
+
+  <article class="ej" id="e19">
+    <div class="ej-head"><span class="ej-id">E19</span><h4>Una <code>union</code> etiquetada: valores de cualquier tipo</h4><span class="lvl"><b>&#9679;&#9679;</b>&#9675;</span><span class="nuevo">Nuevo</span></div>
+    <div class="keys"><code>union</code><code>enum</code><code>switch</code><code>struct anidado</code></div>
+    <p>Una <code class="inl">union</code> guarda <em>uno</em> de varios campos en la misma memoria. Combinada con un
+    <code class="inl">enum</code> que indica cuál está activo, sirve para valores de tipo variable, como en una hoja de
+    cálculo:</p>
+    <script type="text/plain" class="srccode" data-file="valor.c">
+typedef enum { V_INT, V_DOUBLE, V_TEXT, V_BOOL } value_type;
+
+typedef struct {
+    value_type type;           // la etiqueta: qué campo de la union es válido
+    union {
+        long   i;
+        double d;
+        char   text[24];
+        int    b;
+    } as;
+} value;
+</script>
+    <ol>
+      <li>Escribe constructores (<code class="inl">value_int(42)</code>, <code class="inl">value_text("hola")</code>&hellip;)
+      y <code class="inl">void value_print(value v)</code>.</li>
+      <li>Escribe <code class="inl">value value_add(value a, value b)</code>: suma números (int + double da double),
+      concatena textos, y devuelve un error razonable si los tipos no se pueden combinar.</li>
+      <li>Compara <code class="inl">sizeof(value)</code> con la suma de los tamaños de sus campos.</li>
+    </ol>
+    <details><summary>Pista</summary>
+      <p>Es la misma idea que el <code class="inl">enum material_type</code> de la Tarea 8, pero sin desperdiciar memoria
+      en los campos que no se usan. Leer un campo distinto del último escrito (salvo para inspeccionar bytes) es un error:
+      la etiqueta existe para evitarlo.</p>
+    </details>
+  </article>
+
+  <article class="ej" id="e20">
+    <div class="ej-head"><span class="ej-id">E20</span><h4>Ordenar con <code>qsort</code></h4><span class="lvl"><b>&#9679;&#9679;</b>&#9675;</span><span class="nuevo">Nuevo</span></div>
+    <div class="keys"><code>void *</code><code>qsort</code><code>bsearch</code><code>comparadores</code><code>clock()</code></div>
+    <p>Crea un array de structs <code class="inl">student</code> (nombre, nota, año de nacimiento) y ordénalo con
+    <code class="inl">qsort</code> de <code class="inl">&lt;stdlib.h&gt;</code> de tres formas: por nota (descendente), por
+    nombre (alfabético) y por año y, a igualdad, por nombre.</p>
+    <ul>
+      <li>Cada criterio es una función <code class="inl">int cmp_xxx(const void *a, const void *b)</code>.</li>
+      <li>Busca un alumno por nombre con <code class="inl">bsearch</code> en el array ordenado por nombre.</li>
+      <li>Implementa tú una ordenación por burbuja con la <strong>misma</strong> firma que <code class="inl">qsort</code>
+      (<code class="inl">void *base, size_t n, size_t size, int (*cmp)(const void *, const void *)</code>). Compara tiempos
+      con 50&nbsp;000 <code class="inl">double</code> aleatorios usando <code class="inl">clock()</code> de <code class="inl">&lt;time.h&gt;</code>.</li>
+    </ul>
+    <details><summary>Pista</summary>
+      <p>Dentro del comparador, convierte primero: <code class="inl">const student *sa = a;</code>. Para comparar
+      <code class="inl">double</code>, no devuelvas <code class="inl">x - y</code> (se trunca a <code class="inl">int</code>);
+      devuelve <code class="inl">(x &gt; y) - (x &lt; y)</code>. En tu burbuja genérica no puedes indexar un
+      <code class="inl">void *</code>: conviértelo a <code class="inl">char *</code> y avanza <code class="inl">i * size</code>
+      bytes. Para intercambiar elementos, usa <code class="inl">memcpy</code> con un búfer temporal.</p>
+    </details>
+  </article>
+</section>
+
+<!-- =========================================================== -->
+<section class="tarea" id="b6" data-num="B6" data-title="Memoria dinámica">
+  <h3 class="sec">Bloque 6 &mdash; Memoria dinámica y estructuras de datos</h3>
+
+  <article class="ej" id="e21">
+    <div class="ej-head"><span class="ej-id">E21</span><h4>Un array que crece solo</h4><span class="lvl"><b>&#9679;&#9679;</b>&#9675;</span></div>
+    <div class="keys"><code>realloc</code><code>capacidad vs. tamaño</code><code>struct + malloc</code></div>
+    <p>Implementa un «vector dinámico» de <code class="inl">double</code>:</p>
+    <script type="text/plain" class="srccode" data-file="vector.c (interfaz)">
+typedef struct {
+    double *data;
+    size_t  size;       // elementos usados
+    size_t  capacity;   // elementos reservados
+} dvec;
+
+void   dvec_init(dvec *v);
+int    dvec_push(dvec *v, double x);   // 0 si va bien, -1 si no hay memoria
+double dvec_get(const dvec *v, size_t i);
+void   dvec_free(dvec *v);
+</script>
+    <p>Cuando se llene, duplica la capacidad con <code class="inl">realloc</code>. Úsalo para leer de la entrada estándar
+    todos los números que lleguen (no sabes cuántos), y después imprime cuántos son, su media y su mediana. Imprime
+    también cada vez que la capacidad cambia.</p>
+    <div class="term">
+      <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="p">$</span> seq 1 1000 | ./vector
+capacidad: 1 -&gt; 2 -&gt; 4 -&gt; 8 -&gt; ... -&gt; 1024
+n = 1000   media = 500.5   mediana = 500.5</pre>
+    </div>
+    <details><summary>Pista</summary>
+      <p>Nunca escribas <code class="inl">v-&gt;data = realloc(v-&gt;data, ...)</code>: si falla devuelve
+      <code class="inl">NULL</code> y pierdes el puntero antiguo (una fuga). Guárdalo antes en un temporal. ¿Por qué se
+      duplica la capacidad en lugar de sumarle 1? Cuenta cuántas copias hace cada estrategia.</p>
+    </details>
+  </article>
+
+  <article class="ej" id="e22">
+    <div class="ej-head"><span class="ej-id">E22</span><h4>Lista enlazada</h4><span class="lvl"><b>&#9679;&#9679;</b>&#9675;</span><span class="nuevo">Nuevo</span></div>
+    <div class="keys"><code>struct autorreferente</code><code>node **</code><code>malloc por nodo</code></div>
+    <script type="text/plain" class="srccode" data-file="lista.c (interfaz)">
+typedef struct node {
+    int value;
+    struct node *next;     // un struct puede apuntar a otro de su mismo tipo
+} node;
+
+void  list_push_front(node **head, int value);
+void  list_push_back (node **head, int value);
+int   list_remove    (node **head, int value);   // borra el primero que coincida; 1 si lo encontró
+void  list_reverse   (node **head);               // sin crear nodos nuevos
+void  list_print     (const node *head);          // [3 -> 1 -> 4]
+void  list_free      (node **head);               // deja *head a NULL
+</script>
+    <p>Escribe un <code class="inl">main</code> que pruebe cada función, incluidos los casos límite: lista vacía, borrar el
+    primer nodo, borrar el último y borrar un valor que no está. Pásalo por Valgrind: <strong>0 bytes perdidos</strong>.</p>
+    <details><summary>Pista</summary>
+      <p>Las funciones que pueden cambiar la cabeza reciben <code class="inl">node **head</code>, la dirección del puntero
+      de cabeza. Es la «salida por parámetro» de la Tarea 5 aplicada a un puntero. Para invertir bastan tres punteros:
+      <code class="inl">prev</code>, <code class="inl">cur</code> y <code class="inl">next</code>. En
+      <code class="inl">list_free</code>, guarda <code class="inl">cur-&gt;next</code> <em>antes</em> de liberar
+      <code class="inl">cur</code>.</p>
+    </details>
+  </article>
+
+  <article class="ej" id="e23">
+    <div class="ej-head"><span class="ej-id">E23</span><h4>Paréntesis equilibrados con una pila</h4><span class="lvl"><b>&#9679;&#9679;</b>&#9675;</span><span class="nuevo">Nuevo</span></div>
+    <div class="keys"><code>pila (LIFO)</code><code>array dinámico</code><code>switch</code></div>
+    <p>Implementa una pila de <code class="inl">char</code> sobre un array dinámico que crezca como en E21. Úsala para
+    comprobar si un fichero de código fuente tiene <code class="inl">()</code>, <code class="inl">[]</code> y
+    <code class="inl">{}</code> bien emparejados. Si hay un error, indica la línea y la columna.</p>
+    <div class="term">
+      <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="p">$</span> ./parentesis &lt; bien.c
+Todo equilibrado.
+<span class="p">$</span> ./parentesis &lt; mal.c
+Error en 12:17: se esperaba ')' y aparece ']'</pre>
+    </div>
+    <details><summary>Pista</summary>
+      <p>Al ver un símbolo de apertura, apílalo; al ver uno de cierre, desapila y comprueba que es su pareja. Al llegar a
+      <code class="inl">EOF</code>, la pila debe estar vacía. Para nota: ignora lo que haya dentro de cadenas
+      <code class="inl">"..."</code> y de comentarios <code class="inl">/* ... */</code>.</p>
+    </details>
+  </article>
+
+  <article class="ej" id="e24">
+    <div class="ej-head"><span class="ej-id">E24</span><h4>Árbol binario de búsqueda</h4><span class="lvl"><b>&#9679;&#9679;&#9679;</b></span><span class="nuevo">Nuevo</span></div>
+    <div class="keys"><code>recursión + malloc</code><code>strdup</code><code>recorrido en orden</code></div>
+    <p>Lee un texto de la entrada estándar y cuenta cuántas veces aparece cada palabra, guardándolas en un árbol binario de
+    búsqueda ordenado alfabéticamente. Cada nodo tiene una copia de la palabra (memoria dinámica), un contador y dos hijos.</p>
+    <ul>
+      <li><code class="inl">tree_insert</code> (recursiva): si la palabra existe, incrementa el contador; si no, crea un nodo.</li>
+      <li>Recorrido <em>en orden</em> para imprimir las palabras alfabéticamente con su frecuencia.</li>
+      <li><code class="inl">tree_height</code> y <code class="inl">tree_size</code> (recursivas).</li>
+      <li><code class="inl">tree_free</code> en <em>postorden</em>: ¿por qué tiene que ser postorden?</li>
+      <li>Inserta las palabras de un texto ya ordenado. ¿Qué altura tiene el árbol? ¿Qué le ha pasado?</li>
+    </ul>
+    <details><summary>Pista</summary>
+      <p>Una firma cómoda es <code class="inl">node *tree_insert(node *root, const char *word)</code>, que devuelve la
+      (posible) nueva raíz: <code class="inl">root-&gt;left = tree_insert(root-&gt;left, word);</code>. Para copiar la
+      palabra, haz <code class="inl">malloc(strlen(w) + 1)</code> + <code class="inl">strcpy</code>. Ese
+      <code class="inl">+ 1</code> es para el <code class="inl">'\0'</code>. Cada copia necesitará su propio
+      <code class="inl">free</code>.</p>
+    </details>
+  </article>
+</section>
+
+<!-- =========================================================== -->
+<section class="tarea" id="b7" data-num="B7" data-title="Ficheros">
+  <h3 class="sec">Bloque 7 &mdash; Ficheros de texto y binarios</h3>
+
+  <article class="ej" id="e25">
+    <div class="ej-head"><span class="ej-id">E25</span><h4>Procesar un fichero de medidas (CSV)</h4><span class="lvl"><b>&#9679;&#9679;</b>&#9675;</span><span class="nuevo">Nuevo</span></div>
+    <div class="keys"><code>fopen</code><code>fgets</code><code>sscanf</code><code>fprintf</code><code>perror</code><code>fclose</code></div>
+    <p>Un experimento de caída libre ha generado un fichero <code class="inl">medidas.csv</code> con una cabecera y una
+    línea por medida: <code class="inl">tiempo_s,altura_m</code>. Escribe un programa que:</p>
+    <ol>
+      <li>Reciba el nombre del fichero de entrada y el de salida por <code class="inl">argv</code>.</li>
+      <li>Lo lea línea a línea con <code class="inl">fgets</code> y extraiga los dos números con <code class="inl">sscanf</code>.
+      Las líneas mal formadas no deben detener el programa: avisa por <code class="inl">stderr</code> con su número de línea.</li>
+      <li>Ajuste por mínimos cuadrados <em>h</em> = <em>h</em><sub>0</sub> &minus; &frac12;<em>g t</em>&sup2; (es una recta en
+      <em>t</em>&sup2;) y estime <em>g</em>.</li>
+      <li>Escriba en el fichero de salida una tabla con la medida, el valor ajustado y el residuo.</li>
+    </ol>
+    <p>Crea tú el fichero de prueba, con alguna línea estropeada a propósito.</p>
+    <script type="text/plain" class="srccode" data-file="medidas.csv (ejemplo)">
+tiempo_s,altura_m
+0.00,20.00
+0.10,19.95
+0.20,19.80
+esto no es una medida
+0.30,19.56
+</script>
+    <details><summary>Pista</summary>
+      <p><code class="inl">fopen</code> devuelve <code class="inl">NULL</code> si falla. Entonces
+      <code class="inl">perror(nombre)</code> imprime el motivo («No such file or directory»). Comprueba que
+      <code class="inl">sscanf(linea, "%lf,%lf", &amp;t, &amp;h) == 2</code>. Cierra todos los ficheros que abras.</p>
+    </details>
+  </article>
+
+  <article class="ej" id="e26">
+    <div class="ej-head"><span class="ej-id">E26</span><h4>Guardar y cargar en binario</h4><span class="lvl"><b>&#9679;&#9679;</b>&#9675;</span><span class="nuevo">Nuevo</span></div>
+    <div class="keys"><code>fwrite</code><code>fread</code><code>"wb"/"rb"</code><code>fseek</code><code>ftell</code></div>
+    <p>Genera 100&nbsp;000 partículas aleatorias (struct con posición y velocidad en 3D) y guárdalas de dos maneras:
+    como texto con <code class="inl">fprintf("%.17g ...")</code> y en binario con una única llamada a
+    <code class="inl">fwrite</code>. Después:</p>
+    <ol>
+      <li>Compara el tamaño de los dos ficheros (con <code class="inl">ls -l</code> y con <code class="inl">fseek</code> +
+      <code class="inl">ftell</code> desde el propio programa).</li>
+      <li>Recarga ambos y comprueba que los datos son <strong>idénticos bit a bit</strong> a los originales
+      (<code class="inl">memcmp</code>).</li>
+      <li>Lee directamente la partícula número 54&nbsp;321 del fichero binario con <code class="inl">fseek</code>, sin leer
+      las anteriores.</li>
+      <li>Al principio del fichero binario, escribe una pequeña cabecera con un «número mágico» y el número de partículas, y
+      compruébala al cargar.</li>
+    </ol>
+    <details><summary>Pista</summary>
+      <p>El fichero binario es una copia exacta de la memoria, relleno incluido (E18). Por eso no es portable entre
+      máquinas con distinto tamaño de tipos o distinto orden de bytes. Piensa qué ventajas tiene cada formato.</p>
+    </details>
+  </article>
+</section>
+
+<!-- =========================================================== -->
+<section class="tarea" id="b8" data-num="B8" data-title="Bits">
+  <h3 class="sec">Bloque 8 &mdash; Bits y representación interna</h3>
+
+  <article class="ej" id="e27">
+    <div class="ej-head"><span class="ej-id">E27</span><h4>Operadores de bits y banderas</h4><span class="lvl"><b>&#9679;&#9679;</b>&#9675;</span><span class="nuevo">Nuevo</span></div>
+    <div class="keys"><code>&amp; | ^ ~</code><code>&lt;&lt; &gt;&gt;</code><code>máscaras</code><code>uint32_t</code></div>
+    <ol>
+      <li>Escribe <code class="inl">void print_binary(uint32_t x)</code> y <code class="inl">int count_bits(uint32_t x)</code>.
+      Por ejemplo, 2026 = <code class="inl">11111101010</code> y tiene 8 bits a 1.</li>
+      <li>Escribe <code class="inl">int is_power_of_two(uint32_t x)</code> en una línea, sin bucles.</li>
+      <li>Intercambia dos enteros con tres XOR y explica por qué funciona (y por qué falla si ambos son la misma variable).</li>
+      <li><strong>Banderas.</strong> Representa los permisos de un fichero como en Unix:</li>
+    </ol>
+    <script type="text/plain" class="srccode" data-file="permisos.c">
+enum {
+    PERM_READ  = 1u << 2,   // 4
+    PERM_WRITE = 1u << 1,   // 2
+    PERM_EXEC  = 1u << 0    // 1
+};
+// Escribe: activar, desactivar, conmutar y consultar un permiso,
+// y una función que imprima los 9 bits de "rwxr-x---" a partir de un número octal como 0750.
+</script>
+    <details><summary>Pista</summary>
+      <p>Activar: <code class="inl">p |= F</code>. Desactivar: <code class="inl">p &amp;= ~F</code>. Conmutar:
+      <code class="inl">p ^= F</code>. Consultar: <code class="inl">(p &amp; F) != 0</code>. <code class="inl">x &amp; (x - 1)</code>
+      borra el bit 1 más bajo de <em>x</em>. Con eso tienes tanto <code class="inl">count_bits</code> como
+      <code class="inl">is_power_of_two</code>. Usa tipos <code class="inl">unsigned</code> para desplazar bits:
+      desplazar números negativos da problemas.</p>
+    </details>
+  </article>
+
+  <article class="ej" id="e28">
+    <div class="ej-head"><span class="ej-id">E28</span><h4>Dentro de un <code>double</code>: IEEE 754</h4><span class="lvl"><b>&#9679;&#9679;&#9679;</b></span><span class="nuevo">Nuevo</span></div>
+    <div class="keys"><code>uint64_t</code><code>memcpy</code><code>union</code><code>PRIx64</code><code>NaN / inf</code></div>
+    <p>Un <code class="inl">double</code> ocupa 64 bits: 1 de signo, 11 de exponente (con sesgo 1023) y 52 de mantisa.
+    Escribe un programa que, para cada número que reciba por <code class="inl">argv</code>, muestre sus bits en
+    hexadecimal, separe los tres campos y reconstruya el valor con la fórmula
+    (&minus;1)<sup>s</sup> · 1.<em>m</em> · 2<sup><em>e</em>&minus;1023</sup>.</p>
+    <div class="term">
+      <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">salida esperada</span></div>
+<pre class="shell"><span class="p">$</span> ./ieee 1 -0.1
+1      bits=3ff0000000000000  signo=0  exponente=1023 (2^0)   mantisa=0000000000000
+-0.1   bits=bfb999999999999a  signo=1  exponente=1019 (2^-4)  mantisa=999999999999a</pre>
+    </div>
+    <p>Prueba también <code class="inl">0</code>, <code class="inl">-0</code>, <code class="inl">1e308*10</code> (infinito),
+    <code class="inl">0.0/0.0</code> (NaN) y <code class="inl">5e-324</code> (el menor número subnormal).</p>
+    <details><summary>Pista</summary>
+      <p>Copia los bytes con <code class="inl">memcpy(&amp;u, &amp;d, sizeof d)</code>, siendo <code class="inl">u</code> un
+      <code class="inl">uint64_t</code>. Esa es la forma correcta; un cast de punteros
+      <code class="inl">*(uint64_t *)&amp;d</code> viola las reglas de <em>aliasing</em>. Luego, exponente:
+      <code class="inl">(u &gt;&gt; 52) &amp; 0x7FF</code>; mantisa: <code class="inl">u &amp; ((1ULL &lt;&lt; 52) - 1)</code>.
+      Para imprimir: <code class="inl">printf("%016" PRIx64, u)</code> con <code class="inl">&lt;inttypes.h&gt;</code>.</p>
+    </details>
+  </article>
+</section>
+
+<!-- =========================================================== -->
+<section class="tarea" id="b9" data-num="B9" data-title="Preprocesador y herramientas">
+  <h3 class="sec">Bloque 9 &mdash; Preprocesador, módulos, funciones variádicas y depuración</h3>
+
+  <article class="ej" id="e29">
+    <div class="ej-head"><span class="ej-id">E29</span><h4>Macros: potencia y peligros</h4><span class="lvl"><b>&#9679;&#9679;</b>&#9675;</span></div>
+    <div class="keys"><code>#define</code><code>#ifdef</code><code>-DDEBUG</code><code>assert</code><code>__FILE__ / __LINE__</code></div>
+    <ol>
+      <li>Predice y después comprueba qué imprime este fragmento. Corrige las macros para que den el resultado «esperado».
+      ¿Hay alguno que no se pueda corregir con una macro?
+        <script type="text/plain" class="srccode" data-file="macros.c">
+#define SQUARE(x) x * x
+#define MAX(a, b) a > b ? a : b
+
+int i = 3;
+printf("%d\n", SQUARE(2 + 1));      // ¿9?
+printf("%d\n", 10 * MAX(2, 5));     // ¿50?
+printf("%d\n", MAX(i++, 2));        // ¿3? ¿y cuánto vale i después?
+</script>
+      </li>
+      <li>Crea una macro <code class="inl">LOG(msg)</code> que imprima el fichero y la línea desde la que se llama, y que
+      <strong>no genere código</strong> salvo que se compile con <code class="inl">-DDEBUG</code>.</li>
+      <li>Añade <code class="inl">assert</code> a la función <code class="inl">frac_make</code> de E17 para que falle si el
+      denominador es 0. Compila después con <code class="inl">-DNDEBUG</code> y observa qué cambia.</li>
+      <li>Mira la salida del preprocesador con <code class="inl">gcc -E macros.c | tail -20</code>.</li>
+    </ol>
+    <details><summary>Pista</summary>
+      <p>Una macro sustituye texto antes de compilar; no evalúa nada. Pon paréntesis alrededor de cada parámetro y de toda
+      la expresión: <code class="inl">#define SQUARE(x) ((x) * (x))</code>. Aun así, <code class="inl">MAX(i++, 2)</code>
+      incrementa <code class="inl">i</code> dos veces. Por eso, en C moderno se prefiere una función
+      <code class="inl">static inline</code>, como hicimos con <code class="inl">vec3</code>.</p>
+    </details>
+  </article>
+
+  <article class="ej" id="e30">
+    <div class="ej-head"><span class="ej-id">E30</span><h4>Un módulo con tipo opaco y su Makefile</h4><span class="lvl"><b>&#9679;&#9679;&#9679;</b></span></div>
+    <div class="keys"><code>.h / .c</code><code>tipo incompleto</code><code>static</code><code>Makefile</code><code>ar</code></div>
+    <p>Convierte la pila de E23 en un módulo reutilizable cuyo usuario <strong>no pueda</strong> ver ni tocar los campos
+    internos:</p>
+    <script type="text/plain" class="srccode" data-file="stack.h">
+#ifndef STACK_H
+#define STACK_H
+
+#include <stddef.h>
+
+typedef struct stack stack;    // declarado pero no definido: tipo opaco
+
+stack *stack_new(void);
+void   stack_delete(stack *s);
+int    stack_push(stack *s, double x);
+int    stack_pop(stack *s, double *out);   // 0 si estaba vacía
+size_t stack_size(const stack *s);
+
+#endif
+</script>
+    <ul>
+      <li>La definición de <code class="inl">struct stack</code> va solo en <code class="inl">stack.c</code>. Las funciones
+      auxiliares internas (por ejemplo, <code class="inl">grow</code>) deben ser <code class="inl">static</code>.</li>
+      <li>Escribe dos programas distintos que lo usen: la calculadora RPN de E16 y un test (<code class="inl">test_stack.c</code>)
+      que compruebe cada función con <code class="inl">assert</code>.</li>
+      <li>Escribe un <code class="inl">Makefile</code> con los objetivos <code class="inl">all</code>, <code class="inl">test</code>
+      y <code class="inl">clean</code>, y con las dependencias correctas de las cabeceras.</li>
+      <li>Intenta escribir <code class="inl">s-&gt;size</code> desde <code class="inl">main.c</code>. ¿Qué error da el
+      compilador?</li>
+    </ul>
+    <details><summary>Pista</summary>
+      <p>Repasa la Tarea 13. Con un tipo incompleto puedes declarar punteros (<code class="inl">stack *</code>), pero no
+      variables (<code class="inl">stack s;</code>) ni acceder a campos. Así es <code class="inl">FILE</code> en
+      <code class="inl">stdio.h</code>. Para nota, empaqueta el módulo en una biblioteca estática con
+      <code class="inl">ar rcs libstack.a stack.o</code> y enlaza con <code class="inl">-L. -lstack</code>.</p>
+    </details>
+  </article>
+
+  <article class="ej" id="e31">
+    <div class="ej-head"><span class="ej-id">E31</span><h4>Funciones con número variable de argumentos</h4><span class="lvl"><b>&#9679;&#9679;</b>&#9675;</span><span class="nuevo">Nuevo</span></div>
+    <div class="keys"><code>stdarg.h</code><code>va_list</code><code>va_arg</code><code>vfprintf</code></div>
+    <p><code class="inl">printf</code> acepta cualquier número de argumentos. Tú también puedes escribir funciones así:</p>
+    <ol>
+      <li><code class="inl">double average(int n, ...)</code>, que haga la media de <em>n</em> valores <code class="inl">double</code>:
+      <code class="inl">average(3, 1.0, 2.0, 6.0)</code> &rarr; 3.</li>
+      <li><code class="inl">void log_msg(const char *level, const char *fmt, ...)</code>, que añada la hora y el nivel delante
+      del mensaje y lo pase todo a <code class="inl">vfprintf(stderr, ...)</code>.</li>
+      <li>Un mini <code class="inl">printf</code> propio que solo entienda <code class="inl">%d</code>, <code class="inl">%s</code>,
+      <code class="inl">%c</code> y <code class="inl">%%</code>, escribiendo carácter a carácter con <code class="inl">putchar</code>.</li>
+    </ol>
+    <details><summary>Pista</summary>
+      <p>Patrón: <code class="inl">va_list ap; va_start(ap, n); ... va_arg(ap, double) ... va_end(ap);</code>. La función no
+      puede saber cuántos argumentos ni de qué tipo le han pasado; por eso hace falta <em>n</em> o una cadena de formato.
+      ¿Qué ocurre con <code class="inl">average(3, 1, 2, 6)</code>, con enteros? Compruébalo y explícalo.</p>
+    </details>
+  </article>
+
+  <article class="ej" id="e32">
+    <div class="ej-head"><span class="ej-id">E32</span><h4>Caza de errores</h4><span class="lvl"><b>&#9679;&#9679;</b>&#9675;</span><span class="nuevo">Nuevo</span></div>
+    <div class="keys"><code>-Wall -Wextra</code><code>-fsanitize=address,undefined</code><code>valgrind</code><code>gdb</code></div>
+    <p>Este programa compila y a veces incluso parece funcionar, pero tiene <strong>al menos siete errores</strong>. Encuéntralos
+    usando las herramientas en este orden y anota cuáles detecta cada una:</p>
+    <ol>
+      <li>Leyendo el código.</li>
+      <li><code class="inl">gcc -Wall -Wextra</code></li>
+      <li><code class="inl">gcc -g -fsanitize=address,undefined</code> y ejecutar.</li>
+      <li><code class="inl">valgrind ./bugs</code> (compilado sin sanitizadores).</li>
+      <li><code class="inl">gdb ./bugs</code>: pon un punto de ruptura en <code class="inl">mean</code> (<code class="inl">break mean</code>,
+      <code class="inl">run</code>, <code class="inl">next</code>, <code class="inl">print sum</code>) y sigue el bucle paso a paso.</li>
+    </ol>
+    <script type="text/plain" class="srccode" data-file="bugs.c">
+#include <stdio.h>
+#include <stdlib.h>
+
+double mean(const int *v, int n) {
+    int sum;
+    for (int i = 0; i <= n; i++)
+        sum += v[i];
+    return sum / n;
+}
+
+char *greeting(const char *name) {
+    char buf[32];
+    sprintf(buf, "Hola, %s", name);
+    return buf;
+}
+
+int main(void) {
+    int n = 5;
+    int *v = malloc(n * sizeof(int));
+    for (int i = 0; i < n; i++)
+        v[i] = i + 1;
+
+    printf("media = %f\n", mean(v, n));       // debería ser 3.0
+
+    char *s = greeting("Ada");
+    printf("%s\n", s);
+
+    if (n = 0)
+        printf("el array está vacío\n");
+
+    free(v);
+    printf("primer elemento: %d\n", v[0]);
+    return 0;
+}
+</script>
+    <details><summary>Pista</summary>
+      <p>Busca: una variable sin inicializar, un acceso fuera del array, una división entera, un puntero a una variable local
+      que ya no existe (Tarea 8), una asignación que debía ser una comparación, un uso después de
+      <code class="inl">free</code>, un <code class="inl">malloc</code> sin comprobar&hellip; y piensa qué pasa con
+      <code class="inl">greeting</code> si el nombre tiene 40 letras (sustitúyelo por <code class="inl">snprintf</code>).
+      Ninguna herramienta lo encuentra todo: por eso se usan varias.</p>
+    </details>
+  </article>
+
+  <div class="box reto">
+    <p class="box-label">Proyecto integrador (opcional)</p>
+    <p>Combina varios bloques en un único programa: una <strong>agenda de contactos</strong> en la terminal con un menú
+    (E4), contactos guardados en un array dinámico (E21) o en una lista (E22), búsqueda por nombre (E13, E20), guardado y
+    carga en un fichero (E25 o E26), separada en módulos con su <code class="inl">Makefile</code> (E30) y sin fugas
+    según Valgrind (E32).</p>
+    <ul class="entrega">
+      <li>Código organizado en al menos tres módulos <code class="inl">.c</code>/<code class="inl">.h</code>.</li>
+      <li>Compila sin avisos con <code class="inl">-Wall -Wextra</code>.</li>
+      <li>Salida de <code class="inl">valgrind --leak-check=full</code> sin errores.</li>
+      <li>Un breve informe: qué estructura de datos elegiste y por qué.</li>
+    </ul>
+  </div>
+</section>
+
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="shell">
+    <p>Ejercicios complementarios del curso de C. Son independientes del trazador de rayos y se pueden hacer en cualquier orden
+    dentro de cada bloque.</p>
+    <p>Compila cada ejercicio con <code class="inl">gcc -std=c11 -Wall -Wextra -g ej.c -o ej -lm</code>.</p>
+  </div>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>

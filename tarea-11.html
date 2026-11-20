@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tarea 11 &middot; Desenfoque (profundidad de campo) &mdash; Trazador de Rayos en C</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,600&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><b>Trazador de Rayos en C</b></a>
+    <div class="spacer"></div>
+    <button class="theme-btn" id="themeBtn" aria-label="Cambiar tema">
+      <span id="themeIcon">&#9680;</span><span id="themeLabel">Tema</span>
+    </button>
+  </div>
+</div>
+<div class="shell">
+  <div class="layout">
+    <div class="toc-wrap"><nav class="toc" aria-label="Ruta del curso"><p class="toc-title">Ruta del curso</p><ol>
+<li><a class="" href="index.html"><span class="n">&#9632;</span><span>Inicio</span></a></li>
+<li><a class="" href="tarea-00.html"><span class="n">0</span><span>Preparar el entorno</span></a></li>
+<li><a class="" href="tarea-01.html"><span class="n">1</span><span>Generar una imagen (PPM)</span></a></li>
+<li><a class="" href="tarea-02.html"><span class="n">2</span><span>El tipo vec3 (structs)</span></a></li>
+<li><a class="" href="tarea-03.html"><span class="n">3</span><span>Rayos y un fondo</span></a></li>
+<li><a class="" href="tarea-04.html"><span class="n">4</span><span>Añadir una esfera</span></a></li>
+<li><a class="" href="tarea-05.html"><span class="n">5</span><span>Normales y varios objetos</span></a></li>
+<li><a class="" href="tarea-06.html"><span class="n">6</span><span>Antialiasing y aleatoriedad</span></a></li>
+<li><a class="" href="tarea-07.html"><span class="n">7</span><span>Materiales difusos (recursión)</span></a></li>
+<li><a class="" href="tarea-08.html"><span class="n">8</span><span>Materiales: metal</span></a></li>
+<li><a class="" href="tarea-09.html"><span class="n">9</span><span>Dieléctricos (vidrio)</span></a></li>
+<li><a class="" href="tarea-10.html"><span class="n">10</span><span>Cámara posicionable</span></a></li>
+<li><a class="active" href="tarea-11.html"><span class="n">11</span><span>Desenfoque (profundidad de campo)</span></a></li>
+<li><a class="" href="tarea-12.html"><span class="n">12</span><span>Escena final y memoria dinámica</span></a></li>
+<li><a class="" href="tarea-13.html"><span class="n">13</span><span>Compilación separada y Makefile</span></a></li>
+<li><a class="" href="tarea-14.html"><span class="n">14</span><span>¿Qué sigue?</span></a></li>
+    </ol></nav></div>
+    <main class="solo">
+      <nav class="pager top"><a class="pg prev" href="tarea-10.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tarea 10 &middot; Cámara posicionable</span></a><a class="pg next" href="tarea-12.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tarea 12 &middot; Escena final y memoria dinámica</span></a></nav>
+      <section class="tarea" id="tarea-11" data-num="11" data-title="Desenfoque (profundidad de campo)">
+  <div class="tarea-head">
+    <div class="tarea-num">Tarea<span>11</span></div>
+    <div class="titles">
+      <p class="tarea-kicker">Lente y apertura</p>
+      <h2>Desenfoque: profundidad de campo</h2>
+    </div>
+  </div>
+
+  <div class="box objetivo">
+    <p class="box-label">Objetivo</p>
+    <p>Simular una lente real: los objetos a la distancia de enfoque salen nítidos y el resto, desenfocado. Se
+    añaden pocos campos a la cámara y una nueva fuente de aleatoriedad (un disco).</p>
+  </div>
+
+  <div class="box fisica">
+    <p class="box-label">Física · lente delgada y disco de desenfoque</p>
+    <p>Hasta ahora todos los rayos salían de un punto (cámara ideal, todo nítido). Una cámara real tiene una
+    <strong>apertura</strong> finita: los rayos parten de puntos distintos de un pequeño disco (la lente) pero
+    convergen en el <strong>plano de enfoque</strong>, situado a <code class="inl">focus_dist</code>. Cuanto
+    mayor el ángulo de apertura <code class="inl">defocus_angle</code>, más borroso queda lo que está fuera de
+    ese plano. Es la profundidad de campo de la fotografía.</p>
+  </div>
+
+  <p>Primero, un vector aleatorio dentro de un disco unitario. Añádelo a <code class="inl">rtweekend.h</code>:</p>
+
+  <script type="text/plain" class="srccode" data-file="rtweekend.h (añadir)">
+// Punto aleatorio dentro del disco unidad del plano z = 0
+static inline vec3 random_in_unit_disk(void) {
+    while (1) {
+        vec3 p = v3(random_double_range(-1, 1), random_double_range(-1, 1), 0);
+        if (vec3_length_squared(p) < 1) return p;
+    }
+}
+</script>
+
+  <div class="box concepto">
+    <p class="box-label">Concepto de C · extender un <code>struct</code> existente</p>
+    <p>Ampliar la cámara es simplemente añadir campos al <code class="inl">struct</code> y usarlos en
+    <code class="inl">camera_initialize</code> y <code class="inl">get_ray</code>. Esto muestra la ventaja de
+    haber encapsulado: el resto del programa (y tu <code class="inl">main</code>) apenas cambia.</p>
+  </div>
+
+  <script type="text/plain" class="srccode" data-file="camera.h (cambios para desenfoque)">
+// 1) Añade estos campos al struct camera:
+    double defocus_angle;   // angulo de apertura (0 = todo nitido)
+    double focus_dist;      // distancia del plano de enfoque
+    // ... y estos derivados:
+    vec3   defocus_disk_u, defocus_disk_v;
+
+// 2) En camera_initialize, usa focus_dist en vez de focal_length:
+    //   double focal_length = vec3_length(...);   <-- ELIMINA esta linea
+    double theta = degrees_to_radians(cam->vfov);
+    double h = tan(theta / 2);
+    double viewport_height = 2 * h * cam->focus_dist;   // <-- focus_dist
+    // ... (viewport_width, base u/v/w y deltas igual que antes) ...
+
+    // El viewport se coloca a focus_dist en vez de a focal_length:
+    point3 viewport_upper_left =
+        vec3_sub(vec3_sub(vec3_sub(cam->center, vec3_scale(cam->w, cam->focus_dist)),
+                          vec3_scale(viewport_u, 0.5)),
+                 vec3_scale(viewport_v, 0.5));
+    // ... (pixel00_loc igual) ...
+
+    // Radio del disco de la lente
+    double defocus_radius =
+        cam->focus_dist * tan(degrees_to_radians(cam->defocus_angle / 2));
+    cam->defocus_disk_u = vec3_scale(cam->u, defocus_radius);
+    cam->defocus_disk_v = vec3_scale(cam->v, defocus_radius);
+
+// 3) Nueva funcion: origen del rayo tomado del disco de la lente.
+static point3 defocus_disk_sample(const camera *cam) {
+    vec3 p = random_in_unit_disk();
+    return vec3_add(cam->center,
+             vec3_add(vec3_scale(cam->defocus_disk_u, p.x),
+                      vec3_scale(cam->defocus_disk_v, p.y)));
+}
+
+// 4) En get_ray, el origen ya no es siempre el centro:
+    point3 ray_origin = (cam->defocus_angle <= 0)
+                        ? cam->center
+                        : defocus_disk_sample(cam);
+    ray r = { ray_origin, vec3_sub(pixel_sample, ray_origin) };
+    return r;
+</script>
+
+  <p>Y en <code class="inl">main</code>, añade los dos parámetros nuevos:</p>
+
+  <script type="text/plain" class="srccode" data-file="main.c (añadir a la cámara)">
+    cam.defocus_angle = 10.0;
+    cam.focus_dist    = 3.4;
+</script>
+
+  <div class="box reto">
+    <p class="box-label">Entrega</p>
+    <ul class="entrega">
+      <li>La escena con desenfoque, y una comparación entre <code>defocus_angle = 0</code> y un valor grande.</li>
+      <li><strong>Reto:</strong> ajusta <code>focus_dist</code> para enfocar nítidamente una esfera concreta.</li>
+    </ul>
+  </div>
+</section>
+      <nav class="pager bottom"><a class="pg prev" href="tarea-10.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tarea 10 &middot; Cámara posicionable</span></a><a class="pg next" href="tarea-12.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tarea 12 &middot; Escena final y memoria dinámica</span></a></nav>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="shell">
+    <p>Material docente derivado y adaptado de <a href="https://raytracing.github.io/books/RayTracingInOneWeekend.html">«Ray Tracing in One Weekend»</a>
+    de Peter Shirley, Trevor David Black y Steve Hollasch (licencia CC0). Esta versión reescribe todo el código en
+    <strong>C puro</strong> y reorganiza el contenido como tareas de curso, con toda la explicación en español.</p>
+    <p>Compila los ejemplos con <code class="inl">gcc -O2 main.c -o rt -lm</code> y visualiza con <code class="inl">./rt &gt; imagen.ppm</code>.</p>
+  </div>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>
