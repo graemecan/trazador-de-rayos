@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Linux básico &mdash; Trazador de Rayos en C</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,600&display=swap">
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><b>Linux básico</b></a>
+    <div class="spacer"></div>
+    <button class="theme-btn" id="themeBtn" aria-label="Cambiar tema">
+      <span id="themeIcon">&#9680;</span><span id="themeLabel">Tema</span>
+    </button>
+  </div>
+</div>
+<div class="shell">
+  <header class="hero">
+    <p class="eyebrow">Complemento del curso de C · 2.º de Física</p>
+    <h1>La <em>terminal</em> como laboratorio</h1>
+    <div class="spectrum" aria-hidden="true"></div>
+    <p class="lede">Ya usas la terminal para compilar con <strong>gcc</strong> y ejecutar
+    <strong>./rt &gt; imagen.ppm</strong>. Este módulo corto explica qué hay detrás de ese
+    <strong>&gt;</strong> y presenta las herramientas clásicas de Unix para encadenar programas,
+    proteger ficheros, buscar y transformar texto, y programar tareas que se ejecutan solas.</p>
+    <div class="meta-row">
+      <span class="chip">Sistema: <b>Linux / WSL / macOS</b></span>
+      <span class="chip">Shell: <b>bash</b></span>
+      <span class="chip"><b>7</b> temas cortos</span>
+    </div>
+  </header>
+  <section id="intro">
+  <h2>La filosofía Unix</h2>
+  <p>Las herramientas de Unix siguen una idea sencilla: <strong>cada programa hace una sola cosa, y la
+  hace bien</strong>; los programas leen y escriben <strong>texto</strong>, de modo que la salida de uno
+  puede ser la entrada de otro. Con media docena de órdenes pequeñas —<code class="inl">grep</code>, <code class="inl">sort</code>,
+  <code class="inl">sed</code>, <code class="inl">awk</code>…— y la forma de conectarlas (<code class="inl">|</code>, <code class="inl">&gt;</code>) se resuelven en una
+  línea problemas que en C costarían un programa entero.</p>
+
+  <p>Para un físico esto es muy práctico: los datos de laboratorio, las salidas de simulaciones y los
+  registros (<em>logs</em>) de un programa como nuestro trazador de rayos son, casi siempre, ficheros de
+  texto organizados en líneas y columnas.</p>
+
+  <div class="box nota">
+    <p class="box-label">Cómo leer los ejemplos</p>
+    <p>Las líneas que empiezan por <code class="inl">$</code> son órdenes que escribes tú (sin el
+    <code class="inl">$</code>). Lo que aparece debajo es la salida. Lo que va tras <code class="inl">#</code>
+    es un comentario: la shell lo ignora.</p>
+  </div>
+
+  <h3 id="datos">Ficheros de práctica</h3>
+  <p>Todos los temas usan dos ficheros pequeños: unas <strong>medidas de laboratorio</strong> en formato
+  CSV y el <strong>registro</strong> de varias ejecuciones del trazador de rayos. Créalos copiando y pegando
+  este bloque en una terminal (la construcción <code class="inl">&lt;&lt;'EOF'</code> se explica en el tema 1):</p>
+  <div class="term">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="p">$</span> mkdir -p ~/practica-linux &amp;&amp; cd ~/practica-linux
+<span class="p">$</span> cat &gt; medidas.csv &lt;&lt;'EOF'
+alumno,experimento,tiempo_s,temp_C
+ana,pendulo,2.01,21.5
+luis,pendulo,1.98,21.7
+marta,muelle,0.85,22.0
+ana,muelle,0.87,22.1
+pedro,pendulo,2.05,21.4
+luis,caida,0.45,21.9
+marta,pendulo,2.00,21.6
+pedro,caida,0.47,22.3
+EOF
+<span class="p">$</span> cat &gt; render.log &lt;&lt;'EOF'
+2026-11-18 10:02:11 INFO  inicio escena=final ancho=400 muestras=10
+2026-11-18 10:02:11 WARN  pocas muestras: la imagen tendra ruido
+2026-11-18 10:04:37 INFO  fin tiempo=146.2
+2026-11-18 11:15:02 INFO  inicio escena=vidrio ancho=800 muestras=50
+2026-11-18 11:15:03 ERROR no se pudo abrir textura.ppm
+2026-11-18 11:31:40 INFO  fin tiempo=997.8
+2026-11-19 09:00:00 INFO  inicio escena=final ancho=1200 muestras=100
+2026-11-19 09:00:01 WARN  memoria: 512 MB reservados
+2026-11-19 10:12:55 INFO  fin tiempo=4375.0
+EOF
+<span class="p">$</span> ls
+medidas.csv  render.log</pre>
+  </div>
+  </section>
+  <h2 style="font-family:'Spectral',Georgia,serif;margin-top:3rem">Los 7 temas</h2>
+  <ol class="course-list">
+<li><a href="01-redireccion.html"><span class="cl-num">1</span><span class="cl-title">Redirección &mdash; Entrada, salida y errores</span></a></li>
+<li><a href="02-tuberias.html"><span class="cl-num">2</span><span class="cl-title">Tuberías &mdash; Conectar programas con |</span></a></li>
+<li><a href="03-permisos.html"><span class="cl-num">3</span><span class="cl-title">Permisos &mdash; Quién puede leer, escribir, ejecutar</span></a></li>
+<li><a href="04-grep.html"><span class="cl-num">4</span><span class="cl-title">grep &mdash; Buscar texto con patrones</span></a></li>
+<li><a href="05-sed.html"><span class="cl-num">5</span><span class="cl-title">sed &mdash; Editar texto en flujo</span></a></li>
+<li><a href="06-awk.html"><span class="cl-num">6</span><span class="cl-title">awk &mdash; Procesar datos por columnas</span></a></li>
+<li><a href="07-cron.html"><span class="cl-num">7</span><span class="cl-title">cron &mdash; Tareas programadas</span></a></li>
+  </ol>
+</div>
+<footer class="foot">
+  <div class="shell">
+    <p>Complemento del curso <a href="../index.html">Trazador de Rayos en C</a>: herramientas de la
+    línea de órdenes de Linux que usarás para compilar, ejecutar y analizar tus programas.</p>
+    <p>Todos los ejemplos usan los ficheros de práctica <code class="inl">medidas.csv</code> y
+    <code class="inl">render.log</code> creados en la <a href="index.html#datos">página de inicio</a>.</p>
+  </div>
+</footer>
+<script src="../app.js"></script>
+</body>
+</html>

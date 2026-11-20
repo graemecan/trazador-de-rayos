@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tema 7 &middot; cron &mdash; Linux básico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,600&display=swap">
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><b>Linux básico</b></a>
+    <div class="spacer"></div>
+    <button class="theme-btn" id="themeBtn" aria-label="Cambiar tema">
+      <span id="themeIcon">&#9680;</span><span id="themeLabel">Tema</span>
+    </button>
+  </div>
+</div>
+<div class="shell">
+  <div class="layout">
+    <div class="toc-wrap"><nav class="toc" aria-label="Ruta del módulo"><p class="toc-title">Linux básico</p><ol>
+<li><a href="../index.html"><span class="n">&larr;</span><span>Curso de C</span></a></li>
+<li><a class="" href="index.html"><span class="n">&#9632;</span><span>Inicio</span></a></li>
+<li><a class="" href="01-redireccion.html"><span class="n">1</span><span>Redirección</span></a></li>
+<li><a class="" href="02-tuberias.html"><span class="n">2</span><span>Tuberías</span></a></li>
+<li><a class="" href="03-permisos.html"><span class="n">3</span><span>Permisos</span></a></li>
+<li><a class="" href="04-grep.html"><span class="n">4</span><span>grep</span></a></li>
+<li><a class="" href="05-sed.html"><span class="n">5</span><span>sed</span></a></li>
+<li><a class="" href="06-awk.html"><span class="n">6</span><span>awk</span></a></li>
+<li><a class="active" href="07-cron.html"><span class="n">7</span><span>cron</span></a></li>
+    </ol></nav></div>
+    <main class="solo">
+      <nav class="pager top"><a class="pg prev" href="06-awk.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tema 6 &middot; awk</span></a><a class="pg next" href="../index.html"><span class="dir">Volver &rarr;</span><span class="lbl">Curso de C</span></a></nav>
+      <section class="tarea" id="tema-7" data-num="7" data-title="cron">
+  <div class="tarea-head">
+    <div class="tarea-num">Tema<span>7</span></div>
+    <div class="titles">
+      <p class="tarea-kicker">Automatizar</p>
+      <h2><code>cron</code>: tareas programadas</h2>
+    </div>
+  </div>
+
+  <div class="box objetivo">
+    <p class="box-label">Objetivo</p>
+    <p>Programar órdenes para que se ejecuten <strong>solas</strong> a horas fijas (cada noche, cada lunes, cada 5 minutos) con <code class="inl">cron</code>, y aprender a depurarlas cuando «no hacen nada».</p>
+  </div>
+
+  <div class="box concepto">
+    <p class="box-label">Concepto · el demonio cron y la crontab</p>
+    <p><code class="inl">cron</code> es un programa que se ejecuta permanentemente en segundo plano (un <em>demonio</em>) y, cada
+    minuto, mira si hay alguna tarea programada. Cada usuario tiene su propia tabla de tareas, la
+    <strong>crontab</strong>, que se edita con <code class="inl">crontab -e</code> y se consulta con <code class="inl">crontab -l</code>.</p>
+  </div>
+
+  <h3>Formato de una línea</h3>
+  <p>Cinco campos de tiempo y, después, la orden:</p>
+  <div class="term">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">archivo · <b>crontab</b></span></div>
+<pre class="shell"><span class="c"># ┌───────── minuto        (0-59)</span>
+<span class="c"># │ ┌─────── hora          (0-23)</span>
+<span class="c"># │ │ ┌───── día del mes   (1-31)</span>
+<span class="c"># │ │ │ ┌─── mes           (1-12)</span>
+<span class="c"># │ │ │ │ ┌─ día de semana (0-7; 0 y 7 = domingo)</span>
+<span class="c"># │ │ │ │ │</span>
+  30 2 * * *  /home/ana/rt/render_nocturno.sh</pre>
+  </div>
+  <p>Un <code class="inl">*</code> significa «cualquier valor». Esta línea ejecuta el script todos los días a las 02:30.</p>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Línea</th><th>Cuándo se ejecuta</th></tr></thead>
+      <tbody>
+          <tr><td><code class="inl">*/5 * * * *</code></td><td>cada 5 minutos</td></tr>
+          <tr><td><code class="inl">0 * * * *</code></td><td>al principio de cada hora</td></tr>
+          <tr><td><code class="inl">30 2 * * *</code></td><td>todos los días a las 02:30</td></tr>
+          <tr><td><code class="inl">0 9 * * 1-5</code></td><td>de lunes a viernes a las 09:00</td></tr>
+          <tr><td><code class="inl">0 0 1 * *</code></td><td>el día 1 de cada mes a medianoche</td></tr>
+          <tr><td><code class="inl">15,45 8-18 * * *</code></td><td>a y cuarto y a menos cuarto, de 8 a 18 h</td></tr>
+          <tr><td><code class="inl">@reboot</code></td><td>una vez, al arrancar el ordenador</td></tr>
+          <tr><td><code class="inl">@daily</code></td><td>una vez al día (equivale a <code>0 0 * * *</code>)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Un ejemplo completo: render nocturno</h3>
+  <p>El render final en alta resolución tarda más de una hora. Lo programamos para la noche con un script que usa todo lo
+  aprendido: redirección, permisos y (para el informe) <code class="inl">grep</code> y <code class="inl">awk</code>.</p>
+  <div class="term">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">archivo · <b>render_nocturno.sh</b></span></div>
+<pre class="shell"><span class="c">#!/bin/bash</span>
+<span class="c"># Render nocturno: compila, renderiza y registra el resultado.</span>
+cd /home/ana/rt || exit 1             # cron arranca en $HOME: vamos al proyecto
+FECHA=$(date +%F)                     # p. ej. 2026-11-20
+
+gcc -Wall -O2 src/*.c -o rt -lm || exit 1
+inicio=$(date +%s)
+./rt &gt; "renders/final-$FECHA.ppm" 2&gt; /dev/null
+fin=$(date +%s)
+
+echo "$FECHA render terminado en $((fin - inicio)) s" &gt;&gt; renders/historial.txt</pre>
+  </div>
+  <div class="term">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="p">$</span> chmod +x render_nocturno.sh      <span class="c"># ¡imprescindible! (tema 3)</span>
+<span class="p">$</span> ./render_nocturno.sh               <span class="c"># pruébalo a mano ANTES de programarlo</span>
+<span class="p">$</span> crontab -e                         <span class="c"># se abre un editor; añade esta línea:</span>
+30 2 * * * /home/ana/rt/render_nocturno.sh &gt;&gt; /home/ana/rt/cron.log 2&gt;&amp;1
+<span class="p">$</span> crontab -l                         <span class="c"># comprueba que quedó guardada</span></pre>
+  </div>
+
+  <div class="box pista">
+    <p class="box-label">Pista · «mi tarea de cron no hace nada»</p>
+    <p>Es el problema más habitual. Casi siempre es una de estas causas:</p>
+    <ul>
+      <li><strong>Entorno distinto.</strong> cron ejecuta con un <code class="inl">PATH</code> mínimo y desde tu directorio personal.
+      Usa <strong>rutas absolutas</strong> para todo, o haz <code class="inl">cd</code> al principio del script.</li>
+      <li><strong>Sin permiso de ejecución.</strong> Comprueba <code class="inl">ls -l</code> del script.</li>
+      <li><strong>La salida se pierde.</strong> No hay terminal: redirige stdout y stderr a un fichero
+      (<code class="inl">&gt;&gt; cron.log 2&gt;&amp;1</code>) para poder ver los errores.</li>
+      <li><strong>El % es especial</strong> en la crontab: escríbelo como <code class="inl">\%</code>, o mejor, mete la orden en un script.</li>
+      <li><strong>cron no está en marcha.</strong> Compruébalo con <code class="inl">systemctl status cron</code>. En WSL no se arranca solo:
+      <code class="inl">sudo service cron start</code>.</li>
+    </ul>
+  </div>
+
+  <h3>Un primer ejercicio, de un minuto</h3>
+  <div class="term">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="p">$</span> crontab -e                               <span class="c"># añade la línea de abajo: cada minuto</span>
+* * * * * date &gt;&gt; /tmp/latido.txt
+<span class="p">$</span> tail -f /tmp/latido.txt                  <span class="c"># observa cómo crece (Ctrl+C para salir)</span>
+vie 20 nov 2026 10:41:01 -03
+vie 20 nov 2026 10:42:01 -03
+<span class="p">$</span> crontab -e                               <span class="c"># ...y BORRA la línea al terminar</span></pre>
+  </div>
+
+  <div class="box nota">
+    <p class="box-label">Ordenadores compartidos</p>
+    <p>En los ordenadores del laboratorio piensa antes de programar tareas pesadas: un render cada 5 minutos
+    ocupará la máquina de otros. Para lanzar <em>una sola vez</em> algo largo que sobreviva a cerrar la sesión,
+    es más adecuado <code class="inl">nohup ./rt &gt; imagen.ppm 2&gt; progreso.txt &amp;</code>.</p>
+  </div>
+
+  <div class="box reto">
+    <p class="box-label">Ejercicios</p>
+    <ul class="entrega">
+      <li>Programa la tarea «latido» de cada minuto, comprueba que funciona con <code>tail -f</code> y después elimínala. ¿Qué muestra <code>crontab -l</code> al final?</li>
+      <li>Escribe la línea de crontab que ejecutaría <code>~/rt/render_nocturno.sh</code> a las 23:00 los viernes, y otra para cada 15 minutos entre las 9 y las 17 h.</li>
+      <li>Crea un script <code>informe.sh</code> que, a partir de <code>render.log</code>, escriba en <code>informe.txt</code> cuántos errores y avisos hubo y el tiempo total de render (combina <code>grep -c</code>, <code>awk</code> y <code>&gt;&gt;</code>). Prográmalo con cron y comprueba el resultado.</li>
+    </ul>
+  </div>
+
+</section>
+      <nav class="pager bottom"><a class="pg prev" href="06-awk.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tema 6 &middot; awk</span></a><a class="pg next" href="../index.html"><span class="dir">Volver &rarr;</span><span class="lbl">Curso de C</span></a></nav>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="shell">
+    <p>Complemento del curso <a href="../index.html">Trazador de Rayos en C</a>: herramientas de la
+    línea de órdenes de Linux que usarás para compilar, ejecutar y analizar tus programas.</p>
+    <p>Todos los ejemplos usan los ficheros de práctica <code class="inl">medidas.csv</code> y
+    <code class="inl">render.log</code> creados en la <a href="index.html#datos">página de inicio</a>.</p>
+  </div>
+</footer>
+<script src="../app.js"></script>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tema 2 &middot; Tuberías &mdash; Linux básico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,600&display=swap">
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><b>Linux básico</b></a>
+    <div class="spacer"></div>
+    <button class="theme-btn" id="themeBtn" aria-label="Cambiar tema">
+      <span id="themeIcon">&#9680;</span><span id="themeLabel">Tema</span>
+    </button>
+  </div>
+</div>
+<div class="shell">
+  <div class="layout">
+    <div class="toc-wrap"><nav class="toc" aria-label="Ruta del módulo"><p class="toc-title">Linux básico</p><ol>
+<li><a href="../index.html"><span class="n">&larr;</span><span>Curso de C</span></a></li>
+<li><a class="" href="index.html"><span class="n">&#9632;</span><span>Inicio</span></a></li>
+<li><a class="" href="01-redireccion.html"><span class="n">1</span><span>Redirección</span></a></li>
+<li><a class="active" href="02-tuberias.html"><span class="n">2</span><span>Tuberías</span></a></li>
+<li><a class="" href="03-permisos.html"><span class="n">3</span><span>Permisos</span></a></li>
+<li><a class="" href="04-grep.html"><span class="n">4</span><span>grep</span></a></li>
+<li><a class="" href="05-sed.html"><span class="n">5</span><span>sed</span></a></li>
+<li><a class="" href="06-awk.html"><span class="n">6</span><span>awk</span></a></li>
+<li><a class="" href="07-cron.html"><span class="n">7</span><span>cron</span></a></li>
+    </ol></nav></div>
+    <main class="solo">
+      <nav class="pager top"><a class="pg prev" href="01-redireccion.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tema 1 &middot; Redirección</span></a><a class="pg next" href="03-permisos.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tema 3 &middot; Permisos</span></a></nav>
+      <section class="tarea" id="tema-2" data-num="2" data-title="Tuberías">
+  <div class="tarea-head">
+    <div class="tarea-num">Tema<span>2</span></div>
+    <div class="titles">
+      <p class="tarea-kicker">Componer programas</p>
+      <h2>Tuberías: conectar programas con <code>|</code></h2>
+    </div>
+  </div>
+
+  <div class="box objetivo">
+    <p class="box-label">Objetivo</p>
+    <p>Conectar la salida de un programa con la entrada de otro mediante la <strong>tubería</strong> <code class="inl">|</code> y conocer las herramientas pequeñas que se suelen encadenar: <code class="inl">head</code>, <code class="inl">tail</code>, <code class="inl">wc</code>, <code class="inl">sort</code>, <code class="inl">uniq</code>, <code class="inl">cut</code>, <code class="inl">tee</code>.</p>
+  </div>
+
+  <div class="box concepto">
+    <p class="box-label">Concepto · la tubería</p>
+    <p><code class="inl">a | b</code> conecta el <strong>stdout</strong> de <code class="inl">a</code> con el <strong>stdin</strong> de <code class="inl">b</code>.
+    Ambos programas se ejecutan a la vez; los datos pasan de uno a otro sin crear ficheros intermedios.
+    Fíjate en que stderr <em>no</em> pasa por la tubería: sigue saliendo por pantalla.</p>
+  </div>
+
+  <p>Un primer ejemplo: comprobar la cabecera de la imagen sin abrirla. Un fichero PPM empieza por <code class="inl">P3</code>, el ancho y alto, y <code class="inl">255</code>:</p>
+  <div class="term">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="p">$</span> ./rt 2&gt; /dev/null | head -n 3
+P3
+400 225
+255</pre>
+  </div>
+
+  <h3>Las piezas</h3>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Orden</th><th>Qué hace</th><th>Ejemplo</th></tr></thead>
+      <tbody>
+          <tr><td><code class="inl">head -n N</code></td><td>primeras N líneas</td><td><code class="inl">head -n 3 medidas.csv</code></td></tr>
+          <tr><td><code class="inl">tail -n N</code></td><td>últimas N líneas (<code>-n +2</code>: desde la 2.ª)</td><td><code class="inl">tail -n +2 medidas.csv</code></td></tr>
+          <tr><td><code class="inl">wc -l</code></td><td>cuenta líneas (<code>-w</code> palabras, <code>-c</code> bytes)</td><td><code class="inl">wc -l render.log</code></td></tr>
+          <tr><td><code class="inl">sort</code></td><td>ordena (<code>-n</code> numérico, <code>-r</code> inverso, <code>-t, -k3</code> por la 3.ª columna separada por comas)</td><td><code class="inl">sort -n</code></td></tr>
+          <tr><td><code class="inl">uniq</code></td><td>quita líneas repetidas <em>consecutivas</em> (<code>-c</code> las cuenta)</td><td><code class="inl">sort | uniq -c</code></td></tr>
+          <tr><td><code class="inl">cut</code></td><td>extrae columnas (<code>-d,</code> separador, <code>-f2</code> campo)</td><td><code class="inl">cut -d, -f2</code></td></tr>
+          <tr><td><code class="inl">tr</code></td><td>traduce caracteres</td><td><code class="inl">tr ',' '\t'</code></td></tr>
+          <tr><td><code class="inl">tee f</code></td><td>copia stdin a <code>f</code> <em>y</em> a stdout</td><td><code class="inl">... | tee copia.txt | ...</code></td></tr>
+          <tr><td><code class="inl">less</code></td><td>pagina la salida (salir con <code>q</code>)</td><td><code class="inl">... | less</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Construir una tubería paso a paso</h3>
+  <p>Pregunta: <em>¿cuántas medidas hay de cada experimento?</em> Se construye añadiendo una pieza cada vez y mirando el resultado:</p>
+  <div class="term">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="p">$</span> cut -d, -f2 medidas.csv                 <span class="c"># 1. la columna "experimento"</span>
+experimento
+pendulo
+pendulo
+muelle
+...
+<span class="p">$</span> cut -d, -f2 medidas.csv | tail -n +2   <span class="c"># 2. sin la cabecera</span>
+<span class="p">$</span> cut -d, -f2 medidas.csv | tail -n +2 | sort | uniq -c | sort -rn
+      4 pendulo
+      2 muelle
+      2 caida</pre>
+  </div>
+
+  <div class="box pista">
+    <p class="box-label">Pista · <code>uniq</code> necesita <code>sort</code></p>
+    <p><code class="inl">uniq</code> solo compara cada línea con la anterior, así que casi siempre va detrás de
+    <code class="inl">sort</code>. El último <code class="inl">sort -rn</code> ordena por el número que añade <code class="inl">uniq -c</code>, de mayor a menor.</p>
+  </div>
+
+  <p>Más ejemplos con nuestros ficheros:</p>
+  <div class="term">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="p">$</span> tail -n +2 medidas.csv | wc -l                       <span class="c"># número de medidas (sin cabecera)</span>
+8
+<span class="p">$</span> tail -n +2 medidas.csv | sort -t, -k3 -n | head -n 3  <span class="c"># las 3 medidas más rápidas</span>
+luis,caida,0.45,21.9
+pedro,caida,0.47,22.3
+marta,muelle,0.85,22.0
+<span class="p">$</span> cut -d, -f1 medidas.csv | tail -n +2 | sort -u | wc -l   <span class="c"># cuántos alumnos distintos</span>
+4
+<span class="p">$</span> ./rt 2&gt; /dev/null | tee imagen.ppm | head -n 3       <span class="c"># guarda la imagen Y mira la cabecera</span></pre>
+  </div>
+
+  <h3><code class="inl">xargs</code>: de líneas a argumentos</h3>
+  <p>Algunas órdenes no leen stdin sino <em>argumentos</em>. <code class="inl">xargs</code> convierte las líneas que recibe en argumentos:</p>
+  <div class="term">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="p">$</span> ls *.c | xargs wc -l          <span class="c"># líneas de código de cada fichero .c</span>
+<span class="p">$</span> ls *.ppm | xargs rm           <span class="c"># borrar todas las imágenes (¡cuidado!)</span></pre>
+  </div>
+
+  <div class="box reto">
+    <p class="box-label">Ejercicios</p>
+    <ul class="entrega">
+      <li>Usando solo <code>cut</code>, <code>sort</code>, <code>uniq</code> y <code>head</code>, averigua qué alumno ha hecho más medidas (si hay empate, muestra todos los empatados).</li>
+      <li>Muestra las 2 temperaturas más altas de <code>medidas.csv</code>, sin la cabecera.</li>
+      <li>Cuenta cuántas líneas de <code>render.log</code> son de cada nivel (<code>INFO</code>, <code>WARN</code>, <code>ERROR</code>). Pista: la 3.ª palabra de cada línea; <code>cut -d' ' -f3</code>.</li>
+      <li>Cuenta el número total de líneas de código de tu proyecto del trazador: <code>cat *.c *.h | wc -l</code>. ¿Por qué no da lo mismo que <code>wc -l *.c *.h</code>?</li>
+    </ul>
+  </div>
+
+</section>
+      <nav class="pager bottom"><a class="pg prev" href="01-redireccion.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tema 1 &middot; Redirección</span></a><a class="pg next" href="03-permisos.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tema 3 &middot; Permisos</span></a></nav>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="shell">
+    <p>Complemento del curso <a href="../index.html">Trazador de Rayos en C</a>: herramientas de la
+    línea de órdenes de Linux que usarás para compilar, ejecutar y analizar tus programas.</p>
+    <p>Todos los ejemplos usan los ficheros de práctica <code class="inl">medidas.csv</code> y
+    <code class="inl">render.log</code> creados en la <a href="index.html#datos">página de inicio</a>.</p>
+  </div>
+</footer>
+<script src="../app.js"></script>
+</body>
+</html>

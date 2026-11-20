@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tema 4 &middot; grep &mdash; Linux básico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,600&display=swap">
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><b>Linux básico</b></a>
+    <div class="spacer"></div>
+    <button class="theme-btn" id="themeBtn" aria-label="Cambiar tema">
+      <span id="themeIcon">&#9680;</span><span id="themeLabel">Tema</span>
+    </button>
+  </div>
+</div>
+<div class="shell">
+  <div class="layout">
+    <div class="toc-wrap"><nav class="toc" aria-label="Ruta del módulo"><p class="toc-title">Linux básico</p><ol>
+<li><a href="../index.html"><span class="n">&larr;</span><span>Curso de C</span></a></li>
+<li><a class="" href="index.html"><span class="n">&#9632;</span><span>Inicio</span></a></li>
+<li><a class="" href="01-redireccion.html"><span class="n">1</span><span>Redirección</span></a></li>
+<li><a class="" href="02-tuberias.html"><span class="n">2</span><span>Tuberías</span></a></li>
+<li><a class="" href="03-permisos.html"><span class="n">3</span><span>Permisos</span></a></li>
+<li><a class="active" href="04-grep.html"><span class="n">4</span><span>grep</span></a></li>
+<li><a class="" href="05-sed.html"><span class="n">5</span><span>sed</span></a></li>
+<li><a class="" href="06-awk.html"><span class="n">6</span><span>awk</span></a></li>
+<li><a class="" href="07-cron.html"><span class="n">7</span><span>cron</span></a></li>
+    </ol></nav></div>
+    <main class="solo">
+      <nav class="pager top"><a class="pg prev" href="03-permisos.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tema 3 &middot; Permisos</span></a><a class="pg next" href="05-sed.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tema 5 &middot; sed</span></a></nav>
+      <section class="tarea" id="tema-4" data-num="4" data-title="grep">
+  <div class="tarea-head">
+    <div class="tarea-num">Tema<span>4</span></div>
+    <div class="titles">
+      <p class="tarea-kicker">Búsqueda de texto</p>
+      <h2><code>grep</code>: buscar con patrones</h2>
+    </div>
+  </div>
+
+  <div class="box objetivo">
+    <p class="box-label">Objetivo</p>
+    <p>Buscar líneas que contienen un texto o un <strong>patrón</strong> (expresión regular) en ficheros o en la salida de otro programa, con <code class="inl">grep</code> y sus opciones más útiles.</p>
+  </div>
+
+  <p><code class="inl">grep patrón fichero</code> imprime las líneas del fichero que contienen el patrón. Sin fichero, lee stdin, así que encaja al final de una tubería.</p>
+  <div class="term">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="p">$</span> grep ERROR render.log
+2026-11-18 11:15:03 ERROR no se pudo abrir textura.ppm
+<span class="p">$</span> grep -n WARN render.log           <span class="c"># -n: con número de línea</span>
+2:2026-11-18 10:02:11 WARN  pocas muestras: la imagen tendra ruido
+8:2026-11-19 09:00:01 WARN  memoria: 512 MB reservados
+<span class="p">$</span> grep -c INFO render.log           <span class="c"># -c: solo cuántas</span>
+6
+<span class="p">$</span> grep -v INFO render.log           <span class="c"># -v: las que NO contienen INFO</span>
+2026-11-18 10:02:11 WARN  pocas muestras: la imagen tendra ruido
+2026-11-18 11:15:03 ERROR no se pudo abrir textura.ppm
+2026-11-19 09:00:01 WARN  memoria: 512 MB reservados</pre>
+  </div>
+
+  <div class="box pista">
+    <p class="box-label">Pista · <code>grep</code> busca texto, no palabras</p>
+    <p>Queremos las líneas que marcan el fin de un render:</p>
+<pre class="shell" style="background:#0d0f14;border-radius:8px;margin:.7rem 0"><span class="p">$</span> grep fin render.log
+2026-11-18 10:02:11 INFO  inicio escena=final ancho=400 muestras=10
+2026-11-18 10:04:37 INFO  fin tiempo=146.2
+...</pre>
+    <p>¡También salen las de <code class="inl">escena=final</code>! La opción <code class="inl">-w</code> exige que el patrón sea una
+    <strong>palabra completa</strong>: <code class="inl">grep -w fin render.log</code> devuelve solo las tres líneas correctas.</p>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Opción</th><th>Efecto</th></tr></thead>
+      <tbody>
+          <tr><td><code class="inl">-i</code></td><td>ignora mayúsculas/minúsculas</td></tr>
+          <tr><td><code class="inl">-n</code></td><td>muestra el número de línea</td></tr>
+          <tr><td><code class="inl">-c</code></td><td>cuenta las líneas que coinciden</td></tr>
+          <tr><td><code class="inl">-v</code></td><td>invierte: líneas que <em>no</em> coinciden</td></tr>
+          <tr><td><code class="inl">-w</code></td><td>solo palabras completas</td></tr>
+          <tr><td><code class="inl">-o</code></td><td>imprime solo el trozo que coincide, no la línea entera</td></tr>
+          <tr><td><code class="inl">-r</code></td><td>busca recursivamente en un directorio</td></tr>
+          <tr><td><code class="inl">-l</code></td><td>solo los nombres de los ficheros con coincidencias</td></tr>
+          <tr><td><code class="inl">-E</code></td><td>expresiones regulares extendidas (<code>+ ? | ()</code> sin barras)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Expresiones regulares</h3>
+  <p>El patrón es una <strong>expresión regular</strong>: un pequeño lenguaje para describir texto. Ponlo siempre
+  entre comillas simples para que la shell no interprete los caracteres especiales.</p>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Patrón</th><th>Coincide con</th></tr></thead>
+      <tbody>
+          <tr><td><code class="inl">.</code></td><td>cualquier carácter</td></tr>
+          <tr><td><code class="inl">^</code> <code class="inl">$</code></td><td>principio / final de línea</td></tr>
+          <tr><td><code class="inl">[0-9]</code></td><td>un carácter del conjunto (aquí, una cifra); <code>[^0-9]</code>: cualquiera que no lo sea</td></tr>
+          <tr><td><code class="inl">x*</code></td><td>cero o más <code>x</code></td></tr>
+          <tr><td><code class="inl">x+</code></td><td>una o más <code>x</code> (con <code>-E</code>)</td></tr>
+          <tr><td><code class="inl">x?</code></td><td><code>x</code> opcional (con <code>-E</code>)</td></tr>
+          <tr><td><code class="inl">a|b</code></td><td><code>a</code> o <code>b</code> (con <code>-E</code>)</td></tr>
+          <tr><td><code class="inl">\.</code></td><td>un punto literal (el <code>\</code> «escapa» el carácter especial)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="term">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="p">$</span> grep -E 'WARN|ERROR' render.log            <span class="c"># avisos o errores</span>
+<span class="p">$</span> grep '^2026-11-19' render.log                 <span class="c"># líneas que EMPIEZAN por esa fecha</span>
+<span class="p">$</span> grep -oE 'escena=[a-z]+' render.log | sort | uniq -c
+      2 escena=final
+      1 escena=vidrio
+<span class="p">$</span> grep -oE 'muestras=[0-9]+' render.log      <span class="c"># solo el trozo que coincide</span>
+muestras=10
+muestras=50
+muestras=100</pre>
+  </div>
+
+  <h3>Buscar en tu código</h3>
+  <p><code class="inl">grep -r</code> es la forma más rápida de encontrar dónde se usa una función en un proyecto:</p>
+  <div class="term">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="p">$</span> grep -rn 'vec3_unit' src/          <span class="c"># ¿dónde se llama a vec3_unit?</span>
+<span class="p">$</span> grep -rl 'malloc' src/             <span class="c"># ¿qué ficheros reservan memoria?</span>
+<span class="p">$</span> grep -rn 'TODO' --include='*.c' .  <span class="c"># tareas pendientes, solo en ficheros .c</span>
+<span class="p">$</span> gcc -Wall main.c -o rt -lm 2&gt;&amp;1 | grep -c warning   <span class="c"># ¿cuántos avisos?</span></pre>
+  </div>
+
+  <div class="box reto">
+    <p class="box-label">Ejercicios</p>
+    <ul class="entrega">
+      <li>Muestra, con número de línea, todas las líneas de <code>render.log</code> del día 18 que <em>no</em> sean <code>INFO</code>.</li>
+      <li>Con <code>grep -o</code> y una tubería, obtén el mayor valor de <code>ancho=</code> que aparece en el log.</li>
+      <li>Lista las medidas de <code>medidas.csv</code> cuyo tiempo empieza por <code>2.</code>. Cuidado: el punto es especial.</li>
+      <li>En tu proyecto del trazador, encuentra todas las líneas que declaran una función que devuelve <code>vec3</code> (empiezan por <code>vec3 </code> o <code>static inline vec3 </code>).</li>
+    </ul>
+  </div>
+
+</section>
+      <nav class="pager bottom"><a class="pg prev" href="03-permisos.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tema 3 &middot; Permisos</span></a><a class="pg next" href="05-sed.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tema 5 &middot; sed</span></a></nav>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="shell">
+    <p>Complemento del curso <a href="../index.html">Trazador de Rayos en C</a>: herramientas de la
+    línea de órdenes de Linux que usarás para compilar, ejecutar y analizar tus programas.</p>
+    <p>Todos los ejemplos usan los ficheros de práctica <code class="inl">medidas.csv</code> y
+    <code class="inl">render.log</code> creados en la <a href="index.html#datos">página de inicio</a>.</p>
+  </div>
+</footer>
+<script src="../app.js"></script>
+</body>
+</html>

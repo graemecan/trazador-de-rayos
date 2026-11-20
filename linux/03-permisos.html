@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tema 3 &middot; Permisos &mdash; Linux básico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,600&display=swap">
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><b>Linux básico</b></a>
+    <div class="spacer"></div>
+    <button class="theme-btn" id="themeBtn" aria-label="Cambiar tema">
+      <span id="themeIcon">&#9680;</span><span id="themeLabel">Tema</span>
+    </button>
+  </div>
+</div>
+<div class="shell">
+  <div class="layout">
+    <div class="toc-wrap"><nav class="toc" aria-label="Ruta del módulo"><p class="toc-title">Linux básico</p><ol>
+<li><a href="../index.html"><span class="n">&larr;</span><span>Curso de C</span></a></li>
+<li><a class="" href="index.html"><span class="n">&#9632;</span><span>Inicio</span></a></li>
+<li><a class="" href="01-redireccion.html"><span class="n">1</span><span>Redirección</span></a></li>
+<li><a class="" href="02-tuberias.html"><span class="n">2</span><span>Tuberías</span></a></li>
+<li><a class="active" href="03-permisos.html"><span class="n">3</span><span>Permisos</span></a></li>
+<li><a class="" href="04-grep.html"><span class="n">4</span><span>grep</span></a></li>
+<li><a class="" href="05-sed.html"><span class="n">5</span><span>sed</span></a></li>
+<li><a class="" href="06-awk.html"><span class="n">6</span><span>awk</span></a></li>
+<li><a class="" href="07-cron.html"><span class="n">7</span><span>cron</span></a></li>
+    </ol></nav></div>
+    <main class="solo">
+      <nav class="pager top"><a class="pg prev" href="02-tuberias.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tema 2 &middot; Tuberías</span></a><a class="pg next" href="04-grep.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tema 4 &middot; grep</span></a></nav>
+      <section class="tarea" id="tema-3" data-num="3" data-title="Permisos">
+  <div class="tarea-head">
+    <div class="tarea-num">Tema<span>3</span></div>
+    <div class="titles">
+      <p class="tarea-kicker">Seguridad del sistema de ficheros</p>
+      <h2>Permisos de ficheros</h2>
+    </div>
+  </div>
+
+  <div class="box objetivo">
+    <p class="box-label">Objetivo</p>
+    <p>Leer los permisos de un fichero con <code class="inl">ls -l</code>, cambiarlos con <code class="inl">chmod</code> (en notación simbólica y octal) y entender por qué un script necesita permiso de <strong>ejecución</strong>.</p>
+  </div>
+
+  <h3>Leer los permisos</h3>
+  <div class="term">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="p">$</span> ls -l
+-rw-r--r-- 1 ana alumnos   215 nov 20 09:14 medidas.csv
+-rwxr-xr-x 1 ana alumnos 21456 nov 20 09:30 rt
+drwxr-xr-x 2 ana alumnos  4096 nov 20 09:00 src</pre>
+  </div>
+
+  <div class="box concepto">
+    <p class="box-label">Concepto · <code>-rwxr-xr-x</code></p>
+    <p>El primer carácter es el tipo: <code class="inl">-</code> fichero, <code class="inl">d</code> directorio, <code class="inl">l</code> enlace. Después vienen
+    tres grupos de tres letras:</p>
+    <ul>
+      <li><strong>u</strong> (<em>user</em>): el propietario, aquí <code class="inl">ana</code>.</li>
+      <li><strong>g</strong> (<em>group</em>): los miembros del grupo, aquí <code class="inl">alumnos</code>.</li>
+      <li><strong>o</strong> (<em>others</em>): todos los demás.</li>
+    </ul>
+    <p>En cada grupo: <code class="inl">r</code> leer, <code class="inl">w</code> escribir, <code class="inl">x</code> ejecutar; un <code class="inl">-</code> indica que falta ese permiso.
+    Así, <code class="inl">rt</code> lo puede ejecutar cualquiera, pero solo <code class="inl">ana</code> puede modificarlo.</p>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th></th><th>En un fichero</th><th>En un directorio</th></tr></thead>
+      <tbody>
+          <tr><td><code>r</code></td><td>leer su contenido</td><td>listar lo que contiene (<code>ls</code>)</td></tr>
+          <tr><td><code>w</code></td><td>modificarlo</td><td>crear, borrar o renombrar ficheros dentro</td></tr>
+          <tr><td><code>x</code></td><td>ejecutarlo como programa</td><td>entrar en él (<code>cd</code>) y acceder a sus ficheros</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Cambiar permisos: <code class="inl">chmod</code> simbólico</h3>
+  <div class="term">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="p">$</span> chmod u+x analiza.sh        <span class="c"># añade ejecución al propietario</span>
+<span class="p">$</span> chmod go-w medidas.csv      <span class="c"># quita escritura a grupo y otros</span>
+<span class="p">$</span> chmod a+r informe.pdf       <span class="c"># todos (a = all) pueden leer</span>
+<span class="p">$</span> chmod u=rw,go= notas.txt    <span class="c"># propietario lee/escribe; nadie más nada</span></pre>
+  </div>
+
+  <h3>Notación octal</h3>
+  <p>Cada grupo de tres bits se escribe como una cifra octal sumando <strong>r = 4</strong>, <strong>w = 2</strong>,
+  <strong>x = 1</strong>. Así <code class="inl">rwx</code> = 7, <code class="inl">r-x</code> = 5, <code class="inl">rw-</code> = 6, <code class="inl">r--</code> = 4.</p>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Octal</th><th>Permisos</th><th>Uso típico</th></tr></thead>
+      <tbody>
+          <tr><td><code class="inl">755</code></td><td><code class="inl">rwxr-xr-x</code></td><td>programas y scripts, directorios</td></tr>
+          <tr><td><code class="inl">644</code></td><td><code class="inl">rw-r--r--</code></td><td>ficheros de datos y código</td></tr>
+          <tr><td><code class="inl">700</code></td><td><code class="inl">rwx------</code></td><td>directorio privado</td></tr>
+          <tr><td><code class="inl">600</code></td><td><code class="inl">rw-------</code></td><td>ficheros privados (claves SSH)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="term">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="p">$</span> chmod 640 medidas.csv
+<span class="p">$</span> ls -l medidas.csv
+-rw-r----- 1 ana alumnos 215 nov 20 09:14 medidas.csv</pre>
+  </div>
+
+  <h3>Scripts ejecutables</h3>
+  <p>Un <strong>script</strong> es un fichero de texto con órdenes. La primera línea, el <em>shebang</em>
+  <code class="inl">#!</code>, dice qué intérprete lo ejecuta:</p>
+  <div class="term">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">archivo · <b>render.sh</b></span></div>
+<pre class="shell"><span class="c">#!/bin/bash</span>
+<span class="c"># Compila y renderiza en un solo paso</span>
+gcc -Wall -O2 main.c -o rt -lm || exit 1
+./rt &gt; imagen.ppm
+echo "Hecho: imagen.ppm"</pre>
+  </div>
+  <div class="term">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="p">$</span> ./render.sh
+bash: ./render.sh: Permiso denegado
+<span class="p">$</span> chmod +x render.sh
+<span class="p">$</span> ./render.sh
+Hecho: imagen.ppm</pre>
+  </div>
+
+  <div class="box pista">
+    <p class="box-label">Pista · ¿por qué <code>./</code>?</p>
+    <p>La shell busca los programas en los directorios de la variable <code class="inl">PATH</code>
+    (<code class="inl">echo $PATH</code>), que por seguridad no incluye el directorio actual. <code class="inl">./rt</code> significa
+    «el programa <code class="inl">rt</code> que está <em>aquí</em>». <code class="inl">gcc</code> ya crea los ejecutables con permiso <code class="inl">x</code>;
+    los scripts que escribes tú, no.</p>
+  </div>
+
+  <div class="box nota">
+    <p class="box-label">Propietario y superusuario</p>
+    <p>Solo el propietario (o el administrador, <code class="inl">root</code>) puede cambiar los permisos de un fichero.
+    <code class="inl">chown usuario:grupo f</code> cambia el propietario y normalmente requiere <code class="inl">sudo</code>. No uses
+    <code class="inl">chmod 777</code> «para que funcione»: da permiso de escritura a cualquiera.</p>
+  </div>
+
+  <div class="box reto">
+    <p class="box-label">Ejercicios</p>
+    <ul class="entrega">
+      <li>Crea <code>render.sh</code>, intenta ejecutarlo antes y después de <code>chmod +x</code>, y anota los permisos que muestra <code>ls -l</code> en cada caso.</li>
+      <li>Traduce a octal: <code>rwxr-x---</code>, <code>rw-rw-r--</code>, <code>r--------</code>. Y a letras: <code>750</code>, <code>664</code>.</li>
+      <li>Quita a un directorio el permiso <code>x</code> (<code>chmod u-x dir</code>) pero deja <code>r</code>. ¿Funciona <code>ls dir</code>? ¿Y <code>cat dir/fichero</code>? Restaura los permisos al terminar.</li>
+    </ul>
+  </div>
+
+</section>
+      <nav class="pager bottom"><a class="pg prev" href="02-tuberias.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tema 2 &middot; Tuberías</span></a><a class="pg next" href="04-grep.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tema 4 &middot; grep</span></a></nav>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="shell">
+    <p>Complemento del curso <a href="../index.html">Trazador de Rayos en C</a>: herramientas de la
+    línea de órdenes de Linux que usarás para compilar, ejecutar y analizar tus programas.</p>
+    <p>Todos los ejemplos usan los ficheros de práctica <code class="inl">medidas.csv</code> y
+    <code class="inl">render.log</code> creados en la <a href="index.html#datos">página de inicio</a>.</p>
+  </div>
+</footer>
+<script src="../app.js"></script>
+</body>
+</html>

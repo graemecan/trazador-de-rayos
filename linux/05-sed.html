@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tema 5 &middot; sed &mdash; Linux básico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,600&display=swap">
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><b>Linux básico</b></a>
+    <div class="spacer"></div>
+    <button class="theme-btn" id="themeBtn" aria-label="Cambiar tema">
+      <span id="themeIcon">&#9680;</span><span id="themeLabel">Tema</span>
+    </button>
+  </div>
+</div>
+<div class="shell">
+  <div class="layout">
+    <div class="toc-wrap"><nav class="toc" aria-label="Ruta del módulo"><p class="toc-title">Linux básico</p><ol>
+<li><a href="../index.html"><span class="n">&larr;</span><span>Curso de C</span></a></li>
+<li><a class="" href="index.html"><span class="n">&#9632;</span><span>Inicio</span></a></li>
+<li><a class="" href="01-redireccion.html"><span class="n">1</span><span>Redirección</span></a></li>
+<li><a class="" href="02-tuberias.html"><span class="n">2</span><span>Tuberías</span></a></li>
+<li><a class="" href="03-permisos.html"><span class="n">3</span><span>Permisos</span></a></li>
+<li><a class="" href="04-grep.html"><span class="n">4</span><span>grep</span></a></li>
+<li><a class="active" href="05-sed.html"><span class="n">5</span><span>sed</span></a></li>
+<li><a class="" href="06-awk.html"><span class="n">6</span><span>awk</span></a></li>
+<li><a class="" href="07-cron.html"><span class="n">7</span><span>cron</span></a></li>
+    </ol></nav></div>
+    <main class="solo">
+      <nav class="pager top"><a class="pg prev" href="04-grep.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tema 4 &middot; grep</span></a><a class="pg next" href="06-awk.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tema 6 &middot; awk</span></a></nav>
+      <section class="tarea" id="tema-5" data-num="5" data-title="sed">
+  <div class="tarea-head">
+    <div class="tarea-num">Tema<span>5</span></div>
+    <div class="titles">
+      <p class="tarea-kicker">Transformar texto</p>
+      <h2><code>sed</code>: editar texto en flujo</h2>
+    </div>
+  </div>
+
+  <div class="box objetivo">
+    <p class="box-label">Objetivo</p>
+    <p>Usar <code class="inl">sed</code> (<em>stream editor</em>) para transformar texto sin abrir un editor: sustituir, borrar y seleccionar líneas, en una tubería o directamente sobre ficheros.</p>
+  </div>
+
+  <div class="box concepto">
+    <p class="box-label">Concepto · un editor de flujo</p>
+    <p><code class="inl">sed</code> lee la entrada <strong>línea a línea</strong>, aplica a cada una las órdenes que le das y
+    escribe el resultado en stdout. El fichero original <strong>no se modifica</strong> (salvo con <code class="inl">-i</code>).
+    La orden más usada, con diferencia, es la sustitución: <code class="inl">s/viejo/nuevo/</code>.</p>
+  </div>
+
+  <h3>Sustituir: <code class="inl">s/viejo/nuevo/</code></h3>
+  <div class="term">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="p">$</span> sed 's/pendulo/péndulo/' medidas.csv | head -n 3
+alumno,experimento,tiempo_s,temp_C
+ana,péndulo,2.01,21.5
+luis,péndulo,1.98,21.7
+<span class="p">$</span> sed 's/,/\t/g' medidas.csv | head -n 2      <span class="c"># comas -&gt; tabuladores</span>
+alumno	experimento	tiempo_s	temp_C
+ana	pendulo	2.01	21.5</pre>
+  </div>
+  <p>Sin la <code class="inl">g</code> final (<em>global</em>) solo se sustituye la <strong>primera</strong> aparición de cada línea.</p>
+
+  <div class="box fisica">
+    <p class="box-label">Ejemplo práctico · datos para una hoja de cálculo en español</p>
+    <p>Una hoja de cálculo configurada en español espera la <strong>coma decimal</strong> y el
+    <strong>punto y coma</strong> como separador. Dos sustituciones, en orden, separadas por <code class="inl">;</code>:</p>
+<pre class="shell" style="background:#0d0f14;border-radius:8px;margin:.7rem 0"><span class="p">$</span> sed 's/,/;/g; s/\./,/g' medidas.csv | head -n 3
+alumno;experimento;tiempo_s;temp_C
+ana;pendulo;2,01;21,5
+luis;pendulo;1,98;21,7</pre>
+    <p>El orden importa: si cambiáramos antes los puntos por comas, ya no sabríamos qué comas eran separadores.</p>
+  </div>
+
+  <h3>Seleccionar y borrar líneas</h3>
+  <p>Delante de una orden se puede poner una <strong>dirección</strong>: un número de línea, un rango o un patrón entre barras.</p>
+  <div class="term">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="p">$</span> sed '1d' medidas.csv            <span class="c"># borra la línea 1 (la cabecera)</span>
+<span class="p">$</span> sed '/INFO/d' render.log         <span class="c"># borra las líneas que contienen INFO</span>
+<span class="p">$</span> sed -n '2,4p' medidas.csv        <span class="c"># -n: no imprimas nada... salvo lo que pida p</span>
+ana,pendulo,2.01,21.5
+luis,pendulo,1.98,21.7
+marta,muelle,0.85,22.0
+<span class="p">$</span> sed -n '/WARN/p' render.log      <span class="c"># equivale a grep WARN</span>
+<span class="p">$</span> sed '3q' render.log              <span class="c"># imprime hasta la línea 3 y termina (como head -n 3)</span></pre>
+  </div>
+
+  <h3>Grupos y referencias: <code class="inl">-E</code> y <code class="inl">\1</code></h3>
+  <p>Con <code class="inl">-E</code>, los paréntesis capturan un trozo del patrón, que se reutiliza en el reemplazo como <code class="inl">\1</code>, <code class="inl">\2</code>…</p>
+  <div class="term">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="p">$</span> sed -E 's/^([0-9-]+) ([0-9:]+)/\2 \1/' render.log | head -n 2      <span class="c"># intercambia fecha y hora</span>
+10:02:11 2026-11-18 INFO  inicio escena=final ancho=400 muestras=10
+10:02:11 2026-11-18 WARN  pocas muestras: la imagen tendra ruido
+<span class="p">$</span> grep -w fin render.log | sed 's/.*tiempo=//'                    <span class="c"># deja solo el número</span>
+146.2
+997.8
+4375.0</pre>
+  </div>
+
+  <h3>Editar ficheros en su sitio: <code class="inl">-i</code></h3>
+  <p>Con <code class="inl">-i</code>, <code class="inl">sed</code> sobrescribe el fichero con el resultado. Es muy útil para refactorizar código, por ejemplo,
+  para renombrar una función en todo el proyecto:</p>
+  <div class="term">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="p">$</span> grep -rl 'vec3_length_squared' src/                          <span class="c"># 1. ¿qué ficheros la usan?</span>
+<span class="p">$</span> sed -i.bak 's/vec3_length_squared/vec3_len2/g' src/*.c src/*.h   <span class="c"># 2. renombrar (con copia .bak)</span>
+<span class="p">$</span> gcc -Wall -O2 src/*.c -o rt -lm                             <span class="c"># 3. ¿sigue compilando?</span>
+<span class="p">$</span> rm src/*.bak                                                <span class="c"># 4. si todo va bien, borra las copias</span></pre>
+  </div>
+
+  <div class="box pista">
+    <p class="box-label">Pista · prueba antes de usar <code>-i</code></p>
+    <p>Ejecuta primero la orden <strong>sin</strong> <code class="inl">-i</code> y mira la salida (con <code class="inl">| less</code> o
+    <code class="inl">| grep nuevo</code>). Solo cuando estés seguro, añade <code class="inl">-i</code>. Si el patrón contiene barras (rutas de
+    ficheros), usa otro delimitador: <code class="inl">s|/usr/local|/opt|g</code>.</p>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Orden</th><th>Efecto</th></tr></thead>
+      <tbody>
+          <tr><td><code class="inl">s/a/b/</code></td><td>sustituye la primera <code>a</code> de cada línea por <code>b</code></td></tr>
+          <tr><td><code class="inl">s/a/b/g</code></td><td>sustituye todas</td></tr>
+          <tr><td><code class="inl">s/a/b/2</code></td><td>solo la segunda aparición</td></tr>
+          <tr><td><code class="inl">Nd</code></td><td> borra la línea N; <code>/pat/d</code> borra las que contienen <code>pat</code></td></tr>
+          <tr><td><code class="inl">-n 'Np'</code></td><td>imprime solo la línea N; <code>-n '/pat/p'</code> las que contienen <code>pat</code></td></tr>
+          <tr><td><code class="inl">N,Mp</code></td><td>rango de líneas de N a M; <code>/a/,/b/p</code> desde una línea con <code>a</code> hasta una con <code>b</code></td></tr>
+          <tr><td><code class="inl">-E</code></td><td>expresiones regulares extendidas; <code>\1</code> en el reemplazo</td></tr>
+          <tr><td><code class="inl">-i</code></td><td>modifica el fichero (<code>-i.bak</code> guarda copia)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="box reto">
+    <p class="box-label">Ejercicios</p>
+    <ul class="entrega">
+      <li>Convierte <code>medidas.csv</code> en una tabla separada por espacios, sin cabecera, y cambia <code>pendulo</code> por <code>PENDULO</code> (todo con un solo <code>sed</code>; pista: varias órdenes separadas por <code>;</code>).</li>
+      <li>Con una sola orden <code>sed</code>, transforma las líneas <code>... escena=final ...</code> en <code>... escena="final" ...</code> (comillas alrededor del nombre de la escena).</li>
+      <li>Imprime con <code>sed -n</code> desde la primera línea que contiene <code>vidrio</code> hasta la siguiente que contiene <code>fin</code>.</li>
+      <li>En una copia de tu proyecto, cambia todos los <code>double</code> por <code>float</code> con <code>sed -i</code>, compila y compara el tiempo de render y la imagen. Después, deshaz el cambio.</li>
+    </ul>
+  </div>
+
+</section>
+      <nav class="pager bottom"><a class="pg prev" href="04-grep.html"><span class="dir">&larr; Anterior</span><span class="lbl">Tema 4 &middot; grep</span></a><a class="pg next" href="06-awk.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tema 6 &middot; awk</span></a></nav>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="shell">
+    <p>Complemento del curso <a href="../index.html">Trazador de Rayos en C</a>: herramientas de la
+    línea de órdenes de Linux que usarás para compilar, ejecutar y analizar tus programas.</p>
+    <p>Todos los ejemplos usan los ficheros de práctica <code class="inl">medidas.csv</code> y
+    <code class="inl">render.log</code> creados en la <a href="index.html#datos">página de inicio</a>.</p>
+  </div>
+</footer>
+<script src="../app.js"></script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tema 1 &middot; Redirección &mdash; Linux básico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=Spectral:ital,wght@0,500;0,600;0,700;1,600&display=swap">
+<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="index.html"><span class="dot"></span><b>Linux básico</b></a>
+    <div class="spacer"></div>
+    <button class="theme-btn" id="themeBtn" aria-label="Cambiar tema">
+      <span id="themeIcon">&#9680;</span><span id="themeLabel">Tema</span>
+    </button>
+  </div>
+</div>
+<div class="shell">
+  <div class="layout">
+    <div class="toc-wrap"><nav class="toc" aria-label="Ruta del módulo"><p class="toc-title">Linux básico</p><ol>
+<li><a href="../index.html"><span class="n">&larr;</span><span>Curso de C</span></a></li>
+<li><a class="" href="index.html"><span class="n">&#9632;</span><span>Inicio</span></a></li>
+<li><a class="active" href="01-redireccion.html"><span class="n">1</span><span>Redirección</span></a></li>
+<li><a class="" href="02-tuberias.html"><span class="n">2</span><span>Tuberías</span></a></li>
+<li><a class="" href="03-permisos.html"><span class="n">3</span><span>Permisos</span></a></li>
+<li><a class="" href="04-grep.html"><span class="n">4</span><span>grep</span></a></li>
+<li><a class="" href="05-sed.html"><span class="n">5</span><span>sed</span></a></li>
+<li><a class="" href="06-awk.html"><span class="n">6</span><span>awk</span></a></li>
+<li><a class="" href="07-cron.html"><span class="n">7</span><span>cron</span></a></li>
+    </ol></nav></div>
+    <main class="solo">
+      <nav class="pager top"><a class="pg prev" href="index.html"><span class="dir">&larr; Anterior</span><span class="lbl">Inicio</span></a><a class="pg next" href="02-tuberias.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tema 2 &middot; Tuberías</span></a></nav>
+      <section class="tarea" id="tema-1" data-num="1" data-title="Redirección">
+  <div class="tarea-head">
+    <div class="tarea-num">Tema<span>1</span></div>
+    <div class="titles">
+      <p class="tarea-kicker">Flujos estándar</p>
+      <h2>Redirección: entrada, salida y errores</h2>
+    </div>
+  </div>
+
+  <div class="box objetivo">
+    <p class="box-label">Objetivo</p>
+    <p>Entender los tres <strong>flujos estándar</strong> de todo programa y saber enviarlos a ficheros (o leerlos de ellos) con <code class="inl">&gt;</code>, <code class="inl">&gt;&gt;</code>, <code class="inl">&lt;</code> y <code class="inl">2&gt;</code>. Es exactamente lo que haces con <code class="inl">./rt &gt; imagen.ppm</code>.</p>
+  </div>
+
+  <div class="box concepto">
+    <p class="box-label">Concepto · los tres flujos estándar</p>
+    <p>Cuando un programa arranca, el sistema le entrega tres «canales» ya abiertos:</p>
+    <ul>
+      <li><strong>0 · stdin</strong> (entrada estándar): normalmente, el teclado.</li>
+      <li><strong>1 · stdout</strong> (salida estándar): normalmente, la pantalla. En C, <code class="inl">printf</code> escribe aquí.</li>
+      <li><strong>2 · stderr</strong> (salida de errores): también la pantalla, pero es un canal <em>distinto</em>. En C, <code class="inl">fprintf(stderr, ...)</code>.</li>
+    </ul>
+    <p>El programa no sabe ni le importa adónde van: la <strong>shell</strong> puede reconectar cada canal a un fichero antes de lanzarlo.</p>
+  </div>
+
+  <h3>Salida a un fichero: <code class="inl">&gt;</code> y <code class="inl">&gt;&gt;</code></h3>
+  <div class="term">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="p">$</span> echo "hola" &gt; saludo.txt      <span class="c"># crea (o SOBRESCRIBE) saludo.txt</span>
+<span class="p">$</span> cat saludo.txt
+hola
+<span class="p">$</span> echo "adios" &gt;&gt; saludo.txt    <span class="c"># AÑADE al final</span>
+<span class="p">$</span> cat saludo.txt
+hola
+adios</pre>
+  </div>
+
+  <h3>Separar salida y errores: <code class="inl">2&gt;</code></h3>
+  <p><code class="inl">ls</code> escribe los ficheros que encuentra en stdout y los que no encuentra en stderr. Podemos mandarlos a sitios distintos:</p>
+  <div class="term">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="p">$</span> ls medidas.csv noexiste &gt; salida.txt 2&gt; errores.txt
+<span class="p">$</span> cat salida.txt
+medidas.csv
+<span class="p">$</span> cat errores.txt
+ls: no se puede acceder a 'noexiste': No existe el archivo o el directorio</pre>
+  </div>
+
+  <div class="box concepto">
+    <p class="box-label">Conexión con el trazador de rayos</p>
+    <p>Por eso nuestro trazador escribe la <strong>imagen</strong> con <code class="inl">printf</code> (stdout) y el
+    <strong>progreso</strong> («líneas restantes…») con <code class="inl">fprintf(stderr, ...)</code>. Al hacer
+    <code class="inl">./rt &gt; imagen.ppm</code> solo stdout va al fichero: los mensajes de progreso siguen apareciendo
+    en pantalla y <strong>no ensucian la imagen</strong>.</p>
+  </div>
+
+  <div class="term">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="p">$</span> ./rt &gt; imagen.ppm 2&gt; progreso.txt     <span class="c"># imagen y progreso en ficheros distintos</span>
+<span class="p">$</span> ./rt &gt; imagen.ppm 2&gt; /dev/null        <span class="c"># descarta el progreso</span>
+<span class="p">$</span> ./rt &gt; todo.txt 2&gt;&amp;1                  <span class="c"># ambos al mismo fichero (raro aquí, útil en general)</span>
+<span class="p">$</span> ./rt &amp;&gt; todo.txt                      <span class="c"># atajo de bash para lo mismo</span></pre>
+  </div>
+
+  <p><code class="inl">/dev/null</code> es un «agujero negro»: todo lo que se escribe en él desaparece. <code class="inl">2&gt;&amp;1</code>
+  significa «manda el canal 2 al mismo sitio que el canal 1 <em>en este momento</em>».</p>
+
+  <div class="box pista">
+    <p class="box-label">Pista · el orden importa</p>
+    <p><code class="inl">orden &gt; f 2&gt;&amp;1</code> manda todo a <code class="inl">f</code>. Pero <code class="inl">orden 2&gt;&amp;1 &gt; f</code> manda
+    stderr a la <em>pantalla</em> (adonde apuntaba stdout cuando se evaluó <code class="inl">2&gt;&amp;1</code>) y solo stdout a <code class="inl">f</code>.
+    Las redirecciones se procesan de izquierda a derecha.</p>
+  </div>
+
+  <h3>Entrada desde un fichero: <code class="inl">&lt;</code> y «here-documents»</h3>
+  <p><code class="inl">&lt;</code> conecta stdin a un fichero. Si tu programa en C lee con <code class="inl">scanf</code>, puedes darle los datos sin teclearlos:</p>
+  <div class="term">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="p">$</span> wc -l &lt; medidas.csv          <span class="c"># wc lee de stdin: no sabe cómo se llama el fichero</span>
+9
+<span class="p">$</span> ./ajuste &lt; datos.txt          <span class="c"># tu programa lee datos.txt como si fuera el teclado</span></pre>
+  </div>
+  <p>Un <strong>here-document</strong> (<code class="inl">&lt;&lt;'EOF'</code> … <code class="inl">EOF</code>) mete varias líneas de texto en stdin
+  directamente desde la terminal o un script; así creamos los ficheros de práctica:</p>
+  <div class="term">
+    <div class="codebar"><span class="lights"><i></i><i></i><i></i></span><span class="fname">terminal</span></div>
+<pre class="shell"><span class="p">$</span> cat &gt; parametros.txt &lt;&lt;'EOF'
+ancho 400
+muestras 10
+EOF</pre>
+  </div>
+
+  <div class="box nota">
+    <p class="box-label">Cuidado · <code>&gt;</code> borra primero</p>
+    <p>La shell vacía el fichero de destino <em>antes</em> de lanzar la orden. Por eso
+    <code class="inl">sort medidas.csv &gt; medidas.csv</code> deja el fichero <strong>vacío</strong>: cuando <code class="inl">sort</code>
+    empieza a leer, ya no queda nada. Escribe en un fichero nuevo y luego renómbralo con <code class="inl">mv</code>.</p>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Sintaxis</th><th>Significado</th></tr></thead>
+      <tbody>
+          <tr><td><code class="inl">orden &gt; f</code></td><td>stdout a <code>f</code> (sobrescribe)</td></tr>
+          <tr><td><code class="inl">orden &gt;&gt; f</code></td><td>stdout al final de <code>f</code></td></tr>
+          <tr><td><code class="inl">orden 2&gt; f</code></td><td>stderr a <code>f</code></td></tr>
+          <tr><td><code class="inl">orden &gt; f 2&gt;&amp;1</code></td><td>stdout y stderr a <code>f</code></td></tr>
+          <tr><td><code class="inl">orden &lt; f</code></td><td>stdin desde <code>f</code></td></tr>
+          <tr><td><code class="inl">orden &lt;&lt;'EOF'</code></td><td>stdin desde las líneas siguientes, hasta <code>EOF</code></td></tr>
+          <tr><td><code class="inl">orden &gt; /dev/null</code></td><td>descartar la salida</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="box reto">
+    <p class="box-label">Ejercicios</p>
+    <ul class="entrega">
+      <li>Escribe un programa en C que imprima «dato» por stdout y «aviso» por stderr. Ejecútalo con <code>&gt; a.txt</code>, con <code>2&gt; b.txt</code> y con <code>&amp;&gt; c.txt</code>, y explica el contenido de cada fichero.</li>
+      <li>Ejecuta tu trazador con <code>./rt &gt; imagen.ppm 2&gt; /dev/null</code>. ¿Qué deja de verse?</li>
+      <li>Usa <code>&gt;&gt;</code> y <code>date</code> para ir añadiendo la fecha a un fichero <code>historial.txt</code> cada vez que renderices.</li>
+    </ul>
+  </div>
+
+</section>
+      <nav class="pager bottom"><a class="pg prev" href="index.html"><span class="dir">&larr; Anterior</span><span class="lbl">Inicio</span></a><a class="pg next" href="02-tuberias.html"><span class="dir">Siguiente &rarr;</span><span class="lbl">Tema 2 &middot; Tuberías</span></a></nav>
+    </main>
+  </div>
+</div>
+<footer class="foot">
+  <div class="shell">
+    <p>Complemento del curso <a href="../index.html">Trazador de Rayos en C</a>: herramientas de la
+    línea de órdenes de Linux que usarás para compilar, ejecutar y analizar tus programas.</p>
+    <p>Todos los ejemplos usan los ficheros de práctica <code class="inl">medidas.csv</code> y
+    <code class="inl">render.log</code> creados en la <a href="index.html#datos">página de inicio</a>.</p>
+  </div>
+</footer>
+<script src="../app.js"></script>
+</body>
+</html>
